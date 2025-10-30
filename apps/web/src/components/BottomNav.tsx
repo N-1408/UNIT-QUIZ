@@ -1,29 +1,32 @@
-﻿import { NavLink } from 'react-router-dom';
-import { Medal, Settings, SquareCheck } from 'lucide-react';
+import { NavLink } from "react-router-dom";
+import { SquareCheck, Medal, Settings } from "lucide-react";
 
-const base = 'flex-1 flex flex-col items-center justify-center gap-1 transition';
-const active = 'text-[var(--brand-yellow)]';
-const idle = 'opacity-70';
+const NAV_ITEMS = [
+  { to: "/", label: "Tests", icon: SquareCheck, end: true },
+  { to: "/rating", label: "Ranking", icon: Medal },
+  { to: "/settings", label: "Settings", icon: Settings }
+] as const;
 
 export default function BottomNav() {
+  const base = "flex h-full flex-col items-center justify-center gap-1 text-[13px]";
+
   return (
-    <nav
-      className="fixed inset-x-0 bottom-0 z-20 border-t pb-[env(safe-area-inset-bottom)]"
-      style={{ background: 'var(--bg)', borderColor: 'var(--divider)' }}
-    >
-      <div className="mx-auto grid h-16 max-w-md grid-cols-3 px-6 pb-[env(safe-area-inset-bottom)]">
-        <NavLink to="/" end className={({ isActive }) => `${base} ${isActive ? active : idle}`}>
-          <SquareCheck size={20} />
-          <span className="text-xs">Tests</span>
-        </NavLink>
-        <NavLink to="/rating" className={({ isActive }) => `${base} ${isActive ? active : idle}`}>
-          <Medal size={20} />
-          <span className="text-xs">Ranking</span>
-        </NavLink>
-        <NavLink to="/settings" className={({ isActive }) => `${base} ${isActive ? active : idle}`}>
-          <Settings size={20} />
-          <span className="text-xs">Settings</span>
-        </NavLink>
+    <nav className="bottom-nav fixed inset-x-0 bottom-0 z-20">
+      <div className="mx-auto flex h-16 max-w-md items-stretch justify-evenly px-6">
+        {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+          <NavLink key={to} to={to} end={end} className="flex-1">
+            {({ isActive }) => (
+              <div className={`${base} ${isActive ? "active" : ""}`}>
+                <Icon size={20} />
+                <span className="text-xs font-medium uppercase tracking-wide">{label}</span>
+                <span
+                  aria-hidden
+                  className={`indicator mt-2 w-12 transition-opacity ${isActive ? "opacity-100" : "opacity-0"}`}
+                />
+              </div>
+            )}
+          </NavLink>
+        ))}
       </div>
     </nav>
   );

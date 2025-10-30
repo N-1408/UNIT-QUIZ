@@ -66,3 +66,51 @@ button:disabled {
 [data-theme='dark'] .brand-logo {
   filter: brightness(0) invert(1);
 }
+
+/* Section title */
+.section-title {
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+.section-accent {
+  width: 56px;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--brand-yellow);
+}
+
+.pill {
+  @apply rounded-xl border px-3 py-2 text-sm transition;
+  border-color: var(--divider);
+}
+
+.pill-active {
+  color: var(--fg);
+  background: color-mix(in oklab, var(--brand-yellow) 28%, var(--bg) 72%);
+  border-color: var(--brand-yellow);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--brand-yellow) 35%, transparent);
+}
+
+.bottom-nav {
+  background: #000;
+  border-top: 1px solid #111;
+  color: #fff;
+}
+
+.bottom-nav .active {
+  color: var(--brand-yellow);
+}
+
+.bottom-nav .indicator {
+  height: 3px;
+  display: block;
+  border-radius: 9999px;
+  background: var(--brand-yellow);
+}
+
+.back-btn {
+  @apply -ml-1 rounded-full p-2;
+  background: color-mix(in oklab, var(--elev) 100%, transparent);
+}

@@ -112,12 +112,24 @@ export default function TestsPage() {
                 </div>
                 <div className="ml-auto flex items-center gap-2">
                   {test.lastScore != null && test.total != null && (
-                    <span className="badge font-semibold">
+                    <span
+                      className="badge font-semibold"
+                      style={{
+                        background: "color-mix(in oklab, var(--green) 20%, transparent)",
+                        color: "var(--green)"
+                      }}
+                    >
                       {test.lastScore}/{test.total}
                     </span>
                   )}
                   {test.lastDuration && (
-                    <span className="badge">
+                    <span
+                      className="badge"
+                      style={{
+                        background: "color-mix(in oklab, var(--muted) 14%, transparent)",
+                        color: "var(--muted)"
+                      }}
+                    >
                       <Clock3 size={14} /> {test.lastDuration}
                     </span>
                   )}

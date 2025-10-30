@@ -133,9 +133,9 @@ export default function SettingsPage() {
             </select>
           </label>
 
-          <div className="flex items-center justify-between pt-2 text-sm">
-            <span className="text-[var(--muted)]">Theme</span>
-            <Switch checked={dark} onChange={setDark} label="theme toggle" />
+          <div className="flex items-center justify-between gap-4 pt-2 text-sm">
+            <span className="text-[var(--muted)]">Dark theme</span>
+            <Switch checked={dark} onChange={setDark} label="Dark theme toggle" />
           </div>
 
           <div className="pt-2">

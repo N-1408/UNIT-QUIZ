@@ -14,7 +14,6 @@ type RatingItem = {
 type Timeframe = "All time" | "This month" | "This week";
 
 const groups = [
-  { id: "all", title: "All groups" },
   { id: "g1", title: "CEFR Up A2" },
   { id: "g2", title: "CEFR Up B1" },
   { id: "g3", title: "CEFR Up B2" }
@@ -29,13 +28,13 @@ const mockData: RatingItem[] = [
 
 export default function RatingPage() {
   const { user } = useOutletContext<AppOutletContext>();
-  const [groupFilter, setGroupFilter] = useState<string>("all");
+  const [groupId, setGroupId] = useState<string>("all");
   const [tf, setTf] = useState<Timeframe>("All time");
 
   const filtered = useMemo(() => {
     const now = new Date();
     const data = mockData.filter((item) => {
-      if (groupFilter !== "all" && item.groupId !== groupFilter) return false;
+      if (groupId !== "all" && item.groupId !== groupId) return false;
       if (tf === "This month") {
         const date = new Date(item.updatedAt);
         return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
@@ -63,43 +62,37 @@ export default function RatingPage() {
       }
     }
 
-    data.sort((a, b) => b.score - a.score);
-
-    return data;
-  }, [groupFilter, tf, user]);
+    return data.sort((a, b) => b.score - a.score);
+  }, [groupId, tf, user]);
 
   return (
-    <section className="flex flex-col gap-4 pb-28">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold" style={{ color: "var(--fg)" }}>
-          Ranking
-        </h1>
-        <p className="text-sm" style={{ color: "var(--muted)" }}>
-          Only the first attempt is counted towards the leaderboard.
-        </p>
+    <div className="mx-auto max-w-md p-4 pb-24">
+      <header>
+        <h1 className="section-title">Ranking</h1>
+        <div aria-hidden className="section-accent mt-2 mb-4" />
       </header>
+      <p className="mb-4 text-sm opacity-70">
+        Only the first attempt is counted towards the leaderboard.
+      </p>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="mb-5 flex flex-col items-center gap-3">
         <select
-          className="rounded-xl border border-[var(--divider)] bg-[var(--card)] px-3 py-2 text-sm"
-          value={groupFilter}
-          onChange={(event) => setGroupFilter(event.target.value)}
+          className="mx-auto rounded-xl border px-3 py-2 text-sm text-center"
+          style={{ background: 'var(--card)', borderColor: 'var(--divider)' }}
+          value={groupId}
+          onChange={(event) => setGroupId(event.target.value)}
         >
+          <option value="all">All groups</option>
           {groups.map((group) => (
             <option key={group.id} value={group.id}>
               {group.title}
             </option>
           ))}
         </select>
-        <div className="ml-auto flex items-center gap-2">
+
+        <div className="flex flex-wrap items-center justify-center gap-2">
           {["All time", "This month", "This week"].map((option) => (
-            <button
-              key={option}
-              onClick={() => setTf(option as Timeframe)}
-              className={`rounded-xl border px-3 py-2 text-sm ${
-                tf === option ? 'border-[var(--brand-yellow)] text-[var(--brand-yellow)]' : 'border-[var(--divider)]'
-              }`}
-            >
+            <button key={option} onClick={() => setTf(option as Timeframe)} className={`pill ${tf === option ? 'pill-active' : ''}`}>
               {option}
             </button>
           ))}
@@ -115,10 +108,10 @@ export default function RatingPage() {
               className={`card flex items-center justify-between px-4 py-3 ${isCurrent ? 'ring-2 ring-[var(--brand-yellow)]' : ''}`}
             >
               <div>
-                <p className="font-medium" style={{ color: "var(--fg)" }}>
+                <p className="font-medium" style={{ color: 'var(--fg)' }}>
                   {index + 1}. {item.name}
                 </p>
-                <p className="text-xs" style={{ color: "var(--muted)" }}>
+                <p className="text-xs" style={{ color: 'var(--muted)' }}>
                   {item.groupTitle}
                 </p>
               </div>
@@ -127,12 +120,11 @@ export default function RatingPage() {
           );
         })}
         {filtered.length === 0 && (
-          <div className="card p-4 text-sm" style={{ color: "var(--muted)" }}>
+          <div className="card p-4 text-sm" style={{ color: 'var(--muted)' }}>
             No results for the selected filters.
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }
-
