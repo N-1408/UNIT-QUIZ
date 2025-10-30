@@ -1,217 +1,197 @@
-﻿import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
-import type { AppOutletContext } from '../App';
-import type { RegisteredUser } from '../lib/user';
+﻿import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const groups = [
-  { id: 'ielts-4', title: 'IELTS-4' },
-  { id: 'upper-1', title: 'Upper-1' },
-  { id: 'b1-express', title: 'B1-Express' }
-];
+type Group = { id: string; title: string };
+type Teacher = { id: string; name: string };
 
-const teachers = [
-  { id: 'malika', title: 'Malika Q.' },
-  { id: 'jamshid', title: 'Jamshid B.' },
-  { id: 'rahim', title: 'Rahim A.' }
-];
-
-export default function SettingsPage() {
-  const { user, updateUser } = useOutletContext<AppOutletContext>();
-  const navigate = useNavigate();
-  const [fullName, setFullName] = useState('');
-  const [groupId, setGroupId] = useState(groups[0]?.id ?? '');
-  const [teacherId, setTeacher'sId] = useState(teachers[0]?.id ?? '');
-  const [darkMode, setDarkMode] = useState(true);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [password, setPassword] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [passwordError, setPasswordError] = useState('');
-
-  const groupOptions = useMemo(() => groups, []);
-  const teacherOptions = useMemo(() => teachers, []);
-
-  useEffect(() => {
-    if (!user) return;
-    setFullName(user.fullName);
-    setGroupId(user.groupId);
-    setTeacher'sId(user.teacherId);
-  }, [user]);
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!fullName.trim()) return;
-
-    setIsSaving(true);
-    const baseId = user?.id ?? (typeof crypto !== 'undefined' && 'randomUUID' in crypto
-      ? crypto.randomUUID()
-      : `user-${Date.now()}`);
-
-    const updated: RegisteredUser = {
-      id: baseId,
-      fullName: fullName.trim(),
-      groupId,
-      teacherId
-    };
-
-    window.setTimeout(() => {
-      updateUser(updated);
-      setIsSaving(false);
-    }, 200);
-  };
-
-  return (
-    <section className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-2xl font-semibold text-white">Sozlamalar</h1>
-        <p className="mt-1 text-sm text-state-blue/80">
-          Bu yerda demo foydalanuvchi ma'lumotlari saqlanadi. Supabase bilan sinxronizatsiya keyingi bosqichda.
-        </p>
-      </div>
-
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-5"
-      >
-        <label className="flex flex-col gap-2 text-sm">
-          <span className="text-white/60">Ism familiya</span>
-          <input
-            value={fullName}
-            onChange={(event) => setFullName(event.target.value)}
-            className="rounded-xl border border-white/10 bg-[#111111] px-3 py-3 text-sm text-white outline-none focus:border-brand-yellow/70 focus:ring-1 focus:ring-brand-yellow/70"
-            placeholder="Masalan, Dilnoza Soatova"
-          />
-        </label>
-
-        <label className="flex flex-col gap-2 text-sm">
-          <span className="text-white/60">Guruh</span>
-          <select
-            value={groupId}
-            onChange={(event) => setGroupId(event.target.value)}
-            className="rounded-xl border border-white/10 bg-[#111111] px-3 py-3 text-sm text-white outline-none focus:border-brand-yellow/70 focus:ring-1 focus:ring-brand-yellow/70"
-          >
-            {groupOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.title}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="flex flex-col gap-2 text-sm">
-          <span className="text-white/60">Mentor</span>
-          <select
-            value={teacherId}
-            onChange={(event) => setTeacher'sId(event.target.value)}
-            className="rounded-xl border border-white/10 bg-[#111111] px-3 py-3 text-sm text-white outline-none focus:border-brand-yellow/70 focus:ring-1 focus:ring-brand-yellow/70"
-          >
-            {teacherOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.title}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="flex items-center justify-between rounded-2xl border border-white/10 bg-[#111111] px-4 py-3 text-sm text-white/70">
-          <div>
-            <p className="font-medium text-white">Dark Mode</p>
-            <p className="text-xs text-white/50">Hozircha demo holatda, tez orada Device theme bilan bog'lanadi.</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setDarkMode((value) => !value)}
-            className={[
-              'relative h-6 w-11 rounded-full transition',
-              darkMode ? 'bg-brand-yellow' : 'bg-white/20'
-            ].join(' ')}
-          >
-            <span
-              className={[
-                'absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-[#0b0b0b] transition',
-                darkMode ? 'translate-x-6' : 'translate-x-1'
-              ].join(' ')}
-            />
-          </button>
-        </label>
-
-        <div className="flex flex-col gap-2 rounded-2xl border border-brand-yellow/30 bg-brand-yellow/10 px-4 py-4 text-sm text-brand-yellow">
-          <p className="font-semibold">Teacher's Panel</p>
-          <p className="text-xs text-brand-yellow/80">
-            O'qituvchilar test natijalarini ko'rish va import qilishlari mumkin. Demo rejimida parol bilan yopiq.
-          </p>
-          <button
-            type="button"
-            onClick={() => setShowPasswordModal(true)}
-            className="mt-2 w-full rounded-xl border border-brand-yellow/50 bg-brand-yellow px-3 py-2 text-sm font-semibold text-black transition hover:bg-brand-yellow/90"
-          >
-            Teacher's Panel
-          </button>
-        </div>
-
-        <button
-          type="submit"
-          disabled={isSaving || !fullName.trim()}
-          className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSaving ? 'Saqlanmoqda...' : 'Saqlash (mock)'}
-        </button>
-      </form>
-
-      {showPasswordModal && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4">
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (password.trim() === 'NKN09') {
-                window.localStorage.setItem('internation:isTeacher', JSON.stringify(true));
-                setPassword('');
-                setPasswordError('');
-                setShowPasswordModal(false);
-                navigate('/teacher');
-              } else {
-                setPasswordError("Parol noto'g'ri. Qaytadan urinib ko'ring.");
-              }
-            }}
-            className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#111111] p-5 text-sm text-white"
-          >
-            <h2 className="text-lg font-semibold text-white">Teacher's Panel paroli</h2>
-            <p className="mt-1 text-xs text-white/50">Default parol: <code className="rounded bg-white/10 px-1">NKN09</code></p>
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => {
-                setPassword(event.target.value);
-                setPasswordError('');
-              }}
-              placeholder="Parol kiriting"
-              className="mt-4 w-full rounded-xl border border-white/10 bg-[#0b0b0b] px-3 py-3 text-sm text-white outline-none focus:border-brand-yellow/70 focus:ring-1 focus:ring-brand-yellow/70"
-              autoFocus
-            />
-            {passwordError && <p className="mt-2 text-xs text-state-red">{passwordError}</p>}
-            <div className="mt-4 flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowPasswordModal(false);
-                  setPassword('');
-                  setPasswordError('');
-                }}
-                className="rounded-xl border border-white/10 px-3 py-2 text-xs text-white/60 transition hover:text-white"
-              >
-                Bekor qilish
-              </button>
-              <button
-                type="submit"
-                className="rounded-xl bg-brand-yellow px-3 py-2 text-xs font-semibold text-black transition hover:bg-brand-yellow/90"
-              >
-                Kirish
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-    </section>
-  );
+function getLocal<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+function setLocal<T>(key: string, value: T) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // ignore
+  }
 }
 
+export default function SettingsPage() {
+  const navigate = useNavigate();
 
+  const [groups] = useState<Group[]>([
+    { id: 'g1', title: 'CEFR Up A2' },
+    { id: 'g2', title: 'CEFR Up B1' },
+    { id: 'g3', title: 'CEFR Up B2' }
+  ]);
+  const [teachers] = useState<Teacher[]>([
+    { id: 't1', name: 'Alisher aka' },
+    { id: 't2', name: 'Dilnoza opa' },
+    { id: 't3', name: 'Sardor aka' }
+  ]);
+
+  const [fullName, setFullName] = useState<string>(() => getLocal('internation:user.fullName', ''));
+  const [groupId, setGroupId] = useState<string>(() => getLocal('internation:user.groupId', 'g1'));
+  const [teacherId, setTeacherId] = useState<string>(() => getLocal('internation:user.teacherId', 't1'));
+
+  const [dark, setDark] = useState<boolean>(() => getLocal('internation:theme.dark', true));
+
+  useEffect(() => {
+    setLocal('internation:user.fullName', fullName);
+  }, [fullName]);
+  useEffect(() => {
+    setLocal('internation:user.groupId', groupId);
+  }, [groupId]);
+  useEffect(() => {
+    setLocal('internation:user.teacherId', teacherId);
+  }, [teacherId]);
+  useEffect(() => {
+    setLocal('internation:theme.dark', dark);
+  }, [dark]);
+
+  const [showPwd, setShowPwd] = useState(false);
+  const [pwd, setPwd] = useState('');
+  const [pwdErr, setPwdErr] = useState('');
+
+  function saveProfile(event: React.FormEvent) {
+    event.preventDefault();
+    alert('Saqlandi.');
+  }
+
+  function openTeacherPanel() {
+    setShowPwd(true);
+  }
+
+  function checkPassword(event: React.FormEvent) {
+    event.preventDefault();
+    if (pwd.trim() === 'NKN09') {
+      setLocal('internation:isTeacher', true);
+      setPwd('');
+      setPwdErr('');
+      setShowPwd(false);
+      navigate('/teacher');
+    } else {
+      setPwdErr('Parol xato. Qaytadan urinib ko‘ring.');
+    }
+  }
+
+  return (
+    <div className="mx-auto max-w-md p-4 pb-24 text-white">
+      <h1 className="mb-4 text-xl font-semibold">Sozlamalar</h1>
+
+      <section className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <h2 className="mb-3 font-medium">Profil</h2>
+        <form onSubmit={saveProfile} className="space-y-3">
+          <label className="block text-sm">
+            <span className="text-white/70">Ism Familiya</span>
+            <input
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
+              placeholder="Masalan: Ali Valiyev"
+              className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 outline-none"
+            />
+          </label>
+
+          <label className="block text-sm">
+            <span className="text-white/70">Guruh</span>
+            <select
+              className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2"
+              value={groupId}
+              onChange={(event) => setGroupId(event.target.value)}
+            >
+              {groups.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.title}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="block text-sm">
+            <span className="text-white/70">Teacher</span>
+            <select
+              className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2"
+              value={teacherId}
+              onChange={(event) => setTeacherId(event.target.value)}
+            >
+              {teachers.map((teacher) => (
+                <option key={teacher.id} value={teacher.id}>
+                  {teacher.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="flex items-center justify-between pt-2 text-sm">
+            <span className="text-white/70">Mavzu</span>
+            <button
+              type="button"
+              onClick={() => setDark((value) => !value)}
+              className="rounded-xl bg-white/10 px-3 py-2 text-sm hover:bg-white/15"
+            >
+              {dark ? 'Dark (qora)' : 'Light'}
+            </button>
+          </div>
+
+          <div className="pt-2">
+            <button className="w-full rounded-xl bg-brand-yellow py-2 text-sm font-medium text-black hover:bg-brand-yellow/90">
+              Saqlash
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+        <h2 className="mb-3 font-medium">Teacher’s panel</h2>
+        <p className="mb-3 text-sm text-white/70">Panelga kirish uchun faqat parol talab qilinadi.</p>
+        <button
+          onClick={openTeacherPanel}
+          className="w-full rounded-xl bg-brand-yellow py-2 text-sm font-medium text-black hover:bg-brand-yellow/90"
+        >
+          Panelga kirish
+        </button>
+      </section>
+
+      {showPwd && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#111111]/95 p-4">
+            <h3 className="mb-2 font-medium">Parol</h3>
+            <form onSubmit={checkPassword} className="space-y-3">
+              <input
+                value={pwd}
+                onChange={(event) => setPwd(event.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 outline-none"
+                type="password"
+                placeholder="NKN09"
+              />
+              {pwdErr && <div className="text-sm text-state-red">{pwdErr}</div>}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPwd(false);
+                    setPwd('');
+                    setPwdErr('');
+                  }}
+                  className="flex-1 rounded-xl bg-white/10 py-2 hover:bg-white/15"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 rounded-xl bg-brand-yellow py-2 text-sm font-medium text-black hover:bg-brand-yellow/90"
+                >
+                  Kirish
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
