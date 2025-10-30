@@ -11,7 +11,7 @@ type TabItem = {
 
 const tabs: TabItem[] = [
   { to: "/", label: "Tests", icon: CheckSquare, end: true },
-  { to: "/ranking", label: "Ranking", icon: Trophy },
+  { to: "/rating", label: "Ranking", icon: Trophy },
   { to: "/settings", label: "Settings", icon: SettingsIcon }
 ];
 
@@ -27,10 +27,6 @@ export default function BottomNav() {
               <div className={`${base} ${isActive ? "active" : ""}`}>
                 <t.icon size={20} />
                 <span className="text-xs font-medium uppercase tracking-wide">{t.label}</span>
-                <span
-                  aria-hidden
-                  className={`indicator mt-2 w-12 transition-opacity ${isActive ? "opacity-100" : "opacity-0"}`}
-                />
               </div>
             )}
           </NavLink>

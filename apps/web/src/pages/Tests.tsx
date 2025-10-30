@@ -95,11 +95,14 @@ export default function TestsPage() {
             }
           };
 
+          const isNew = test.isNew;
+
           return (
             <button
               key={test.id}
               onClick={handleClick}
-              className="card flex flex-col gap-3 p-4 text-left transition hover:shadow-sm"
+              className="card flex flex-col gap-3 p-4 text-left transition"
+              style={{ boxShadow: "0 1px 8px rgba(0, 0, 0, 0.05)" }}
             >
               <div className="flex items-start gap-3">
                 <div>
@@ -133,7 +136,14 @@ export default function TestsPage() {
                       <Clock3 size={14} /> {test.lastDuration}
                     </span>
                   )}
-                  {test.isNew && <span className="badge text-[var(--brand-yellow)]">New</span>}
+                  {isNew && (
+                    <span
+                      className="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+                      style={{ background: "var(--brand-yellow)", color: "var(--brand-black)" }}
+                    >
+                      New
+                    </span>
+                  )}
                 </div>
               </div>
               <p className="text-sm" style={{ color: "var(--muted)" }}>

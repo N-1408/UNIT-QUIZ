@@ -82,8 +82,11 @@ button:disabled {
 }
 
 .pill {
-  @apply rounded-xl border px-3 py-2 text-sm transition;
-  border-color: var(--divider);
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--divider);
+  font-size: 0.875rem;
+  transition: 0.2s ease;
 }
 
 .pill-active {
@@ -101,13 +104,6 @@ button:disabled {
 
 .bottom-nav .active {
   color: var(--brand-yellow);
-}
-
-.bottom-nav .indicator {
-  height: 3px;
-  display: block;
-  border-radius: 9999px;
-  background: var(--brand-yellow);
 }
 
 .back-btn {
