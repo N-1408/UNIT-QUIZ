@@ -20,10 +20,13 @@ app.get('/', (_req, res) => res.json({ ok: true, name: 'INTERNATION API' }));
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
 let bot: Bot | undefined;
+
 try {
   if (env.TELEGRAM_BOT_TOKEN) {
     bot = new Bot(env.TELEGRAM_BOT_TOKEN);
+
     bot.catch((err) => console.error('grammy error:', err));
+
     bot.command('start', async (ctx) => {
       const url = env.WEB_APP_URL || 'https://example.com';
       await ctx.reply('Assalomu alaykum! INTERNATION Mini App’ni ochish uchun tugmani bosing.', {
@@ -36,7 +39,7 @@ try {
     console.warn('TELEGRAM_BOT_TOKEN is missing');
   }
 } catch (error) {
-  console.error('Bot init error:', error);
+  console.error('Bot init constructor error:', error);
 }
 
 app.post('/telegram/webhook', async (req, res) => {
@@ -47,11 +50,11 @@ app.post('/telegram/webhook', async (req, res) => {
     } else {
       console.warn('Webhook called but bot is undefined');
     }
+    res.sendStatus(200);
   } catch (error) {
     console.error('handleUpdate error:', error);
+    res.sendStatus(200);
   }
-
-  res.sendStatus(200);
 });
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
@@ -60,6 +63,12 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 const port = Number(env.PORT) || 8787;
+
+if (bot) {
+  await bot.init();
+  console.log(`Bot initialized as @${bot.botInfo?.username}`);
+}
+
 app.listen(port, () => {
   console.log(`API listening on :${port}`);
 });
