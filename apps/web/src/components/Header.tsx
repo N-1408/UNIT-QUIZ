@@ -1,17 +1,10 @@
-function Header() {
+export default function Header() {
   return (
-    <header className="bg-white/80 backdrop-blur border-b border-slate-200">
-      <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-4">
-        <div>
-          <p className="text-xs uppercase tracking-widest text-slate-400">INTER-NATION.UZ</p>
-          <h1 className="text-xl font-semibold text-slate-900">CEFR Up — Mini Test</h1>
-        </div>
-        <div className="hidden text-sm text-slate-500 sm:block">
-          1-bosqich • Telegram Mini App
-        </div>
+    <header className="sticky top-0 z-20 border-b border-white/10 bg-[#0b0b0b]/90 backdrop-blur">
+      <div className="mx-auto flex w-full max-w-md items-center gap-3 px-4 py-3">
+        <img src="https://inter-nation.uz/logo.svg" alt="INTERNATION" className="h-6" />
+        <div className="text-sm text-white/60">Mini Test</div>
       </div>
     </header>
   );
 }
-
-export default Header;

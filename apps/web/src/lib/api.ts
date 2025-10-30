@@ -1,7 +1,12 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8787';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+if (!BASE_URL) {
+  // eslint-disable-next-line no-console
+  console.warn('VITE_API_BASE_URL is not defined. Requests will target relative paths.');
+}
 
 async function request<T>(path: string, options?: RequestInit) {
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await fetch(`${BASE_URL ?? ''}${path}`, {
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers

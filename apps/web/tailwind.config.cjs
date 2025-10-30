@@ -4,7 +4,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#3B82F6'
+        brand: {
+          yellow: 'var(--brand-yellow)', // TODO: replace with exact hex
+          black: 'var(--brand-black)' // TODO: replace with exact hex
+        },
+        card: '#1111110d'
+      },
+      borderRadius: {
+        xl: '1rem',
+        '2xl': '1.25rem'
       }
     }
   },

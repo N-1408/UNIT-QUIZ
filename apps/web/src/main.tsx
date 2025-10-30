@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './styles/index.css';
 import { initializeTelegramWebApp } from './lib/telegram';
+import { BrowserRouter } from 'react-router-dom';
 
 initializeTelegramWebApp();
 
@@ -14,6 +15,8 @@ if (!container) {
 
 createRoot(container).render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>
 );
