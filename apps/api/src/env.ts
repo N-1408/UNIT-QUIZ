@@ -1,19 +1,15 @@
-import 'dotenv/config';
 import { z } from 'zod';
 
 const EnvSchema = z.object({
-  TELEGRAM_BOT_TOKEN: z.string().min(1, 'TELEGRAM_BOT_TOKEN is required'),
+  TELEGRAM_BOT_TOKEN: z.string().min(1, 'TELEGRAM_BOT_TOKEN required'),
+  WEB_APP_URL: z.string().url().or(z.string().min(1)),
   ADMIN_CHANNEL_ID: z.string().optional(),
-  SUPABASE_URL: z.string().optional(),
-  SUPABASE_ANON_KEY: z.string().optional(),
-  SUPABASE_SERVICE_KEY: z.string().optional()
+  PORT: z.string().optional()
 });
 
-const result = EnvSchema.safeParse(process.env);
-
-if (!result.success) {
-  const issues = result.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('\n');
-  throw new Error(`Invalid environment variables:\n${issues}`);
-}
-
-export const env = result.data;
+export const env = EnvSchema.parse({
+  TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
+  WEB_APP_URL: process.env.WEB_APP_URL,
+  ADMIN_CHANNEL_ID: process.env.ADMIN_CHANNEL_ID,
+  PORT: process.env.PORT
+});

@@ -1,7 +1,7 @@
 import { Bot, InlineKeyboard } from 'grammy';
-import { env } from './env';
+import { env } from './env.js';
 
-const webAppDemoUrl = process.env.WEB_APP_URL ?? 'https://example.com';
+const webAppDemoUrl = env.WEB_APP_URL || 'https://example.com';
 
 export const bot = new Bot(env.TELEGRAM_BOT_TOKEN);
 
