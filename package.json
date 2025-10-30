@@ -1,0 +1,16 @@
+{
+  "name": "unit-quiz",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "lint": "echo skip",
+    "format": "prettier -w ."
+  },
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
+  "devDependencies": {
+    "prettier": "^3.3.2"
+  }
+}

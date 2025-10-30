@@ -1,0 +1,4 @@
+-- TODO: Supabase schema draft
+-- CREATE TABLE profiles (...);
+-- CREATE TABLE tests (...);
+-- CREATE TABLE submissions (...);
