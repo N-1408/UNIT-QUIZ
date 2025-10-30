@@ -1,49 +1,61 @@
-import { useMemo, useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
-import type { AppOutletContext } from '../App';
+﻿import { useMemo, useState } from "react";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { Clock3, CheckCircle, XCircle } from "lucide-react";
+import type { AppOutletContext } from "../App";
+
+type TestHistory = {
+  correct: number;
+  total: number;
+  duration: string;
+  finishedAt: string;
+};
 
 type TestItem = {
   id: string;
   title: string;
   unit: string;
   isNew: boolean;
-  lastAttempt?: {
-    correct: number;
-    total: number;
-    duration: string;
-    finishedAt: string;
-  };
+  lastScore?: number;
+  total?: number;
+  lastDuration?: string;
+  history?: TestHistory;
 };
 
 const mockTests: TestItem[] = [
   {
-    id: 'starter',
-    title: 'Starter Placement',
-    unit: 'Placement',
+    id: "starter",
+    title: "Starter Placement",
+    unit: "Placement",
     isNew: true
   },
   {
-    id: 'unit-1',
-    title: 'Unit 1 — Academic Skills',
-    unit: 'Unit 1',
+    id: "unit-1",
+    title: "Unit 1 — Academic Skills",
+    unit: "Unit 1",
     isNew: false,
-    lastAttempt: {
+    lastScore: 8,
+    total: 10,
+    lastDuration: "6:34",
+    history: {
       correct: 8,
       total: 10,
-      duration: '6:34',
-      finishedAt: '2025-10-18T17:43:00+05:00'
+      duration: "6:34",
+      finishedAt: "2025-10-18T17:43:00+05:00"
     }
   },
   {
-    id: 'speaking-lite',
-    title: 'Speaking Lite',
-    unit: 'Speaking Prep',
+    id: "speaking-lite",
+    title: "Speaking Lite",
+    unit: "Speaking Prep",
     isNew: false,
-    lastAttempt: {
+    lastScore: 5,
+    total: 6,
+    lastDuration: "7:10",
+    history: {
       correct: 5,
       total: 6,
-      duration: '7:10',
-      finishedAt: '2025-10-15T11:05:00+05:00'
+      duration: "7:10",
+      finishedAt: "2025-10-15T11:05:00+05:00"
     }
   }
 ];
@@ -54,61 +66,72 @@ export default function TestsPage() {
   const [selectedTest, setSelectedTest] = useState<TestItem | null>(null);
 
   const tests = useMemo(() => mockTests, []);
-  const firstName = useMemo(() => (user?.fullName?.split(' ')?.[0] ?? 'Talaba'), [user]);
+  const firstName = useMemo(() => user?.fullName?.split(" ")[0] ?? "Student", [user?.fullName]);
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="flex flex-col gap-4 pb-28">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Assalomu alaykum, {firstName}</h1>
-          <p className="text-xs uppercase tracking-wide text-white/40">inter-nation.uz mini testlar</p>
+          <h1 className="text-2xl font-semibold" style={{ color: "var(--fg)" }}>
+            Welcome, {firstName}
+          </h1>
+          <p className="text-xs uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+            inter-nation.uz mini tests
+          </p>
         </div>
-        <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/60">Demo</span>
+        <span className="badge">Demo</span>
       </div>
-      <p className="text-sm text-white/60">
-        Yangi testlar qo‘shilganda Telegram bot orqali bildirishnoma keladi. Yakuniy ball Supabase bilan
-        sinxronlanadi.
+      <p className="text-sm" style={{ color: "var(--muted)" }}>
+        New tests will appear automatically. Final scores will sync with Supabase soon.
       </p>
 
       <div className="mt-2 flex flex-col gap-3">
         {tests.map((test) => {
-          const solvedLabel =
-            test.lastAttempt &&
-            `${test.lastAttempt.correct}/${test.lastAttempt.total} • ${test.lastAttempt.duration}`;
+          const handleClick = () => {
+            if (test.isNew) {
+              navigate(`/test/${test.id}`);
+            } else {
+              setSelectedTest(test);
+            }
+          };
 
           return (
             <button
               key={test.id}
-              onClick={() =>
-                test.lastAttempt ? setSelectedTest(test) : navigate(`/test/${test.id}`)
-              }
-              className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-4 text-left transition hover:bg-white/[0.08]"
+              onClick={handleClick}
+              className="card flex flex-col gap-3 p-4 text-left transition hover:shadow-sm"
             >
-              <div className="flex items-start justify-between">
+              <div className="flex items-start gap-3">
                 <div>
-                  <span className="text-xs uppercase tracking-wide text-white/40">{test.unit}</span>
-                  <h2 className="mt-1 text-lg font-semibold text-white">{test.title}</h2>
-                </div>
-                {test.isNew ? (
-                  <span className="rounded-full border border-brand-yellow/50 bg-brand-yellow/20 px-3 py-1 text-xs font-semibold text-brand-yellow">
-                    Yangi
+                  <span className="text-xs uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+                    {test.unit}
                   </span>
-                ) : (
-                  solvedLabel && (
-                    <span className="rounded-full border border-state-green/30 bg-state-green/10 px-3 py-1 text-xs font-medium text-state-green">
-                      {solvedLabel}
+                  <h2 className="text-lg font-semibold" style={{ color: "var(--fg)" }}>
+                    {test.title}
+                  </h2>
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                  {test.lastScore != null && test.total != null && (
+                    <span className="badge font-semibold">
+                      {test.lastScore}/{test.total}
                     </span>
-                  )
-                )}
+                  )}
+                  {test.lastDuration && (
+                    <span className="badge">
+                      <Clock3 size={14} /> {test.lastDuration}
+                    </span>
+                  )}
+                  {test.isNew && <span className="badge text-[var(--brand-yellow)]">New</span>}
+                </div>
               </div>
-              <p className="text-sm text-white/60">
+              <p className="text-sm" style={{ color: "var(--muted)" }}>
                 {test.isNew
-                  ? "Bu test hali yechilmagan. Birinchi urinish reytingga tushadi, keyingilari faqat kuzatuv uchun."
-                  : 'Oxirgi urinish ma’lumotlari mavjud. Qayta yechish reytingga ta’sir qilmaydi.'}
+                  ? "This test hasn’t been taken yet. Your first attempt counts towards the ranking."
+                  : "Latest attempt recorded. Replays are for practice only."}
               </p>
-              {!test.isNew && (
-                <p className="text-xs text-white/40">
-                  Oxirgi urinish: {new Date(test.lastAttempt!.finishedAt).toLocaleString('uz-UZ')}
+              {!test.isNew && test.history && (
+                <p className="text-xs" style={{ color: "var(--muted)" }}>
+                  Last attempt: {new Date(test.history.finishedAt).toLocaleString("uz-UZ")}
                 </p>
               )}
             </button>
@@ -116,7 +139,7 @@ export default function TestsPage() {
         })}
       </div>
 
-      {selectedTest?.lastAttempt && (
+      {selectedTest?.history && (
         <TestHistoryModal
           test={selectedTest}
           onClose={() => setSelectedTest(null)}
@@ -130,67 +153,78 @@ export default function TestsPage() {
   );
 }
 
-interface TestHistoryModalProps {
+type TestHistoryModalProps = {
   test: TestItem;
   onClose: () => void;
   onRetake: () => void;
-}
+};
 
 function TestHistoryModal({ test, onClose, onRetake }: TestHistoryModalProps) {
-  const attempt = test.lastAttempt!;
+  const history = test.history!;
+  const stats = {
+    correct: history.correct,
+    wrong: history.total - history.correct,
+    time: history.duration
+  };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/70 px-4 pb-10">
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#111111] p-5 text-white shadow-xl">
+    <div className="fixed inset-0 z-40 flex items-end justify-center" style={{ background: 'var(--overlay)' }}>
+      <div className="w-full max-w-md rounded-t-3xl border border-[var(--divider)] bg-[var(--bg)] p-5 shadow-xl">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wide text-white/40">{test.unit}</p>
-            <h3 className="text-xl font-semibold text-white">{test.title}</h3>
+            <p className="text-xs uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+              {test.unit}
+            </p>
+            <h3 className="text-xl font-semibold" style={{ color: "var(--fg)" }}>
+              {test.title}
+            </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/60 transition hover:text-brand-yellow"
+            className="btn-ghost text-sm text-[var(--muted)]"
           >
-            Yopish
+            Close
           </button>
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-3 text-center text-sm">
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
-            <p className="text-xs uppercase tracking-wide text-white/40">To‘g‘ri</p>
-            <p className="mt-1 text-lg font-semibold text-brand-yellow">{attempt.correct}</p>
+        <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+          <div className="card p-3">
+            <div className="flex items-center justify-center gap-1 text-state-green">
+              <CheckCircle size={18} /> <span className="text-sm">Correct</span>
+            </div>
+            <div className="text-2xl font-semibold" style={{ color: "var(--fg)" }}>
+              {stats.correct}
+            </div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
-            <p className="text-xs uppercase tracking-wide text-white/40">Xato</p>
-            <p className="mt-1 text-lg font-semibold text-white/70">
-              {attempt.total - attempt.correct}
-            </p>
+          <div className="card p-3">
+            <div className="flex items-center justify-center gap-1 text-state-red">
+              <XCircle size={18} /> <span className="text-sm">Wrong</span>
+            </div>
+            <div className="text-2xl font-semibold" style={{ color: "var(--fg)" }}>
+              {stats.wrong}
+            </div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
-            <p className="text-xs uppercase tracking-wide text-white/40">Vaqt</p>
-            <p className="mt-1 text-lg font-semibold text-white/70">{attempt.duration}</p>
+          <div className="card p-3">
+            <div className="flex items-center justify-center gap-1 opacity-80">
+              <Clock3 size={18} /> <span className="text-sm">Time</span>
+            </div>
+            <div className="text-2xl font-semibold" style={{ color: "var(--fg)" }}>
+              {stats.time}
+            </div>
           </div>
         </div>
 
-        <p className="mt-4 text-xs text-white/50">
-          Reyting faqat birinchi urinishdagi ball bilan hisoblanadi. Qayta yechish mashq uchun.
+        <p className="mt-4 text-xs" style={{ color: "var(--muted)" }}>
+          Only the first attempt counts towards the ranking. Replays are great for revision.
         </p>
 
         <div className="mt-5 flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={onRetake}
-            className="w-full rounded-xl border border-brand-yellow/40 bg-brand-yellow px-4 py-2 text-sm font-semibold text-black transition hover:bg-brand-yellow/90"
-          >
-            Qayta yechish
+          <button type="button" onClick={onRetake} className="btn-primary">
+            Retake test
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm text-white/70 transition hover:text-brand-yellow"
-          >
-            Bekor qilish
+          <button type="button" onClick={onClose} className="btn-ghost text-sm text-[var(--muted)]">
+            Cancel
           </button>
         </div>
       </div>

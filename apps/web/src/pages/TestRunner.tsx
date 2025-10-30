@@ -1,22 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+ï»¿import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Clock3 } from "lucide-react";
 
-type Option = { key: "A" | "B" | "C" | "D"; text: string };
-type Question = { id: string; text: string; options: Option[]; correct?: "A" | "B" | "C" | "D" };
+type OptionKey = "A" | "B" | "C" | "D";
+type Option = { key: OptionKey; text: string };
+type Question = { id: string; text: string; options: Option[]; correct?: OptionKey };
 
-const DURATION = 600; // 10 minutes
+const DURATION = 600;
 
 export default function TestRunner() {
   const { id } = useParams();
   const [secondsLeft, setSecondsLeft] = useState<number>(DURATION);
-  const [answers, setAnswers] = useState<Record<string, Option["key"] | undefined>>({});
+  const [answers, setAnswers] = useState<Record<string, OptionKey | undefined>>({});
   const timerRef = useRef<number | null>(null);
 
   const questions: Question[] = useMemo(
     () => [
       {
         id: "q1",
-        text: "Which word completes the sentence: “I ____ to school yesterday.”",
+        text: "Which word completes the sentence: â€œI ____ to school yesterday.â€",
         options: [
           { key: "A", text: "go" },
           { key: "B", text: "went" },
@@ -27,7 +29,7 @@ export default function TestRunner() {
       },
       {
         id: "q2",
-        text: "Choose the synonym of “rapid”.",
+        text: "Choose the synonym of â€œrapidâ€.",
         options: [
           { key: "A", text: "slow" },
           { key: "B", text: "fast" },
@@ -43,7 +45,7 @@ export default function TestRunner() {
   useEffect(() => {
     if (timerRef.current !== null) return;
     timerRef.current = window.setInterval(() => {
-      setSecondsLeft((s) => (s > 0 ? s - 1 : 0));
+      setSecondsLeft((seconds) => (seconds > 0 ? seconds - 1 : 0));
     }, 1000);
     return () => {
       if (timerRef.current !== null) window.clearInterval(timerRef.current);
@@ -53,46 +55,56 @@ export default function TestRunner() {
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
 
-  function pick(qid: string, key: Option["key"]) {
-    setAnswers((prev) => ({ ...prev, [qid]: key }));
+  function pick(questionId: string, key: OptionKey) {
+    setAnswers((prev) => ({ ...prev, [questionId]: key }));
   }
 
   function submit() {
     let score = 0;
-    questions.forEach((q) => {
-      if (answers[q.id] && q.correct && answers[q.id] === q.correct) score++;
+    questions.forEach((question) => {
+      if (answers[question.id] && question.correct && answers[question.id] === question.correct) {
+        score++;
+      }
     });
-    window.alert(`Yuborildi (mock). Natija: ${score}/${questions.length}`);
+    alert(`Submitted (mock). Score: ${score}/${questions.length}`);
   }
 
   return (
-    <div className="mx-auto max-w-md p-4 pb-24">
+    <div className="mx-auto max-w-md px-4 pb-32 pt-6">
       <div className="mb-4 flex items-center justify-between">
-        <div className="text-sm text-white/70">Test ID: {id}</div>
-        <div className="rounded-full bg-white/10 px-3 py-1">
-          {mm}:{ss}
+        <div className="text-sm" style={{ color: "var(--muted)" }}>
+          Test ID: {id ?? "demo"}
         </div>
+        <span className="badge"><Clock3 size={14} /> {mm}:{ss}</span>
       </div>
 
       <div className="space-y-4">
-        {questions.map((q, idx) => (
-          <div key={q.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <div className="mb-3 font-medium">
-              {idx + 1}. {q.text}
+        {questions.map((question, index) => (
+          <div key={question.id} className="card space-y-3 p-4">
+            <div className="font-medium" style={{ color: "var(--fg)" }}>
+              {index + 1}. {question.text}
             </div>
-            <div className="grid grid-cols-1 gap-2">
-              {q.options.map((opt) => {
-                const active = answers[q.id] === opt.key;
+            <div className="space-y-2">
+              {question.options.map((option) => {
+                const active = answers[question.id] === option.key;
                 return (
                   <button
-                    key={opt.key}
-                    onClick={() => pick(q.id, opt.key)}
-                    className={`rounded-xl border px-3 py-2 text-left ${
-                      active ? "border-brand-yellow bg-white/10" : "border-white/10 bg-white/5"
+                    key={option.key}
+                    onClick={() => pick(question.id, option.key)}
+                    className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition ${
+                      active
+                        ? 'border-[var(--brand-yellow)] bg-[color-mix(in oklab, var(--elev) 100%, transparent)]'
+                        : 'border-[var(--divider)] bg-[var(--card)] hover:bg-[var(--elev)]'
                     }`}
                   >
-                    <span className="mr-2 font-semibold">{opt.key}.</span>
-                    {opt.text}
+                    <span
+                      className={`flex h-6 w-6 items-center justify-center rounded-full border text-xs font-semibold ${
+                        active ? 'border-[var(--brand-yellow)] text-[var(--brand-yellow)]' : 'border-[var(--divider)]'
+                      }`}
+                    >
+                      {option.key}
+                    </span>
+                    <span>{option.text}</span>
                   </button>
                 );
               })}
@@ -101,13 +113,16 @@ export default function TestRunner() {
         ))}
       </div>
 
-      <div className="mt-5">
-        <button
-          onClick={submit}
-          className="w-full rounded-xl bg-brand-yellow py-3 font-medium text-black transition hover:bg-brand-yellow/90"
-        >
-          Yuborish (mock)
-        </button>
+      <div className="h-24" />
+      <div
+        className="fixed inset-x-0 bottom-0 z-10 border-t"
+        style={{ background: 'var(--bg)', borderColor: 'var(--divider)' }}
+      >
+        <div className="mx-auto max-w-md p-3">
+          <button onClick={submit} className="btn-primary">
+            Submit
+          </button>
+        </div>
       </div>
     </div>
   );

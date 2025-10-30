@@ -1,16 +1,16 @@
-import { FormEvent, useMemo, useState } from 'react';
-import type { RegisteredUser } from '../lib/user';
+﻿import { FormEvent, useMemo, useState } from "react";
+import type { RegisteredUser } from "../lib/user";
 
 const groups = [
-  { id: 'ielts-4', title: 'IELTS-4' },
-  { id: 'upper-1', title: 'Upper-1' },
-  { id: 'b1-express', title: 'B1-Express' }
+  { id: "ielts-4", title: "IELTS-4" },
+  { id: "upper-1", title: "Upper-1" },
+  { id: "b1-express", title: "B1-Express" }
 ];
 
 const teachers = [
-  { id: 'malika', title: 'Malika Q.' },
-  { id: 'jamshid', title: 'Jamshid B.' },
-  { id: 'rahim', title: 'Rahim A.' }
+  { id: "malika", title: "Malika Q." },
+  { id: "jamshid", title: "Jamshid B." },
+  { id: "rahim", title: "Rahim A." }
 ];
 
 interface FirstVisitModalProps {
@@ -18,9 +18,9 @@ interface FirstVisitModalProps {
 }
 
 export default function FirstVisitModal({ onComplete }: FirstVisitModalProps) {
-  const [fullName, setFullName] = useState('');
-  const [groupId, setGroupId] = useState(groups[0]?.id ?? '');
-  const [teacherId, setTeacherId] = useState(teachers[0]?.id ?? '');
+  const [fullName, setFullName] = useState("");
+  const [groupId, setGroupId] = useState(groups[0]?.id ?? "");
+  const [teacherId, setTeacherId] = useState(teachers[0]?.id ?? "");
   const [isSaving, setIsSaving] = useState(false);
 
   const canSubmit = fullName.trim().length > 2 && groupId && teacherId;
@@ -35,7 +35,7 @@ export default function FirstVisitModal({ onComplete }: FirstVisitModalProps) {
 
     window.setTimeout(() => {
       const uuid =
-        typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        typeof crypto !== "undefined" && "randomUUID" in crypto
           ? crypto.randomUUID()
           : `user-${Date.now()}`;
       onComplete({
@@ -48,33 +48,31 @@ export default function FirstVisitModal({ onComplete }: FirstVisitModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-5">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#0b0b0b] px-5 py-6"
-      >
-        <h2 className="text-xl font-semibold text-white">Assalomu alaykum!</h2>
-        <p className="mt-2 text-sm text-white/60">
-          INTER-NATION mini testini boshlashdan oldin qisqa ma’lumotni to‘ldiring. Bu ma’lumot faqat demo
-          rejimida saqlanadi.
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'var(--overlay)' }}>
+      <form onSubmit={handleSubmit} className="card w-full max-w-sm border border-[var(--divider)] bg-[var(--bg)] px-5 py-6">
+        <h2 className="text-xl font-semibold" style={{ color: 'var(--fg)' }}>
+          Assalomu alaykum!
+        </h2>
+        <p className="mt-2 text-sm" style={{ color: 'var(--muted)' }}>
+          INTER-NATION mini testini boshlashdan oldin qisqa ma'lumotni to‘ldiring. Ushbu ma'lumot hozircha faqat demo rejimida saqlanadi.
         </p>
 
-        <label className="mt-5 flex flex-col gap-2 text-sm text-white/70">
-          To‘liq ism
+        <label className="mt-5 flex flex-col gap-2 text-sm">
+          <span style={{ color: 'var(--muted)' }}>To‘liq ism</span>
           <input
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
             placeholder="Masalan, Dilnoza Soatova"
-            className="rounded-xl border border-white/10 bg-[#111111] px-3 py-3 text-sm text-white outline-none focus:border-brand-yellow/70 focus:ring-1 focus:ring-brand-yellow/70"
+            className="rounded-xl border border-[var(--divider)] bg-[var(--card)] px-3 py-3 outline-none"
           />
         </label>
 
-        <label className="mt-4 flex flex-col gap-2 text-sm text-white/70">
-          Guruh
+        <label className="mt-4 flex flex-col gap-2 text-sm">
+          <span style={{ color: 'var(--muted)' }}>Guruh</span>
           <select
             value={groupId}
             onChange={(event) => setGroupId(event.target.value)}
-            className="rounded-xl border border-white/10 bg-[#111111] px-3 py-3 text-sm text-white outline-none focus:border-brand-yellow/70 focus:ring-1 focus:ring-brand-yellow/70"
+            className="rounded-xl border border-[var(--divider)] bg-[var(--card)] px-3 py-3 outline-none"
           >
             {groupOptions.map((group) => (
               <option key={group.id} value={group.id}>
@@ -84,12 +82,12 @@ export default function FirstVisitModal({ onComplete }: FirstVisitModalProps) {
           </select>
         </label>
 
-        <label className="mt-4 flex flex-col gap-2 text-sm text-white/70">
-          Mentor
+        <label className="mt-4 flex flex-col gap-2 text-sm">
+          <span style={{ color: 'var(--muted)' }}>Mentor</span>
           <select
             value={teacherId}
             onChange={(event) => setTeacherId(event.target.value)}
-            className="rounded-xl border border-white/10 bg-[#111111] px-3 py-3 text-sm text-white outline-none focus:border-brand-yellow/70 focus:ring-1 focus:ring-brand-yellow/70"
+            className="rounded-xl border border-[var(--divider)] bg-[var(--card)] px-3 py-3 outline-none"
           >
             {teacherOptions.map((teacher) => (
               <option key={teacher.id} value={teacher.id}>
@@ -102,7 +100,7 @@ export default function FirstVisitModal({ onComplete }: FirstVisitModalProps) {
         <button
           type="submit"
           disabled={!canSubmit || isSaving}
-          className="mt-6 w-full rounded-xl border border-brand-yellow/40 bg-brand-yellow px-4 py-3 text-sm font-semibold text-black transition hover:bg-brand-yellow/90 disabled:cursor-not-allowed disabled:opacity-70"
+          className="btn-primary mt-6"
         >
           Boshlash
         </button>

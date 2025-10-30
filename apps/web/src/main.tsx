@@ -3,9 +3,11 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './styles/index.css';
 import { initializeTelegramWebApp } from './lib/telegram';
+import { applyInitialTheme } from './lib/theme';
 import { BrowserRouter } from 'react-router-dom';
 
 initializeTelegramWebApp();
+applyInitialTheme();
 
 const container = document.getElementById('root');
 

@@ -23,9 +23,9 @@ function AppLayout({
   onUserChange: (user: RegisteredUser | null) => void;
 }) {
   return (
-    <div className="min-h-screen bg-[#0b0b0b] text-white">
+    <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--fg)' }}>
       <Header />
-      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-24 pt-4">
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-4 pb-28 pt-4">
         <Outlet context={{ user, updateUser: onUserChange }} />
       </main>
       <BottomNav />
