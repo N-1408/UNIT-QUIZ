@@ -3,6 +3,8 @@ import type { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { Bot } from 'grammy';
 import { env } from './env.js';
+import testsRouter from './routes/tests.js';
+import authRouter from './routes/auth.js';
 
 const app = express();
 app.enable('trust proxy');
@@ -56,6 +58,9 @@ app.post('/telegram/webhook', async (req, res) => {
     res.sendStatus(200);
   }
 });
+
+app.use('/api', testsRouter);
+app.use('/api', authRouter);
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Global error:', err);
