@@ -1,102 +1,114 @@
-import { useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import Timer from "../components/Timer";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 
-const defaultTest = {
-  title: "Unit 1 Quick Check",
-  summary: "Demo test - 10 ta savol - 10 daqiqa",
-  bullets: [
-    "Savollar Supabase'dan dinamik yuklanadi (keyingi bosqich).",
-    "Tarqatilgan PDF yoki Excel fayllardan convert qilinadi.",
-    "Natijalar Supabase Realtime orqali kuzatiladi."
-  ]
-};
+type Option = { key: "A" | "B" | "C" | "D"; text: string };
+type Question = { id: string; text: string; options: Option[]; correct?: "A" | "B" | "C" | "D" };
 
-const testCatalog: Record<string, typeof defaultTest> = {
-  starter: {
-    title: "Starter Placement",
-    summary: "Boshlang'ich daraja testi - 10 savol",
-    bullets: [
-      "Ingliz tili asosiy ko'nikmalarini baholaydi.",
-      "CEFR bo'yicha avtomatik balanslash.",
-      "Natija asosida keyingi modul tavsiyasi."
-    ]
-  },
-  "unit-1": {
-    title: "Unit 1 - Academic Skills",
-    summary: "Reading va vocabulary - 15 savol",
-    bullets: [
-      "Kontekst asosidagi so'z boyligi.",
-      "Inline feedback va tavsiya etilgan mashqlar.",
-      "Telegram bot orqali natija yuboriladi."
-    ]
-  },
-  "speaking-lite": {
-    title: "Speaking Lite",
-    summary: "Audio tayyorgarlik - 6 savol",
-    bullets: [
-      "Voice note shaklida javoblar (demo).",
-      "AI transkripsiya keyingi bosqichda.",
-      "Mentor bilan feedback jadvali."
-    ]
-  }
-};
+const DURATION = 600; // 10 minutes
 
 export default function TestRunner() {
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
-  const [submitted, setSubmitted] = useState(false);
+  const { id } = useParams();
+  const [secondsLeft, setSecondsLeft] = useState<number>(DURATION);
+  const [answers, setAnswers] = useState<Record<string, Option["key"] | undefined>>({});
+  const timerRef = useRef<number | null>(null);
 
-  const test = useMemo(() => {
-    if (!id) return defaultTest;
-    return testCatalog[id] ?? defaultTest;
-  }, [id]);
+  const questions: Question[] = useMemo(
+    () => [
+      {
+        id: "q1",
+        text: "Which word completes the sentence: “I ____ to school yesterday.”",
+        options: [
+          { key: "A", text: "go" },
+          { key: "B", text: "went" },
+          { key: "C", text: "going" },
+          { key: "D", text: "gone" }
+        ],
+        correct: "B"
+      },
+      {
+        id: "q2",
+        text: "Choose the synonym of “rapid”.",
+        options: [
+          { key: "A", text: "slow" },
+          { key: "B", text: "fast" },
+          { key: "C", text: "late" },
+          { key: "D", text: "weak" }
+        ],
+        correct: "B"
+      }
+    ],
+    []
+  );
+
+  useEffect(() => {
+    if (timerRef.current !== null) return;
+    timerRef.current = window.setInterval(() => {
+      setSecondsLeft((s) => (s > 0 ? s - 1 : 0));
+    }, 1000);
+    return () => {
+      if (timerRef.current !== null) window.clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+  const ss = String(secondsLeft % 60).padStart(2, "0");
+
+  function pick(qid: string, key: Option["key"]) {
+    setAnswers((prev) => ({ ...prev, [qid]: key }));
+  }
+
+  function submit() {
+    let score = 0;
+    questions.forEach((q) => {
+      if (answers[q.id] && q.correct && answers[q.id] === q.correct) score++;
+    });
+    window.alert(`Yuborildi (mock). Natija: ${score}/${questions.length}`);
+  }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-md flex-col bg-[#0b0b0b] px-4 pb-10 pt-6 text-white">
-      <header className="mb-4 flex items-center justify-between">
+    <div className="mx-auto max-w-md p-4 pb-24">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="text-sm text-white/70">Test ID: {id}</div>
+        <div className="rounded-full bg-white/10 px-3 py-1">
+          {mm}:{ss}
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {questions.map((q, idx) => (
+          <div key={q.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <div className="mb-3 font-medium">
+              {idx + 1}. {q.text}
+            </div>
+            <div className="grid grid-cols-1 gap-2">
+              {q.options.map((opt) => {
+                const active = answers[q.id] === opt.key;
+                return (
+                  <button
+                    key={opt.key}
+                    onClick={() => pick(q.id, opt.key)}
+                    className={`rounded-xl border px-3 py-2 text-left ${
+                      active ? "border-brand-yellow bg-white/10" : "border-white/10 bg-white/5"
+                    }`}
+                  >
+                    <span className="mr-2 font-semibold">{opt.key}.</span>
+                    {opt.text}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5">
         <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70 transition hover:text-brand-yellow"
+          onClick={submit}
+          className="w-full rounded-xl bg-brand-yellow py-3 font-medium text-black transition hover:bg-brand-yellow/90"
         >
-          <- Orqaga
+          Yuborish (mock)
         </button>
-        <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/50">Demo rejim</span>
-      </header>
-
-      <section className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-5">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold text-white">{test.title}</h1>
-          <p className="text-sm text-white/60">{test.summary}</p>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-[1fr,auto] md:items-start">
-          <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#111111] px-4 py-4">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-brand-yellow">Preview</h2>
-            <ul className="flex list-disc flex-col gap-2 pl-4 text-sm text-white/70">
-              {test.bullets.map((bullet) => (
-                <li key={bullet}>{bullet}</li>
-              ))}
-            </ul>
-            <button
-              type="button"
-              onClick={() => setSubmitted(true)}
-              disabled={submitted}
-              className="mt-2 rounded-xl border border-brand-yellow/40 bg-brand-yellow px-4 py-2 text-sm font-semibold text-black transition hover:bg-brand-yellow/90 disabled:cursor-not-allowed disabled:opacity-80"
-            >
-              {submitted ? "Yuborildi (mock)" : "Javoblarni yuborish"}
-            </button>
-          </div>
-          <Timer durationSec={600} isActive={!submitted} />
-        </div>
-
-        {submitted && (
-          <div className="rounded-2xl border border-brand-yellow/40 bg-brand-yellow/10 px-4 py-3 text-sm text-brand-yellow">
-            Javoblar yuborildi (mock). Telegram bot orqali natija yuboriladi.
-          </div>
-        )}
-      </section>
+      </div>
     </div>
   );
 }
