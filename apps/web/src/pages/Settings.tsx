@@ -1,23 +1,60 @@
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
+import type { AppOutletContext } from '../App';
+import type { RegisteredUser } from '../lib/user';
 
-const groups = ['IELTS-4', 'Upper-1', 'B1-Express'];
-const teachers = ['Malika Q.', 'Jamshid B.', 'Rahim A.'];
+const groups = [
+  { id: 'ielts-4', title: 'IELTS-4' },
+  { id: 'upper-1', title: 'Upper-1' },
+  { id: 'b1-express', title: 'B1-Express' }
+];
+
+const teachers = [
+  { id: 'malika', title: 'Malika Q.' },
+  { id: 'jamshid', title: 'Jamshid B.' },
+  { id: 'rahim', title: 'Rahim A.' }
+];
 
 export default function SettingsPage() {
-  const [name, setName] = useState('Siz (Demo)');
-  const [group, setGroup] = useState(groups[1]);
-  const [teacher, setTeacher] = useState(teachers[0]);
+  const { user, updateUser } = useOutletContext<AppOutletContext>();
+  const [fullName, setFullName] = useState('');
+  const [groupId, setGroupId] = useState(groups[0]?.id ?? '');
+  const [teacherId, setTeacherId] = useState(teachers[0]?.id ?? '');
   const [darkMode, setDarkMode] = useState(true);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const groupOptions = useMemo(() => groups, []);
   const teacherOptions = useMemo(() => teachers, []);
 
+  useEffect(() => {
+    if (!user) return;
+    setFullName(user.fullName);
+    setGroupId(user.groupId);
+    setTeacherId(user.teacherId);
+  }, [user]);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // eslint-disable-next-line no-console
-    console.log('Settings saved (mock):', { name, group, teacher, darkMode });
+    if (!fullName.trim()) return;
+
+    setIsSaving(true);
+    const baseId = user?.id ?? (typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `user-${Date.now()}`);
+
+    const updated: RegisteredUser = {
+      id: baseId,
+      fullName: fullName.trim(),
+      groupId,
+      teacherId
+    };
+
+    window.setTimeout(() => {
+      updateUser(updated);
+      setIsSaving(false);
+    }, 200);
   };
 
   return (
@@ -25,7 +62,7 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-2xl font-semibold text-white">Sozlamalar</h1>
         <p className="mt-1 text-sm text-white/50">
-          Bu yerda faqat demo ma\'lumotlar saqlanadi. Supabase bilan sinxronizatsiya keyingi bosqichda.
+          Bu yerda demo foydalanuvchi ma'lumotlari saqlanadi. Supabase bilan sinxronizatsiya keyingi bosqichda.
         </p>
       </div>
 
@@ -36,23 +73,23 @@ export default function SettingsPage() {
         <label className="flex flex-col gap-2 text-sm">
           <span className="text-white/60">Ism familiya</span>
           <input
-            value={name}
-            onChange={(event) => setName(event.target.value)}
+            value={fullName}
+            onChange={(event) => setFullName(event.target.value)}
             className="rounded-xl border border-white/10 bg-[#111111] px-3 py-3 text-sm text-white outline-none focus:border-brand-yellow/70 focus:ring-1 focus:ring-brand-yellow/70"
-            placeholder="Ism familiya"
+            placeholder="Masalan, Dilnoza Soatova"
           />
         </label>
 
         <label className="flex flex-col gap-2 text-sm">
           <span className="text-white/60">Guruh</span>
           <select
-            value={group}
-            onChange={(event) => setGroup(event.target.value)}
+            value={groupId}
+            onChange={(event) => setGroupId(event.target.value)}
             className="rounded-xl border border-white/10 bg-[#111111] px-3 py-3 text-sm text-white outline-none focus:border-brand-yellow/70 focus:ring-1 focus:ring-brand-yellow/70"
           >
             {groupOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
+              <option key={option.id} value={option.id}>
+                {option.title}
               </option>
             ))}
           </select>
@@ -61,13 +98,13 @@ export default function SettingsPage() {
         <label className="flex flex-col gap-2 text-sm">
           <span className="text-white/60">Mentor</span>
           <select
-            value={teacher}
-            onChange={(event) => setTeacher(event.target.value)}
+            value={teacherId}
+            onChange={(event) => setTeacherId(event.target.value)}
             className="rounded-xl border border-white/10 bg-[#111111] px-3 py-3 text-sm text-white outline-none focus:border-brand-yellow/70 focus:ring-1 focus:ring-brand-yellow/70"
           >
             {teacherOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
+              <option key={option.id} value={option.id}>
+                {option.title}
               </option>
             ))}
           </select>
@@ -76,7 +113,7 @@ export default function SettingsPage() {
         <label className="flex items-center justify-between rounded-2xl border border-white/10 bg-[#111111] px-4 py-3 text-sm text-white/70">
           <div>
             <p className="font-medium text-white">Dark Mode</p>
-            <p className="text-xs text-white/50">Hozircha faqat demo uchun ishlaydi.</p>
+            <p className="text-xs text-white/50">Hozircha demo holatda, tez orada Device theme bilan bog'lanadi.</p>
           </div>
           <button
             type="button"
@@ -98,8 +135,7 @@ export default function SettingsPage() {
         <div className="flex flex-col gap-2 rounded-2xl border border-brand-yellow/30 bg-brand-yellow/10 px-4 py-4 text-sm text-brand-yellow">
           <p className="font-semibold">Teachers Panel</p>
           <p className="text-xs text-brand-yellow/80">
-            O\'qituvchilar test natijalarini yuklash va PDF yoki Excel import qilishlari mumkin. Hozircha demo
-            parol talab qiladi.
+            O'qituvchilar test natijalarini ko'rish va import qilishlari mumkin. Demo rejimida parol bilan yopiq.
           </p>
           <button
             type="button"
@@ -112,9 +148,10 @@ export default function SettingsPage() {
 
         <button
           type="submit"
-          className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15"
+          disabled={isSaving || !fullName.trim()}
+          className="rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Saqlash (mock)
+          {isSaving ? 'Saqlanmoqda...' : 'Saqlash (mock)'}
         </button>
       </form>
 
@@ -123,7 +160,7 @@ export default function SettingsPage() {
           <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#111111] p-5 text-sm text-white">
             <h2 className="text-lg font-semibold text-white">Teacher Panel paroli</h2>
             <p className="mt-1 text-xs text-white/50">
-              Hozircha demo parol ishlatilmoqda. Supabase Auth bilan integratsiya keyingi bosqichda.
+              Supabase Auth integratsiyasi tayyor bo'lgach bu forma haqiqiy parol bilan ishlaydi.
             </p>
             <input
               type="password"
