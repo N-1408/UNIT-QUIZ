@@ -3,12 +3,19 @@
 @tailwind utilities;
 
 :root {
-  --brand-yellow: #ffd200; /* TODO: replace with inter-nation.uz exact */
-  --brand-black: #0e0e0e; /* TODO: replace with inter-nation.uz exact */
+  --brand-yellow: #ffcf00;
+  --brand-black: #000000;
+  --green: #28a745;
+  --red: #dc3545;
+  --blue: #007bff;
+  --gray: #6c757d;
+  --white: #ffffff;
+  --light-gray: #f4f4f4;
+  --white-blurred: #ffffff20;
 }
 
 body {
-  @apply bg-[#0b0b0b] text-white;
+  @apply bg-[var(--brand-black)] text-[var(--white)];
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 

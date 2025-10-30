@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+﻿import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 import type { AppOutletContext } from '../App';
 import type { RegisteredUser } from '../lib/user';
@@ -20,7 +20,7 @@ export default function SettingsPage() {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState('');
   const [groupId, setGroupId] = useState(groups[0]?.id ?? '');
-  const [teacherId, setTeacherId] = useState(teachers[0]?.id ?? '');
+  const [teacherId, setTeacher'sId] = useState(teachers[0]?.id ?? '');
   const [darkMode, setDarkMode] = useState(true);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState('');
@@ -34,7 +34,7 @@ export default function SettingsPage() {
     if (!user) return;
     setFullName(user.fullName);
     setGroupId(user.groupId);
-    setTeacherId(user.teacherId);
+    setTeacher'sId(user.teacherId);
   }, [user]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -63,7 +63,7 @@ export default function SettingsPage() {
     <section className="flex flex-col gap-4">
       <div>
         <h1 className="text-2xl font-semibold text-white">Sozlamalar</h1>
-        <p className="mt-1 text-sm text-white/50">
+        <p className="mt-1 text-sm text-state-blue/80">
           Bu yerda demo foydalanuvchi ma'lumotlari saqlanadi. Supabase bilan sinxronizatsiya keyingi bosqichda.
         </p>
       </div>
@@ -101,7 +101,7 @@ export default function SettingsPage() {
           <span className="text-white/60">Mentor</span>
           <select
             value={teacherId}
-            onChange={(event) => setTeacherId(event.target.value)}
+            onChange={(event) => setTeacher'sId(event.target.value)}
             className="rounded-xl border border-white/10 bg-[#111111] px-3 py-3 text-sm text-white outline-none focus:border-brand-yellow/70 focus:ring-1 focus:ring-brand-yellow/70"
           >
             {teacherOptions.map((option) => (
@@ -135,7 +135,7 @@ export default function SettingsPage() {
         </label>
 
         <div className="flex flex-col gap-2 rounded-2xl border border-brand-yellow/30 bg-brand-yellow/10 px-4 py-4 text-sm text-brand-yellow">
-          <p className="font-semibold">Teacher’s Panel</p>
+          <p className="font-semibold">Teacher's Panel</p>
           <p className="text-xs text-brand-yellow/80">
             O'qituvchilar test natijalarini ko'rish va import qilishlari mumkin. Demo rejimida parol bilan yopiq.
           </p>
@@ -144,7 +144,7 @@ export default function SettingsPage() {
             onClick={() => setShowPasswordModal(true)}
             className="mt-2 w-full rounded-xl border border-brand-yellow/50 bg-brand-yellow px-3 py-2 text-sm font-semibold text-black transition hover:bg-brand-yellow/90"
           >
-            Teacher’s Panel
+            Teacher's Panel
           </button>
         </div>
 
@@ -174,7 +174,7 @@ export default function SettingsPage() {
             }}
             className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#111111] p-5 text-sm text-white"
           >
-            <h2 className="text-lg font-semibold text-white">Teacher Panel paroli</h2>
+            <h2 className="text-lg font-semibold text-white">Teacher's Panel paroli</h2>
             <p className="mt-1 text-xs text-white/50">Default parol: <code className="rounded bg-white/10 px-1">NKN09</code></p>
             <input
               type="password"
@@ -187,7 +187,7 @@ export default function SettingsPage() {
               className="mt-4 w-full rounded-xl border border-white/10 bg-[#0b0b0b] px-3 py-3 text-sm text-white outline-none focus:border-brand-yellow/70 focus:ring-1 focus:ring-brand-yellow/70"
               autoFocus
             />
-            {passwordError && <p className="mt-2 text-xs text-red-400">{passwordError}</p>}
+            {passwordError && <p className="mt-2 text-xs text-state-red">{passwordError}</p>}
             <div className="mt-4 flex items-center justify-end gap-2">
               <button
                 type="button"
@@ -213,3 +213,5 @@ export default function SettingsPage() {
     </section>
   );
 }
+
+

@@ -5,10 +5,15 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          yellow: 'var(--brand-yellow)', // TODO: replace with exact hex
-          black: 'var(--brand-black)' // TODO: replace with exact hex
+          yellow: 'var(--brand-yellow)',
+          black: 'var(--brand-black)'
         },
-        card: '#1111110d'
+        state: {
+          green: 'var(--green)',
+          red: 'var(--red)',
+          blue: 'var(--blue)',
+          gray: 'var(--gray)'
+        }
       },
       borderRadius: {
         xl: '1rem',

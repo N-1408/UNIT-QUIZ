@@ -95,7 +95,7 @@ export default function TestsPage() {
                   </span>
                 ) : (
                   solvedLabel && (
-                    <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs text-white/70">
+                    <span className="rounded-full border border-state-green/30 bg-state-green/10 px-3 py-1 text-xs font-medium text-state-green">
                       {solvedLabel}
                     </span>
                   )
