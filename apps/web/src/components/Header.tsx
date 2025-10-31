@@ -1,4 +1,5 @@
 ﻿import { useLocation, useNavigate } from "react-router-dom";
+import { haptic } from "../lib/tg";
 
 export default function Header() {
   const nav = useNavigate();
@@ -14,7 +15,14 @@ export default function Header() {
       <div className="mx-auto flex w-full max-w-md items-center justify-between gap-2 px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
           {showBack && (
-            <button className="back-btn" onClick={() => nav(-1)} aria-label="Back">
+            <button
+              className="back-btn tap"
+              onClick={() => {
+                haptic.tap();
+                nav(-1);
+              }}
+              aria-label="Back"
+            >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M15 18l-6-6 6-6"

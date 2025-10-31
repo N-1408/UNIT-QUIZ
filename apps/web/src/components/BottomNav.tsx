@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
 import { CheckSquare, Trophy, Settings as SettingsIcon } from "lucide-react";
+import { haptic } from "../lib/tg";
 
 type TabItem = {
   to: string;
@@ -22,9 +23,9 @@ export default function BottomNav() {
     <nav className="bottom-nav fixed inset-x-0 bottom-0 z-20">
       <div className="mx-auto flex h-16 max-w-md items-stretch justify-evenly px-6">
         {tabs.map((t) => (
-          <NavLink key={t.to} to={t.to} end={!!t.end} className="flex-1">
+          <NavLink key={t.to} to={t.to} end={!!t.end} className="flex-1" onClick={() => haptic.tap()}>
             {({ isActive }) => (
-              <div className={`${base} ${isActive ? "active" : ""}`}>
+              <div className={`${base} tap ${isActive ? "active" : ""}`}>
                 <t.icon size={20} />
                 <span className="text-xs font-medium uppercase tracking-wide">{t.label}</span>
               </div>

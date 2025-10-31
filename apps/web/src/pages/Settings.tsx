@@ -2,6 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import Switch from "../components/Switch";
 import { getTheme, setTheme } from "../lib/theme";
+import { haptic } from "../lib/tg";
 
 type Group = { id: string; title: string };
 type Teacher = { id: string; name: string };
@@ -66,6 +67,7 @@ export default function SettingsPage() {
 
   function saveProfile(event: React.FormEvent) {
     event.preventDefault();
+    haptic.success();
     alert("Saqlandi.");
   }
 
@@ -76,13 +78,15 @@ export default function SettingsPage() {
   function checkPassword(event: React.FormEvent) {
     event.preventDefault();
     if (pwd.trim() === "NKN09") {
+      haptic.success();
       setLocal("internation:isTeacher", true);
       setPwd("");
       setPwdErr("");
       setShowPwd(false);
       navigate("/teacher");
     } else {
-      setPwdErr("Parol xato. Qaytadan urinib ko‘ring.");
+      haptic.error();
+      setPwdErr("Parol xato. Qaytadan urinib ko'ring.");
     }
   }
 
@@ -139,7 +143,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="pt-2">
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="btn btn-primary tap" onClick={() => haptic.tap()}>
               Save
             </button>
           </div>
@@ -149,7 +153,7 @@ export default function SettingsPage() {
       <section className="card mt-6 p-4">
         <h2 className="mb-3 font-medium">Teacher’s panel</h2>
         <p className="mb-3 text-sm text-[var(--muted)]">Panelga kirish uchun faqat parol talab qilinadi.</p>
-        <button onClick={openTeacherPanel} className="btn-primary">
+        <button onClick={() => { haptic.tap(); openTeacherPanel(); }} className="btn btn-primary tap">
           Open teacher mode
         </button>
       </section>
@@ -171,15 +175,20 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    haptic.tap();
                     setShowPwd(false);
                     setPwd("");
                     setPwdErr("");
                   }}
-                  className="btn-ghost flex-1 !w-auto text-center"
+                  className="btn btn-ghost tap flex-1 !w-auto text-center"
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary flex-1 !w-auto">
+                <button
+                  type="submit"
+                  className="btn btn-primary tap flex-1 !w-auto"
+                  onClick={() => haptic.tap()}
+                >
                   Continue
                 </button>
               </div>

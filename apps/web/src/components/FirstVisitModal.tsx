@@ -1,5 +1,6 @@
 ﻿import { FormEvent, useMemo, useState } from "react";
 import type { RegisteredUser } from "../lib/user";
+import { haptic } from "../lib/tg";
 
 const groups = [
   { id: "ielts-4", title: "IELTS-4" },
@@ -31,6 +32,7 @@ export default function FirstVisitModal({ onComplete }: FirstVisitModalProps) {
     event.preventDefault();
     if (!canSubmit || isSaving) return;
 
+    haptic.tap();
     setIsSaving(true);
 
     window.setTimeout(() => {
@@ -44,6 +46,7 @@ export default function FirstVisitModal({ onComplete }: FirstVisitModalProps) {
         groupId,
         teacherId
       });
+      haptic.success();
     }, 250);
   };
 
@@ -54,11 +57,11 @@ export default function FirstVisitModal({ onComplete }: FirstVisitModalProps) {
           Assalomu alaykum!
         </h2>
         <p className="mt-2 text-sm" style={{ color: 'var(--muted)' }}>
-          INTER-NATION mini testini boshlashdan oldin qisqa ma'lumotni to‘ldiring. Ushbu ma'lumot hozircha faqat demo rejimida saqlanadi.
+          INTER-NATION mini testini boshlashdan oldin qisqa ma'lumotni to'ldiring. Ushbu ma'lumot hozircha faqat demo rejimida saqlanadi.
         </p>
 
         <label className="mt-5 flex flex-col gap-2 text-sm">
-          <span style={{ color: 'var(--muted)' }}>To‘liq ism</span>
+          <span style={{ color: 'var(--muted)' }}>To'liq ism</span>
           <input
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
@@ -72,7 +75,7 @@ export default function FirstVisitModal({ onComplete }: FirstVisitModalProps) {
           <select
             value={groupId}
             onChange={(event) => setGroupId(event.target.value)}
-            className="rounded-xl border border-[var(--divider)] bg-[var(--card)] px-3 py-3 outline-none"
+            className="tap rounded-xl border border-[var(--divider)] bg-[var(--card)] px-3 py-3 outline-none"
           >
             {groupOptions.map((group) => (
               <option key={group.id} value={group.id}>
@@ -87,7 +90,7 @@ export default function FirstVisitModal({ onComplete }: FirstVisitModalProps) {
           <select
             value={teacherId}
             onChange={(event) => setTeacherId(event.target.value)}
-            className="rounded-xl border border-[var(--divider)] bg-[var(--card)] px-3 py-3 outline-none"
+            className="tap rounded-xl border border-[var(--divider)] bg-[var(--card)] px-3 py-3 outline-none"
           >
             {teacherOptions.map((teacher) => (
               <option key={teacher.id} value={teacher.id}>
@@ -100,7 +103,7 @@ export default function FirstVisitModal({ onComplete }: FirstVisitModalProps) {
         <button
           type="submit"
           disabled={!canSubmit || isSaving}
-          className="btn-primary mt-6"
+          className="btn btn-primary tap mt-6"
         >
           Boshlash
         </button>

@@ -2,6 +2,7 @@
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { Clock3, CheckCircle, XCircle } from "lucide-react";
 import type { AppOutletContext } from "../App";
+import { haptic } from "../lib/tg";
 
 type TestHistory = {
   correct: number;
@@ -88,6 +89,7 @@ export default function TestsPage() {
       <div className="mt-2 flex flex-col gap-3">
         {tests.map((test) => {
           const handleClick = () => {
+            haptic.tap();
             if (test.isNew) {
               navigate(`/test/${test.id}`);
             } else {
@@ -101,8 +103,7 @@ export default function TestsPage() {
             <button
               key={test.id}
               onClick={handleClick}
-              className="card flex flex-col gap-3 p-4 text-left transition"
-              style={{ boxShadow: "0 1px 8px rgba(0, 0, 0, 0.05)" }}
+              className="card tap flex flex-col gap-3 text-left shadow-[0_1px_8px_rgba(0,0,0,.05)] transition"
             >
               <div className="flex items-start gap-3">
                 <div>
@@ -115,32 +116,17 @@ export default function TestsPage() {
                 </div>
                 <div className="ml-auto flex items-center gap-2">
                   {test.lastScore != null && test.total != null && (
-                    <span
-                      className="badge font-semibold"
-                      style={{
-                        background: "color-mix(in oklab, var(--green) 20%, transparent)",
-                        color: "var(--green)"
-                      }}
-                    >
+                    <span className="badge badge-green">
                       {test.lastScore}/{test.total}
                     </span>
                   )}
                   {test.lastDuration && (
-                    <span
-                      className="badge"
-                      style={{
-                        background: "color-mix(in oklab, var(--muted) 14%, transparent)",
-                        color: "var(--muted)"
-                      }}
-                    >
+                    <span className="badge badge-time">
                       <Clock3 size={14} /> {test.lastDuration}
                     </span>
                   )}
                   {isNew && (
-                    <span
-                      className="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
-                      style={{ background: "var(--brand-yellow)", color: "var(--brand-black)" }}
-                    >
+                    <span className="badge badge-new">
                       New
                     </span>
                   )}
@@ -203,8 +189,11 @@ function TestHistoryModal({ test, onClose, onRetake }: TestHistoryModalProps) {
           </div>
           <button
             type="button"
-            onClick={onClose}
-            className="btn-ghost text-sm text-[var(--muted)]"
+            onClick={() => {
+              haptic.tap();
+              onClose();
+            }}
+            className="btn btn-ghost tap text-sm text-[var(--muted)]"
           >
             Close
           </button>
@@ -242,10 +231,24 @@ function TestHistoryModal({ test, onClose, onRetake }: TestHistoryModalProps) {
         </p>
 
         <div className="mt-5 flex flex-col gap-2">
-          <button type="button" onClick={onRetake} className="btn-primary">
+          <button
+            type="button"
+            onClick={() => {
+              haptic.tap();
+              onRetake();
+            }}
+            className="btn btn-primary tap"
+          >
             Retake test
           </button>
-          <button type="button" onClick={onClose} className="btn-ghost text-sm text-[var(--muted)]">
+          <button
+            type="button"
+            onClick={() => {
+              haptic.tap();
+              onClose();
+            }}
+            className="btn btn-ghost tap text-sm text-[var(--muted)]"
+          >
             Cancel
           </button>
         </div>

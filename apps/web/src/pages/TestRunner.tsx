@@ -1,6 +1,7 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Clock3 } from "lucide-react";
+import { haptic } from "../lib/tg";
 
 type OptionKey = "A" | "B" | "C" | "D";
 type Option = { key: OptionKey; text: string };
@@ -18,7 +19,7 @@ export default function TestRunner() {
     () => [
       {
         id: "q1",
-        text: "Which word completes the sentence: “I ____ to school yesterday.”",
+        text: 'Which word completes the sentence: "I ____ to school yesterday."',
         options: [
           { key: "A", text: "go" },
           { key: "B", text: "went" },
@@ -29,7 +30,7 @@ export default function TestRunner() {
       },
       {
         id: "q2",
-        text: "Choose the synonym of “rapid”.",
+        text: 'Choose the synonym of "rapid".',
         options: [
           { key: "A", text: "slow" },
           { key: "B", text: "fast" },
@@ -56,10 +57,12 @@ export default function TestRunner() {
   const ss = String(secondsLeft % 60).padStart(2, "0");
 
   function pick(questionId: string, key: OptionKey) {
+    haptic.tap();
     setAnswers((prev) => ({ ...prev, [questionId]: key }));
   }
 
   function submit() {
+    haptic.success();
     let score = 0;
     questions.forEach((question) => {
       if (answers[question.id] && question.correct && answers[question.id] === question.correct) {
@@ -75,12 +78,14 @@ export default function TestRunner() {
         <div className="text-sm" style={{ color: "var(--muted)" }}>
           Test ID: {id ?? "demo"}
         </div>
-        <span className="badge"><Clock3 size={14} /> {mm}:{ss}</span>
+        <span className="badge badge-time">
+          <Clock3 size={14} /> {mm}:{ss}
+        </span>
       </div>
 
       <div className="space-y-4">
         {questions.map((question, index) => (
-          <div key={question.id} className="card space-y-3 p-4">
+          <div key={question.id} className="card space-y-3">
             <div className="font-medium" style={{ color: "var(--fg)" }}>
               {index + 1}. {question.text}
             </div>
@@ -91,20 +96,22 @@ export default function TestRunner() {
                   <button
                     key={option.key}
                     onClick={() => pick(question.id, option.key)}
-                    className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition ${
+                    className={`tap flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-3 text-left transition ${
                       active
-                        ? 'border-[var(--brand-yellow)] bg-[color-mix(in oklab, var(--elev) 100%, transparent)]'
-                        : 'border-[var(--divider)] bg-[var(--card)] hover:bg-[var(--elev)]'
+                        ? "border-[#222] bg-[#000] text-[var(--brand-yellow)]"
+                        : "border-[var(--divider)] bg-[var(--card)] hover:bg-[var(--elev)]"
                     }`}
                   >
                     <span
                       className={`flex h-6 w-6 items-center justify-center rounded-full border text-xs font-semibold ${
-                        active ? 'border-[var(--brand-yellow)] text-[var(--brand-yellow)]' : 'border-[var(--divider)]'
+                        active
+                          ? "border-[var(--brand-yellow)] bg-[rgba(255,207,0,0.14)] text-[var(--brand-yellow)]"
+                          : "border-[var(--divider)]"
                       }`}
                     >
                       {option.key}
                     </span>
-                    <span>{option.text}</span>
+                    <span className="flex-1">{option.text}</span>
                   </button>
                 );
               })}
@@ -119,7 +126,13 @@ export default function TestRunner() {
         style={{ background: 'var(--bg)', borderColor: 'var(--divider)' }}
       >
         <div className="mx-auto max-w-md p-3">
-          <button onClick={submit} className="btn-primary">
+          <button
+            onClick={() => {
+              haptic.tap();
+              submit();
+            }}
+            className="btn btn-primary tap w-full"
+          >
             Submit
           </button>
         </div>

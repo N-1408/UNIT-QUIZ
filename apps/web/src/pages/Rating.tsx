@@ -1,6 +1,7 @@
 ﻿import { useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import type { AppOutletContext } from "../App";
+import { haptic } from "../lib/tg";
 
 type RatingItem = {
   id: string;
@@ -67,20 +68,19 @@ export default function RatingPage() {
 
   return (
     <div className="mx-auto max-w-md p-4 pb-24">
-      <header>
+      <header className="text-center">
         <h1 className="section-title">Ranking</h1>
-        <div aria-hidden className="section-accent mt-2 mb-4" />
+        <p className="section-sub mt-1">Only the first attempt counts. Replays are for practice.</p>
       </header>
-      <p className="mb-4 text-sm opacity-70">
-        Only the first attempt is counted towards the leaderboard.
-      </p>
 
-      <div className="mb-5 flex flex-col items-center gap-3">
+      <div className="mt-6 flex flex-col items-center gap-3">
         <select
-          className="mx-auto rounded-xl border px-3 py-2 text-sm text-center"
-          style={{ background: 'var(--card)', borderColor: 'var(--divider)' }}
+          className="tap rounded-xl border border-[var(--divider)] bg-[var(--card)] px-4 py-3 text-sm"
           value={groupId}
-          onChange={(event) => setGroupId(event.target.value)}
+          onChange={(event) => {
+            haptic.tap();
+            setGroupId(event.target.value);
+          }}
         >
           <option value="all">All groups</option>
           {groups.map((group) => (
@@ -92,35 +92,43 @@ export default function RatingPage() {
 
         <div className="flex flex-wrap items-center justify-center gap-2">
           {["All time", "This month", "This week"].map((option) => (
-            <button key={option} onClick={() => setTf(option as Timeframe)} className={`pill ${tf === option ? 'pill-active' : ''}`}>
+            <button
+              key={option}
+              onClick={() => {
+                haptic.tap();
+                setTf(option as Timeframe);
+              }}
+              className={pill tap }
+            >
               {option}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="mt-6 space-y-3">
         {filtered.map((item, index) => {
           const isCurrent = item.id === user?.id;
           return (
             <div
               key={item.id}
-              className={`card flex items-center justify-between px-4 py-3 ${isCurrent ? 'ring-2 ring-[var(--brand-yellow)]' : ''}`}
+              className="card flex items-center justify-between gap-3"
+              style={isCurrent ? { boxShadow: "0 0 0 1px rgba(255, 207, 0, 0.3)" } : undefined}
             >
               <div>
-                <p className="font-medium" style={{ color: 'var(--fg)' }}>
-                  {index + 1}. {item.name}
+                <p className="text-sm font-semibold" style={{ color: "var(--fg)" }}>
+                  #{index + 1} {item.name}
                 </p>
-                <p className="text-xs" style={{ color: 'var(--muted)' }}>
+                <p className="text-xs" style={{ color: "var(--muted)" }}>
                   {item.groupTitle}
                 </p>
               </div>
-              <span className="badge font-semibold text-[var(--brand-yellow)]">{item.score}</span>
+              <span className="badge">{item.score}</span>
             </div>
           );
         })}
         {filtered.length === 0 && (
-          <div className="card p-4 text-sm" style={{ color: 'var(--muted)' }}>
+          <div className="card text-sm" style={{ color: "var(--muted)" }}>
             No results for the selected filters.
           </div>
         )}
