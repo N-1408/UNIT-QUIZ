@@ -53,7 +53,7 @@ function randomId(prefix: string): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
-  return ${prefix}-;
+  return `${prefix}-${Date.now()}`;
 }
 
 export default function TeacherPanel() {
@@ -200,20 +200,20 @@ export default function TeacherPanel() {
     const student = students.find((item) => item.id === id);
     if (!student) return;
     haptic.warn();
-    window.alert(${student.name} vaqtincha bloklandi (demo). Haqiqiy ban keyingi iteratsiyada ulanadi.);
+    window.alert(`${student.name} vaqtincha bloklandi (demo). Haqiqiy ban keyingi iteratsiyada ulanadi.`);
   }
 
   function handleEditTest(id: string) {
     const test = tests.find((item) => item.id === id);
     if (!test) return;
     haptic.tap();
-    window.alert("" uchun editor keyingi bosqichda ishga tushadi.);
+    window.alert(`"${test.title}" uchun editor keyingi bosqichda ishga tushadi.`);
   }
 
   function handleDeleteTest(id: string) {
     const test = tests.find((item) => item.id === id);
     if (!test) return;
-    if (!window.confirm("" testini o'chirishni xohlaysizmi?)) return;
+    if (!window.confirm(`"${test.title}" testini o'chirishni xohlaysizmi?`)) return;
     haptic.warn();
     setTests((prev) => prev.filter((item) => item.id !== id));
   }

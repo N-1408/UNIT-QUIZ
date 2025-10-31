@@ -98,7 +98,7 @@ export default function RatingPage() {
                 haptic.tap();
                 setTf(option as Timeframe);
               }}
-              className={pill tap }
+              className={`pill tap ${tf === option ? "pill-active" : ""}`}
             >
               {option}
             </button>
