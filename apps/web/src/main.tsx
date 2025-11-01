@@ -6,6 +6,7 @@ import { initializeTelegramWebApp } from './lib/telegram';
 import { applyInitialTheme } from './lib/theme';
 import { BrowserRouter } from 'react-router-dom';
 import { I18nProvider } from './i18n';
+import { SupabaseProvider } from './providers/SupabaseProvider';
 
 initializeTelegramWebApp();
 applyInitialTheme();
@@ -19,9 +20,11 @@ if (!container) {
 createRoot(container).render(
   <React.StrictMode>
     <BrowserRouter>
-      <I18nProvider>
-        <App />
-      </I18nProvider>
+      <SupabaseProvider>
+        <I18nProvider>
+          <App />
+        </I18nProvider>
+      </SupabaseProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
