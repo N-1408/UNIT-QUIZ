@@ -1,4 +1,4 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -81,10 +81,14 @@ body {
   color: #495057;
 }
 
-.badge-new {
-  background: var(--brand-yellow);
-  color: #000;
+
+
+@keyframes dropletPop {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-2px) scale(1.04); }
+  100% { transform: translateY(0) scale(1); }
 }
+
 
 .btn {
   display: inline-flex;
@@ -170,21 +174,15 @@ button:disabled {
 
 .bottom-nav a.active {
   color: var(--brand-yellow);
+  animation: dropletPop var(--dur-2) var(--ease);
 }
 
-.bottom-nav a.active::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 8px;
-  width: 44px;
-  height: 28px;
-  border-radius: 999px;
-  background: rgba(255, 207, 0, 0.08);
-  filter: blur(10px);
-  pointer-events: none;
+
+
+.bottom-nav a:active {
+  transform: translateY(1px) scale(.98);
 }
+
 
 .back-btn {
   margin-left: -4px;
@@ -202,3 +200,24 @@ button:disabled {
   transform: scale(.98);
   filter: brightness(.98);
 }
+
+
+
+
+.card-current-user {
+  background: #fff6bf;
+  color: #000;
+  border-color: #ffe166;
+}
+
+.card-current-user .badge {
+  background: #000;
+  color: var(--brand-yellow);
+}
+
+[data-theme="dark"] .card-current-user {
+  background: color-mix(in oklab, var(--brand-yellow) 25%, var(--ink-2) 75%);
+  color: var(--fg);
+  border-color: color-mix(in oklab, var(--brand-yellow) 40%, transparent);
+}
+

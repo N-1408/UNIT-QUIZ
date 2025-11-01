@@ -2,6 +2,7 @@
 import { useOutletContext } from "react-router-dom";
 import type { AppOutletContext } from "../App";
 import { haptic } from "../lib/tg";
+import { useI18n } from "../i18n";
 
 type RatingItem = {
   id: string;
@@ -12,7 +13,7 @@ type RatingItem = {
   updatedAt: string;
 };
 
-type Timeframe = "All time" | "This month" | "This week";
+type Timeframe = "all" | "month" | "week";
 
 const groups = [
   { id: "g1", title: "CEFR Up A2" },
@@ -27,20 +28,27 @@ const mockData: RatingItem[] = [
   { id: "laylo", name: "Laylo M.", groupId: "g3", groupTitle: "CEFR Up B2", score: 84, updatedAt: "2025-09-28" }
 ];
 
+const TIMEFRAME_OPTIONS: Array<{ value: Timeframe; labelKey: string }> = [
+  { value: "all", labelKey: "timeframeAll" },
+  { value: "month", labelKey: "timeframeMonth" },
+  { value: "week", labelKey: "timeframeWeek" }
+];
+
 export default function RatingPage() {
   const { user } = useOutletContext<AppOutletContext>();
+  const { t } = useI18n();
   const [groupId, setGroupId] = useState<string>("all");
-  const [tf, setTf] = useState<Timeframe>("All time");
+  const [tf, setTf] = useState<Timeframe>("all");
 
   const filtered = useMemo(() => {
     const now = new Date();
     const data = mockData.filter((item) => {
       if (groupId !== "all" && item.groupId !== groupId) return false;
-      if (tf === "This month") {
+      if (tf === "month") {
         const date = new Date(item.updatedAt);
         return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
       }
-      if (tf === "This week") {
+      if (tf === "week") {
         const date = new Date(item.updatedAt);
         const diff = Math.abs(now.getTime() - date.getTime());
         return diff <= 7 * 24 * 60 * 60 * 1000;
@@ -69,8 +77,8 @@ export default function RatingPage() {
   return (
     <div className="mx-auto max-w-md p-4 pb-24">
       <header className="text-center">
-        <h1 className="section-title">Ranking</h1>
-        <p className="section-sub mt-1">Only the first attempt counts. Replays are for practice.</p>
+        <h1 className="section-title">{t("ranking")}</h1>
+        <p className="section-sub mt-1">{t("onlyFirstCounts")}</p>
       </header>
 
       <div className="mt-6 flex flex-col items-center gap-3">
@@ -82,7 +90,7 @@ export default function RatingPage() {
             setGroupId(event.target.value);
           }}
         >
-          <option value="all">All groups</option>
+          <option value="all">{t("groupFilter")}</option>
           {groups.map((group) => (
             <option key={group.id} value={group.id}>
               {group.title}
@@ -91,16 +99,16 @@ export default function RatingPage() {
         </select>
 
         <div className="flex flex-wrap items-center justify-center gap-2">
-          {["All time", "This month", "This week"].map((option) => (
+          {TIMEFRAME_OPTIONS.map((option) => (
             <button
-              key={option}
+              key={option.value}
               onClick={() => {
                 haptic.tap();
-                setTf(option as Timeframe);
+                setTf(option.value);
               }}
-              className={`pill tap ${tf === option ? "pill-active" : ""}`}
+              className={`pill tap ${tf === option.value ? "pill-active" : ""}`}
             >
-              {option}
+              {t(option.labelKey)}
             </button>
           ))}
         </div>
@@ -112,8 +120,7 @@ export default function RatingPage() {
           return (
             <div
               key={item.id}
-              className="card flex items-center justify-between gap-3"
-              style={isCurrent ? { boxShadow: "0 0 0 1px rgba(255, 207, 0, 0.3)" } : undefined}
+              className={`card flex items-center justify-between gap-3${isCurrent ? " card-current-user" : ""}`}
             >
               <div>
                 <p className="text-sm font-semibold" style={{ color: "var(--fg)" }}>
@@ -129,7 +136,7 @@ export default function RatingPage() {
         })}
         {filtered.length === 0 && (
           <div className="card text-sm" style={{ color: "var(--muted)" }}>
-            No results for the selected filters.
+            {t("noResults")}
           </div>
         )}
       </div>

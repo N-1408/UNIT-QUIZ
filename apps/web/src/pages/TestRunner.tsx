@@ -2,15 +2,16 @@
 import { useParams } from "react-router-dom";
 import { Clock3 } from "lucide-react";
 import { haptic } from "../lib/tg";
+import { useI18n } from "../i18n";
 
 type OptionKey = "A" | "B" | "C" | "D";
 type Option = { key: OptionKey; text: string };
 type Question = { id: string; text: string; options: Option[]; correct?: OptionKey };
 
 const DURATION = 600;
-
 export default function TestRunner() {
   const { id } = useParams();
+  const { t } = useI18n();
   const [secondsLeft, setSecondsLeft] = useState<number>(DURATION);
   const [answers, setAnswers] = useState<Record<string, OptionKey | undefined>>({});
   const timerRef = useRef<number | null>(null);
@@ -62,14 +63,14 @@ export default function TestRunner() {
   }
 
   function submit() {
-    haptic.success();
     let score = 0;
     questions.forEach((question) => {
       if (answers[question.id] && question.correct && answers[question.id] === question.correct) {
         score++;
       }
     });
-    alert(`Submitted (mock). Score: ${score}/${questions.length}`);
+    haptic.success();
+    alert(`${t("mockSaved")} (${score}/${questions.length})`);
   }
 
   return (
@@ -133,10 +134,13 @@ export default function TestRunner() {
             }}
             className="btn btn-primary tap w-full"
           >
-            Submit
+            {t("submit")}
           </button>
         </div>
       </div>
     </div>
   );
 }
+
+
+

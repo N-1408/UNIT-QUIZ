@@ -3,6 +3,7 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { Clock3, CheckCircle, XCircle } from "lucide-react";
 import type { AppOutletContext } from "../App";
 import { haptic } from "../lib/tg";
+import { useI18n, type Lang } from "../i18n";
 
 type TestHistory = {
   correct: number;
@@ -31,7 +32,7 @@ const mockTests: TestItem[] = [
   },
   {
     id: "unit-1",
-    title: "Unit 1 — Academic Skills",
+    title: "Unit 1 - Academic Skills",
     unit: "Unit 1",
     isNew: false,
     lastScore: 8,
@@ -61,29 +62,38 @@ const mockTests: TestItem[] = [
   }
 ];
 
+const localeMap: Record<Lang, string> = {
+  en: "en-US",
+  uz: "uz-UZ",
+  ru: "ru-RU"
+};
+
 export default function TestsPage() {
   const navigate = useNavigate();
   const { user } = useOutletContext<AppOutletContext>();
+  const { t, lang } = useI18n();
   const [selectedTest, setSelectedTest] = useState<TestItem | null>(null);
 
   const tests = useMemo(() => mockTests, []);
   const firstName = useMemo(() => user?.fullName?.split(" ")[0] ?? "Student", [user?.fullName]);
+  const welcomeText = t("welcomeNamed").replace("{name}", firstName);
+  const locale = localeMap[lang] ?? "en-US";
 
   return (
     <section className="flex flex-col gap-4 pb-28">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold" style={{ color: "var(--fg)" }}>
-            Welcome, {firstName}
+            {welcomeText}
           </h1>
           <p className="text-xs uppercase tracking-wide" style={{ color: "var(--muted)" }}>
-            inter-nation.uz mini tests
+            {t("miniTestsTag")}
           </p>
         </div>
-        <span className="badge">Demo</span>
+        <span className="badge">{t("demo")}</span>
       </div>
       <p className="text-sm" style={{ color: "var(--muted)" }}>
-        New tests will appear automatically. Final scores will sync with Supabase soon.
+        {t("newTestsNote")}
       </p>
 
       <div className="mt-2 flex flex-col gap-3">
@@ -96,8 +106,6 @@ export default function TestsPage() {
               setSelectedTest(test);
             }
           };
-
-          const isNew = test.isNew;
 
           return (
             <button
@@ -125,21 +133,15 @@ export default function TestsPage() {
                       <Clock3 size={14} /> {test.lastDuration}
                     </span>
                   )}
-                  {isNew && (
-                    <span className="badge badge-new">
-                      New
-                    </span>
-                  )}
+                  {test.isNew && <span className="badge badge-new">{t("newBadge")}</span>}
                 </div>
               </div>
               <p className="text-sm" style={{ color: "var(--muted)" }}>
-                {test.isNew
-                  ? "This test hasn’t been taken yet. Your first attempt counts towards the ranking."
-                  : "Latest attempt recorded. Replays are for practice only."}
+                {test.isNew ? t("newTestDescription") : t("replayNote")}
               </p>
               {!test.isNew && test.history && (
                 <p className="text-xs" style={{ color: "var(--muted)" }}>
-                  Last attempt: {new Date(test.history.finishedAt).toLocaleString("uz-UZ")}
+                  {t("lastAttempt")}: {new Date(test.history.finishedAt).toLocaleString(locale)}
                 </p>
               )}
             </button>
@@ -168,6 +170,7 @@ type TestHistoryModalProps = {
 };
 
 function TestHistoryModal({ test, onClose, onRetake }: TestHistoryModalProps) {
+  const { t } = useI18n();
   const history = test.history!;
   const stats = {
     correct: history.correct,
@@ -195,14 +198,14 @@ function TestHistoryModal({ test, onClose, onRetake }: TestHistoryModalProps) {
             }}
             className="btn btn-ghost tap text-sm text-[var(--muted)]"
           >
-            Close
+            {t("close")}
           </button>
         </div>
 
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
           <div className="card p-3">
             <div className="flex items-center justify-center gap-1 text-state-green">
-              <CheckCircle size={18} /> <span className="text-sm">Correct</span>
+              <CheckCircle size={18} /> <span className="text-sm">{t("correct")}</span>
             </div>
             <div className="text-2xl font-semibold" style={{ color: "var(--fg)" }}>
               {stats.correct}
@@ -210,7 +213,7 @@ function TestHistoryModal({ test, onClose, onRetake }: TestHistoryModalProps) {
           </div>
           <div className="card p-3">
             <div className="flex items-center justify-center gap-1 text-state-red">
-              <XCircle size={18} /> <span className="text-sm">Wrong</span>
+              <XCircle size={18} /> <span className="text-sm">{t("wrong")}</span>
             </div>
             <div className="text-2xl font-semibold" style={{ color: "var(--fg)" }}>
               {stats.wrong}
@@ -218,7 +221,7 @@ function TestHistoryModal({ test, onClose, onRetake }: TestHistoryModalProps) {
           </div>
           <div className="card p-3">
             <div className="flex items-center justify-center gap-1 opacity-80">
-              <Clock3 size={18} /> <span className="text-sm">Time</span>
+              <Clock3 size={18} /> <span className="text-sm">{t("time")}</span>
             </div>
             <div className="text-2xl font-semibold" style={{ color: "var(--fg)" }}>
               {stats.time}
@@ -227,7 +230,7 @@ function TestHistoryModal({ test, onClose, onRetake }: TestHistoryModalProps) {
         </div>
 
         <p className="mt-4 text-xs" style={{ color: "var(--muted)" }}>
-          Only the first attempt counts towards the ranking. Replays are great for revision.
+          {t("onlyFirstCounts")}
         </p>
 
         <div className="mt-5 flex flex-col gap-2">
@@ -239,7 +242,7 @@ function TestHistoryModal({ test, onClose, onRetake }: TestHistoryModalProps) {
             }}
             className="btn btn-primary tap"
           >
-            Retake test
+            {t("retakeTest")}
           </button>
           <button
             type="button"
@@ -249,10 +252,15 @@ function TestHistoryModal({ test, onClose, onRetake }: TestHistoryModalProps) {
             }}
             className="btn btn-ghost tap text-sm text-[var(--muted)]"
           >
-            Cancel
+            {t("cancel")}
           </button>
         </div>
       </div>
     </div>
   );
 }
+
+
+
+
+

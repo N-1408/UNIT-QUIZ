@@ -5,6 +5,7 @@ import './styles/index.css';
 import { initializeTelegramWebApp } from './lib/telegram';
 import { applyInitialTheme } from './lib/theme';
 import { BrowserRouter } from 'react-router-dom';
+import { I18nProvider } from './i18n';
 
 initializeTelegramWebApp();
 applyInitialTheme();
@@ -18,7 +19,9 @@ if (!container) {
 createRoot(container).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <I18nProvider>
+        <App />
+      </I18nProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
