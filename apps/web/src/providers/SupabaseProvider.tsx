@@ -118,11 +118,31 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
         }
 
         const initData = window.Telegram?.WebApp?.initData ?? "";
+        const urlToken = new URLSearchParams(window.location.search).get("token") ?? "";
 
-        if (!initData) {
+        let requestPayload: Record<string, string> | null = null;
+        if (initData && initData.trim().length > 0) {
+          console.info("Auth path: initData");
+          requestPayload = { initData };
+        } else if (urlToken && urlToken.trim().length > 0) {
+          console.info("Auth path: url-token");
+          const trimmedToken = urlToken.trim();
+          requestPayload = { token: trimmedToken };
+          try {
+            const url = new URL(window.location.href);
+            url.searchParams.delete("token");
+            const cleanedSearch = url.searchParams.toString();
+            const cleanUrl = `${url.pathname}${cleanedSearch ? `?${cleanedSearch}` : ""}${url.hash}`;
+            window.history.replaceState(null, "", cleanUrl);
+          } catch (error) {
+            console.debug("Failed to clean token param from URL:", error);
+          }
+        } else {
+          console.warn("Auth path: none (no initData or token)");
           setAuthState({
             status: "developer",
-            message: "Telegram WebApp initData topilmadi. Iltimos, mini-appni Telegram orqali ishga tushiring."
+            message:
+              "Telegram WebApp initData topilmadi. Iltimos, mini-appni Telegram orqali ishga tushiring yoki token bilan oching."
           });
           clearCachedToken();
           return;
@@ -137,14 +157,14 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
               Authorization: `Bearer ${supabaseAnonKey}`,
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({ initData })
+            body: JSON.stringify(requestPayload)
           });
 
           if (response.status === 401) {
             clearCachedToken();
             setAuthState({
               status: "error",
-              message: "Telegram WebApp initData topilmadi (401)."
+              message: "Auth server rejected the provided credentials (401)."
             });
             return;
           }

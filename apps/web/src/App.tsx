@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, Route, Routes } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import Header from './components/Header';
@@ -38,15 +38,6 @@ function AppLayout({
 function App() {
   const { authState, refreshAuth } = useSupabase();
   const [user, setUser] = useState<RegisteredUser | null>(null);
-  const initData = useMemo(
-    () => (typeof window !== 'undefined' ? window.Telegram?.WebApp?.initData || 'no_init_data' : 'no_init_data'),
-    []
-  );
-
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('TMA initData:', initData);
-  }, [initData]);
 
   useEffect(() => {
     const stored = loadUser();
@@ -97,19 +88,6 @@ function App() {
 
   return (
     <>
-      <div
-        style={{
-          padding: '8px',
-          color: 'black',
-          fontSize: '12px',
-          background: '#fff7cc',
-          borderBottom: '1px solid #ddd',
-          textAlign: 'center'
-        }}
-      >
-        Telegram initData:{' '}
-        {initData && initData.length > 0 ? `${initData.slice(0, 50)}...` : 'not received'}
-      </div>
       <Routes>
         <Route element={<AppLayout user={user} onUserChange={updateUser} />}>
           <Route index element={<TestsPage />} />
