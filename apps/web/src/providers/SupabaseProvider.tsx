@@ -58,19 +58,11 @@ function clearCachedToken() {
   }
 }
 
-function resolveAuthEndpoint(): string | null {
-  const backendBase = (import.meta.env.NEXT_PUBLIC_BACKEND_URL ?? "").trim();
-  if (backendBase) {
-    return `${backendBase.replace(/\/+$/, "")}/api/login`;
-  }
-  const direct = (import.meta.env.NEXT_PUBLIC_TMA_AUTH_URL ?? "").trim();
-  return direct || null;
-}
-
 export function SupabaseProvider({ children }: { children: ReactNode }) {
   const supabaseUrl = (import.meta.env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
   const supabaseAnonKey = (import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "").trim();
-  const authEndpoint = resolveAuthEndpoint();
+  const backendBase = (import.meta.env.NEXT_PUBLIC_BACKEND_URL ?? "").trim();
+  const authEndpoint = backendBase ? `${backendBase.replace(/\/+$/, "")}/api/tma-auth` : null;
 
   const [authState, setAuthState] = useState<AuthState>({ status: "loading" });
   const [client, setClient] = useState<SupabaseClient | null>(null);
@@ -99,7 +91,7 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
         if (!authEndpoint) {
           setAuthState({
             status: "error",
-            message: "Auth endpoint is not configured. Provide NEXT_PUBLIC_TMA_AUTH_URL or NEXT_PUBLIC_BACKEND_URL."
+            message: "Auth endpoint is not configured. Provide NEXT_PUBLIC_BACKEND_URL."
           });
           return;
         }
@@ -154,7 +146,6 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
           const response = await fetch(authEndpoint, {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${supabaseAnonKey}`,
               "Content-Type": "application/json"
             },
             body: JSON.stringify(requestPayload)
