@@ -1,21 +1,26 @@
-import { Bot, InlineKeyboard, Keyboard } from 'grammy';
-import { env } from './env.js';
-import { getUserById, upsertUser } from './users.js';
+import { Bot, Keyboard } from "grammy";
+import { env } from "./env.js";
+import { getUserById, upsertUser } from "./users.js";
 
-const openAppButton = new InlineKeyboard().webApp('Ilovani ochish', env.APP_ORIGIN);
+const WEB_APP_URL = "https://unitquiz.vercel.app";
+const DOMAIN_WARNING = "WARNING: BotFather domeningizni yangilang -> /setdomain -> https://unitquiz.vercel.app";
+
+if (env.APP_ORIGIN !== WEB_APP_URL) {
+  console.warn(DOMAIN_WARNING);
+}
 
 const requestContactKeyboard = new Keyboard()
-  .requestContact('Raqamni yuborish (Send Contact)')
+  .requestContact("Raqamni yuborish (Send Contact)")
   .resized()
   .oneTime();
 
 export const bot = new Bot(env.BOT_TOKEN);
 
 bot.catch((error) => {
-  console.error('grammy error:', error);
+  console.error("grammy error:", error);
 });
 
-bot.command('start', async (ctx) => {
+bot.command("start", async (ctx) => {
   const from = ctx.from;
   if (!from) {
     return;
@@ -28,27 +33,34 @@ bot.command('start', async (ctx) => {
 
     if (existing) {
       const firstName = existing.first_name || from.first_name || "do'stimiz";
-      await ctx.reply(`👋 Yana sizmi, ${firstName}? 😄\nSiz allaqachon tizimdasiz. Quyidagi tugma orqali UNIT QUIZ'ni oching.`, {
-        reply_markup: openAppButton
-      });
+      await ctx.reply(
+        `Yana sizmi, ${firstName}? :)\nSiz allaqachon tizimdasiz. Quyidagi tugma orqali UNIT QUIZ'ni oching.`,
+        {
+          reply_markup: {
+            inline_keyboard: [[{ text: "Ilovani ochish", web_app: { url: WEB_APP_URL } }]]
+          }
+        }
+      );
       return;
     }
   } catch (error) {
-    console.error('supabase lookup error:', error);
-    await ctx.reply("⚠️ Ulanishda muammo yuz berdi.\nIltimos, qayta urinib ko'ring yoki o'quv markaz bilan bog'laning.");
+    console.error("supabase lookup error:", error);
+    await ctx.reply(
+      "WARNING: Ulanishda muammo yuz berdi.\nIltimos, qayta urinib ko'ring yoki o'quv markaz bilan bog'laning."
+    );
     return;
   }
 
   const firstName = from.first_name || "do'stimiz";
   await ctx.reply(
-    `Salom, ${firstName}! 👋\nBu sizning Nova LC test tizimingiz - UNIT QUIZ.\nDavom etishdan oldin, iltimos, ro'yxatdan o'tish uchun telefon raqamingizni yuboring 📱`,
+    `Salom, ${firstName}!\nBu sizning Nova LC test tizimingiz - UNIT QUIZ.\nDavom etishdan oldin, iltimos, ro'yxatdan o'tish uchun telefon raqamingizni yuboring.`,
     {
       reply_markup: requestContactKeyboard
     }
   );
 });
 
-bot.on('message:contact', async (ctx) => {
+bot.on("message:contact", async (ctx) => {
   const from = ctx.from;
   const contact = ctx.message.contact;
 
@@ -64,16 +76,33 @@ bot.on('message:contact', async (ctx) => {
   try {
     await upsertUser({
       id: String(from.id),
-      firstName: contact.first_name || from.first_name || '',
+      firstName: contact.first_name || from.first_name || "",
       lastName: contact.last_name ?? from.last_name ?? null,
       phoneNumber: contact.phone_number
     });
 
-    await ctx.reply("✅ Ro'yxatdan o'tish muvaffaqiyatli yakunlandi!\nEndi siz Nova LC test platformasidan foydalanishingiz mumkin.", {
-      reply_markup: openAppButton
-    });
+    await ctx.reply(
+      "Ro'yxatdan o'tish muvaffaqiyatli yakunlandi! Endi siz Nova LC test platformasidan foydalanishingiz mumkin.",
+      {
+        reply_markup: {
+          inline_keyboard: [[{ text: "Ilovani ochish", web_app: { url: WEB_APP_URL } }]]
+        }
+      }
+    );
   } catch (error) {
-    console.error('supabase upsert error:', error);
-    await ctx.reply("⚠️ Ulanishda muammo yuz berdi.\nIltimos, qayta urinib ko'ring yoki o'quv markaz bilan bog'laning.");
+    console.error("supabase upsert error:", error);
+    await ctx.reply(
+      "WARNING: Ulanishda muammo yuz berdi.\nIltimos, qayta urinib ko'ring yoki o'quv markaz bilan bog'laning."
+    );
   }
 });
+
+bot.command("test", async (ctx) => {
+  await ctx.reply("WebApp ochish sinovi", {
+    reply_markup: {
+      inline_keyboard: [[{ text: "UNIT QUIZ ochish", web_app: { url: WEB_APP_URL } }]]
+    }
+  });
+});
+
+

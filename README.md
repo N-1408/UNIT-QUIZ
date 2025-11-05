@@ -23,7 +23,7 @@ Nova LC oquvchilari uchun ishlab chiqilgan Telegram Mini App. Monorepo quyidagi 
 VITE_API_URL=http://localhost:8787
 
 BOT_TOKEN=__PUT_TELEGRAM_BOT_TOKEN_HERE__
-APP_ORIGIN=https://nova-lc-unit-quiz.vercel.app
+APP_ORIGIN=https://unitquiz.vercel.app
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_KEY=__PUT_SUPABASE_SERVICE_ROLE_KEY__
 PORT=8787
