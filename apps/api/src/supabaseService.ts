@@ -1,14 +1,10 @@
 import { supabase } from "./supabaseClient.js";
 
-export type ServiceResult<T> =
-  | {
-      success: true;
-      data: T;
-    }
-  | {
-      success: false;
-      message: string;
-    };
+export type ServiceResult<T> = {
+  success: boolean;
+  data?: T;
+  message?: string;
+};
 
 export type StudentRecord = {
   id: number;
@@ -87,6 +83,12 @@ const createError = <T>(scope: string, error: unknown): ServiceResult<T> => {
   };
 };
 
+const createSuccess = <T>(data: T, message = "OK"): ServiceResult<T> => ({
+  success: true,
+  data,
+  message
+});
+
 export async function getStudentByTgId(tg_id: number): Promise<ServiceResult<StudentRecord | null>> {
   const { data, error } = await supabase
     .from("students")
@@ -98,7 +100,7 @@ export async function getStudentByTgId(tg_id: number): Promise<ServiceResult<Stu
     return createError("getStudentByTgId", error);
   }
 
-  return { success: true, data: data as StudentRecord | null };
+  return createSuccess(data as StudentRecord | null);
 }
 
 export async function getOrCreateStudent(
@@ -129,7 +131,7 @@ export async function getOrCreateStudent(
     }
 
     if (Object.keys(updates).length === 0) {
-      return { success: true, data: existing.data };
+      return createSuccess(existing.data);
     }
 
     const { data, error } = await supabase
@@ -147,7 +149,7 @@ export async function getOrCreateStudent(
       return { success: false, message: "Failed to update student record" };
     }
 
-    return { success: true, data: data as StudentRecord };
+    return createSuccess(data as StudentRecord);
   }
 
   const insertPayload = {
@@ -171,7 +173,7 @@ export async function getOrCreateStudent(
     return { success: false, message: "Failed to create student record" };
   }
 
-  return { success: true, data: data as StudentRecord };
+  return createSuccess(data as StudentRecord);
 }
 
 export async function createAttempt(student_tg_id: number, exam_id: number): Promise<ServiceResult<AttemptRecord>> {
@@ -192,7 +194,7 @@ export async function createAttempt(student_tg_id: number, exam_id: number): Pro
     return { success: false, message: "Failed to create attempt" };
   }
 
-  return { success: true, data: data as AttemptRecord };
+  return createSuccess(data as AttemptRecord);
 }
 
 export async function submitAttempt(
@@ -217,7 +219,7 @@ export async function submitAttempt(
     return { success: false, message: "Attempt not found" };
   }
 
-  return { success: true, data: data as AttemptRecord };
+  return createSuccess(data as AttemptRecord);
 }
 
 export async function saveAnswer(
@@ -247,7 +249,7 @@ export async function saveAnswer(
     return { success: false, message: "Failed to save answer" };
   }
 
-  return { success: true, data: data as AttemptAnswerRecord };
+  return createSuccess(data as AttemptAnswerRecord);
 }
 
 export async function getExamWithQuestions(exam_id: number): Promise<ServiceResult<ExamWithQuestions | null>> {
@@ -292,7 +294,7 @@ export async function getExamWithQuestions(exam_id: number): Promise<ServiceResu
     return createError("getExamWithQuestions", error);
   }
 
-  return { success: true, data: (data as ExamWithQuestions) ?? null };
+  return createSuccess((data as ExamWithQuestions) ?? null);
 }
 
 export async function getStudentAttempts(student_tg_id: number): Promise<ServiceResult<AttemptRecord[]>> {
@@ -304,5 +306,5 @@ export async function getStudentAttempts(student_tg_id: number): Promise<Service
     return createError("getStudentAttempts", error);
   }
 
-  return { success: true, data: (data as AttemptRecord[]) ?? [] };
+  return createSuccess((data as AttemptRecord[]) ?? []);
 }
