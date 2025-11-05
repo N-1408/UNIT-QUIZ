@@ -1,9 +1,9 @@
 import { Bot, InlineKeyboard } from 'grammy';
 import { env } from './env.js';
 
-const webAppDemoUrl = env.WEB_APP_URL || 'https://example.com';
+const webAppDemoUrl = env.APP_ORIGIN || 'https://example.com';
 
-export const bot = new Bot(env.TELEGRAM_BOT_TOKEN);
+export const bot = new Bot(env.BOT_TOKEN);
 
 bot.command('start', async (ctx) => {
   const keyboard = new InlineKeyboard().webApp('Open App', webAppDemoUrl);

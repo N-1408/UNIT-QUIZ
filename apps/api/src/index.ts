@@ -1,6 +1,7 @@
 import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { Bot } from 'grammy';
 import { env } from './env.js';
 import testsRouter from './routes/tests.js';
@@ -10,8 +11,13 @@ const app = express();
 app.enable('trust proxy');
 app.use(express.json({ limit: '2mb' }));
 
-const allowed = env.WEB_APP_URL || '*';
-app.use(cors({ origin: allowed }));
+app.use(
+  cors({
+    origin: env.APP_ORIGIN,
+    credentials: true
+  })
+);
+app.use(cookieParser());
 
 app.use((req, _res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
@@ -24,13 +30,13 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 let bot: Bot | undefined;
 
 try {
-  if (env.TELEGRAM_BOT_TOKEN) {
-    bot = new Bot(env.TELEGRAM_BOT_TOKEN);
+  if (env.BOT_TOKEN) {
+    bot = new Bot(env.BOT_TOKEN);
 
     bot.catch((err) => console.error('grammy error:', err));
 
     bot.command('start', async (ctx) => {
-      const url = env.WEB_APP_URL || 'https://example.com';
+      const url = env.APP_ORIGIN || 'https://example.com';
       await ctx.reply('Assalomu alaykum! INTERNATION Mini App’ni ochish uchun tugmani bosing.', {
         reply_markup: {
           inline_keyboard: [[{ text: 'Open INTERNATION', web_app: { url } }]]
