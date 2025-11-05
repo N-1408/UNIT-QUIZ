@@ -1,24 +1,75 @@
-import WebApp from "@twa-dev/sdk";
+type TelegramBackButton = {
+  show: () => void;
+  hide: () => void;
+  onClick: (callback: () => void) => void;
+  offClick: (callback: () => void) => void;
+};
 
-export function initializeTelegramWebApp() {
+type TelegramWebApp = {
+  ready: () => void;
+  expand: () => void;
+  colorScheme: "light" | "dark";
+  themeParams?: Record<string, unknown>;
+  onEvent: (event: string, callback: () => void) => void;
+  offEvent: (event: string, callback: () => void) => void;
+  BackButton: TelegramBackButton;
+  HapticFeedback?: {
+    impactOccurred: (type: "light" | "medium" | "heavy") => void;
+  };
+};
+
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp?: TelegramWebApp;
+    };
+  }
+}
+
+let webApp: TelegramWebApp | undefined;
+
+export const initTelegramWebApp = () => {
   if (typeof window === "undefined") return;
-
+  const tg = window.Telegram?.WebApp;
+  if (!tg) return;
+  webApp = tg;
   try {
-    WebApp.ready();
-    WebApp.expand();
-    WebApp.setHeaderColor("#ff5f00");
-    WebApp.setBackgroundColor("#ffffff");
+    tg.ready();
+    tg.expand();
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.warn("Telegram WebApp init skipped:", error);
+    console.warn("Telegram WebApp init failed", error);
   }
-}
+};
 
-export function closeTelegramWebApp() {
-  try {
-    WebApp.close();
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.warn("Telegram WebApp close skipped:", error);
+export const syncTelegramTheme = (
+  listener: (payload: { colorScheme: "light" | "dark" }) => void
+) => {
+  if (!webApp) {
+    listener({ colorScheme: "light" });
+    return () => undefined;
   }
-}
+
+  const handler = () => listener({ colorScheme: webApp!.colorScheme ?? "light" });
+  handler();
+  webApp.onEvent("themeChanged", handler);
+  return () => webApp?.offEvent("themeChanged", handler);
+};
+
+export const registerTelegramBackButton = (callback: () => void) => {
+  if (!webApp) return () => undefined;
+  const btn = webApp.BackButton;
+  btn.show();
+  btn.onClick(callback);
+  return () => {
+    btn.offClick(callback);
+    btn.hide();
+  };
+};
+
+export const triggerHaptic = (type: "light" | "medium" | "heavy" = "light") => {
+  try {
+    webApp?.HapticFeedback?.impactOccurred(type);
+  } catch (error) {
+    console.warn("Telegram haptic unavailable", error);
+  }
+};

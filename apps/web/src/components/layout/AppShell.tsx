@@ -1,0 +1,43 @@
+import { Outlet, useLocation } from "react-router-dom";
+import { Header } from "@/components/layout/Header";
+import { Page } from "@/components/layout/Page";
+import { BottomNav } from "@/components/layout/BottomNav";
+
+const TITLES: Record<string, { title: string; subtitle?: string }> = {
+  "/": {
+    title: "Bosh sahifa",
+    subtitle: "Bugungi kayfiyatingiz qanday?"
+  },
+  "/exams": {
+    title: "Imtihonlar",
+    subtitle: "Tayyor chiqqan odam doim g'alaba qilar"
+  },
+  "/results": {
+    title: "Natijalar",
+    subtitle: "Bu yerda hammasi ochiq va shaffof"
+  },
+  "/settings": {
+    title: "Sozlamalar",
+    subtitle: "O'zingizga yoqqancha moslab oling"
+  }
+};
+
+export const AppShell = () => {
+  const location = useLocation();
+  const info =
+    TITLES[location.pathname] ??
+    ({
+      title: "UNIT QUIZ",
+      subtitle: "Nova LC imtihon ekotizimi"
+    } as const);
+
+  return (
+    <div className="flex min-h-screen w-full flex-col bg-surface text-slate-100">
+      <Header title={info.title} subtitle={info.subtitle} showBack={location.pathname !== "/"} />
+      <Page>
+        <Outlet />
+      </Page>
+      <BottomNav />
+    </div>
+  );
+};
