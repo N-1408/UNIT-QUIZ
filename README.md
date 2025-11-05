@@ -1,69 +1,71 @@
 # Nova LC - UNIT QUIZ
 
-Nova LC o'quvchilari uchun yaratilgan yengil va tezkor Telegram Mini App. Monorepo ikkita asosiy bo'limdan iborat:
+Nova LC oquvchilari uchun ishlab chiqilgan Telegram Mini App. Monorepo quyidagi paketlardan iborat:
 
-- `apps/web`: React + Vite asosidagi Nova LC brendli Telegram WebApp.
-- `apps/api`: Express + grammY webhook serveri va kontakt orqali avtorizatsiya.
+- `apps/web`: React + TypeScript + Telegram Mini App SDK
+- `apps/api`: Express + grammY webhook serveri
 
-## Asosiy imkoniyatlar
+## Auth oqimi (Send Contact + Supabase)
 
-- **Send Contact login**: botdagi `/start` buyrug'idan so'ng foydalanuvchi telefon raqamini yuboradi va bir marta ro'yxatdan o'tadi.
-- **Foydalanuvchi bazasi**: `users.json` fayli `telegram_id`, ism, username va telefon raqamini saqlaydi.
-- **Telegram WebApp integratsiyasi**: UI foydalanuvchini faqat Telegram ID orqali taniydi, header'da ism va avatar ko'rsatiladi.
-- **Nova LC dizayni**: #FF5F00 → #FF7B33 gradient tugmalar, Inter / SF Pro Rounded shriftlari, yumaloq burchaklar va soft soya.
+1. Foydalanuvchi botga `/start` yuboradi.
+2. Agar foydalanuvchi Supabase `users` jadvalida topilmasa, bot "Raqamni yuborish (Send Contact)" tugmasini korsatadi.
+3. Foydalanuvchi kontakt yuboradi:
+   - Telegram `user_id` Supabase `users.id` sifatida saqlanadi (`first_name`, `last_name`, `phone_number` maydonlari bilan).
+   - Bot royxatdan otish tasdigini yuboradi va Mini App havolasini korsatadi.
+4. Agar foydalanuvchi allaqachon mavjud bolsa, bot bevosita "Ilovani ochish" tugmasini qaytaradi.
+5. Frontend WebApp ochilgach, Telegram WebApp kontekstdan `user.id` oladi va `/api/users/:id` orqali Supabase dagi malumotni oladi.
 
-## Tuzilma
+## Muhit ozgaruvchilari
 
-```
-/
-├─ apps/
-│  ├─ api/   # Express webhook + grammY bot
-│  └─ web/   # Telegram WebApp (React)
-├─ db/       # users.json fayli shu yerda saqlanadi
-└─ docs/     # Qo'shimcha hujjatlar
-```
-
-## Muhit o'zgaruvchilari
-
-.env namunasi `.env.example` faylida:
+`.env.example` fayli bazaviy sozlamalarni korsatadi:
 
 ```
 VITE_API_URL=http://localhost:8787
+
 BOT_TOKEN=__PUT_TELEGRAM_BOT_TOKEN_HERE__
 APP_ORIGIN=https://nova-lc-unit-quiz.vercel.app
-DATABASE_URL=./db/users.json
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=__PUT_SUPABASE_SERVICE_ROLE_KEY__
 PORT=8787
 ```
 
-> `DATABASE_URL` bo'sh qoldirilsa, backend avtomatik ravishda `db/users.json` faylini yaratadi.
+> Supabase service role key faqat backendda ishlatiladi. Frontend uchun kerak bolsa alohida anon key qoshish mumkin.
 
 ## Ishga tushirish
 
-1. **Backend** (`apps/api`):
-   ```bash
-   npm install
-   npm run dev
-   ```
-   `/telegram/webhook` endpoint'ini HTTPS orqali Telegram botga ulang (masalan, ngrok yoki Render).
+### Backend (Render uchun tayyor)
 
-2. **Frontend** (`apps/web`):
-   ```bash
-   npm install
-   npm run dev
-   ```
-   Lokal Vite serverini Telegram WebApp sifatida ishlatish uchun `https://` tunnel tavsiya qilinadi.
+```
+cd apps/api
+npm install
+npm run dev
+```
 
-## Autentikatsiya oqimi
+- Webhook endpoint: `/telegram/webhook`
+- Render da deploy qilishda env ozgaruvchilarini panelda korsating.
 
-1. Foydalanuvchi botda `/start` yuboradi.
-2. Agar foydalanuvchi bazada bo'lmasa, bot `Raqamni yuborish (Send Contact)` tugmasini ko'rsatadi.
-3. Kontakt yuborilgach:
-   - backend `users` fayliga foydalanuvchi ma'lumotlarini yozadi;
-   - bot `Ilovani ochish` WebApp tugmasini yuboradi.
-4. WebApp ochilganda `Telegram.WebApp.initDataUnsafe.user.id` orqali foydalanuvchi aniqlanadi va `/api/users/:id` dan ma'lumot olinadi.
+### Frontend (Vercel uchun tayyor)
 
-## Keyingi qadamlar
+```
+cd apps/web
+npm install
+npm run dev
+```
 
-- Testlar va reyting API larini real ma'lumotlar bilan bog'lash.
-- Render/Vercel deployment jarayonini yakunlash.
-- Nova LC uchun analitika va monitoring qo'shish.
+- `VITE_API_URL` ni Render API manziliga yonaltiring.
+- Vercel da deploy qilganda build buyruqlari avtomatik (`npm run build`).
+
+## GitHub Actions
+
+`.github/workflows/deploy.yml` har bir pushda frontend va backend buildlarini tekshiradi. Vercel va Render autodeploy haqiqiy hisoblarga boglanadi (secrets orqali).
+
+## Dizayn prinsiplari
+
+- Brend nomi: **Nova LC**
+- Asosiy rang: `#FF5F00` (gradient tugmalar `#FF5F00 -> #FF7B33`)
+- Inter / SF Pro Rounded shriftlariga mos, yumaloq (rounded-xl) elementlar, minimal Telegram/Apple uslubi
+
+## Keyingi qadamlarga oid eslatmalar
+
+- Reyting/test API larini Supabase yoki boshqa manbaga boglash.
+- Render va Vercel autodeploy uchun kerakli secrets (BOT_TOKEN, SUPABASE_URL, SUPABASE_KEY va boshqalar) ni GitHub repository secrets orqali ulash.

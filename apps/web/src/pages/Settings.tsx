@@ -47,10 +47,10 @@ export default function SettingsPage() {
           ) : null}
           <div className="mt-3 grid gap-2 text-xs text-[var(--muted)]">
             <p>
-              <span className="font-medium text-[var(--fg)]">Telegram ID:</span> {profile?.telegramId ?? telegramUser?.id ?? "---"}
+              <span className="font-medium text-[var(--fg)]">Telegram ID:</span> {profile?.telegramId ?? telegramUser?.id ?? "-"}
             </p>
             <p>
-              <span className="font-medium text-[var(--fg)]">Telefon raqam:</span> {profile?.phoneNumber ?? "---"}
+              <span className="font-medium text-[var(--fg)]">Telefon raqam:</span> {profile?.phoneNumber ?? "-"}
             </p>
           </div>
         </div>
@@ -132,5 +132,6 @@ export default function SettingsPage() {
     </div>
   );
 }
+
 
 

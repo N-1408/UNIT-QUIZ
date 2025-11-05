@@ -124,3 +124,4 @@ function InfoScreen({ title, description, actionLabel, actionHref, onAction }: I
     </div>
   );
 }
+

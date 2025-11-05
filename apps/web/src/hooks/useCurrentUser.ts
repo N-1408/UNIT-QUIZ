@@ -14,12 +14,10 @@ export type TelegramUser =
 
 export type UserProfile = {
   telegramId: string;
-  firstName: string;
+  firstName: string | null;
   lastName: string | null;
-  username: string | null;
-  phoneNumber: string;
+  phoneNumber: string | null;
   createdAt: string;
-  updatedAt: string;
 };
 
 export class NotRegisteredError extends Error {
@@ -62,7 +60,15 @@ export function useCurrentUser() {
         throw new Error(message || "failed_to_load_profile");
       }
 
-      return (await response.json()) as UserProfile;
+      const raw = (await response.json()) as Partial<UserProfile>;
+
+      return {
+        telegramId: raw.telegramId ?? telegramId,
+        firstName: raw.firstName ?? null,
+        lastName: raw.lastName ?? null,
+        phoneNumber: raw.phoneNumber ?? null,
+        createdAt: raw.createdAt ?? ''
+      };
     },
     enabled: Boolean(telegramId),
     retry: false,

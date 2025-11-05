@@ -1,6 +1,6 @@
 import { Bot, InlineKeyboard, Keyboard } from 'grammy';
 import { env } from './env.js';
-import { usersStore } from './storage.js';
+import { getUserById, upsertUser } from './users.js';
 
 const openAppButton = new InlineKeyboard().webApp('Ilovani ochish', env.APP_ORIGIN);
 
@@ -22,19 +22,26 @@ bot.command('start', async (ctx) => {
   }
 
   const telegramId = String(from.id);
-  const existing = usersStore.findByTelegramId(telegramId);
 
-  if (existing) {
-    const firstName = existing.firstName || from.first_name || "do'stimiz";
-    await ctx.reply(`👋 Yana sizmi, ${firstName}? 😄\nSiz allaqachon tizimdasiz. Quyidagi tugma orqali UNIT QUIZ'ni oching.`, {
-      reply_markup: openAppButton
-    });
+  try {
+    const existing = await getUserById(telegramId);
+
+    if (existing) {
+      const firstName = existing.first_name || from.first_name || "do'stimiz";
+      await ctx.reply(`👋 Yana sizmi, ${firstName}? 😄\nSiz allaqachon tizimdasiz. Quyidagi tugma orqali UNIT QUIZ'ni oching.`, {
+        reply_markup: openAppButton
+      });
+      return;
+    }
+  } catch (error) {
+    console.error('supabase lookup error:', error);
+    await ctx.reply("⚠️ Ulanishda muammo yuz berdi.\nIltimos, qayta urinib ko'ring yoki o'quv markaz bilan bog'laning.");
     return;
   }
 
   const firstName = from.first_name || "do'stimiz";
   await ctx.reply(
-    `Salom, ${firstName}! 👋\nBu sizning Nova LC test tizimingiz — UNIT QUIZ.\nDavom etishdan oldin, iltimos, ro'yxatdan o'tish uchun raqamingizni yuboring 📱`,
+    `Salom, ${firstName}! 👋\nBu sizning Nova LC test tizimingiz - UNIT QUIZ.\nDavom etishdan oldin, iltimos, ro'yxatdan o'tish uchun telefon raqamingizni yuboring 📱`,
     {
       reply_markup: requestContactKeyboard
     }
@@ -54,15 +61,19 @@ bot.on('message:contact', async (ctx) => {
     return;
   }
 
-  usersStore.upsert({
-    telegramId: String(from.id),
-    firstName: contact.first_name || from.first_name || '',
-    lastName: contact.last_name ?? from.last_name ?? null,
-    username: from.username ?? null,
-    phoneNumber: contact.phone_number
-  });
+  try {
+    await upsertUser({
+      id: String(from.id),
+      firstName: contact.first_name || from.first_name || '',
+      lastName: contact.last_name ?? from.last_name ?? null,
+      phoneNumber: contact.phone_number
+    });
 
-  await ctx.reply("✅ Ro'yxatdan o'tish muvaffaqiyatli yakunlandi!\nEndi siz Nova LC test platformasidan foydalanishingiz mumkin.", {
-    reply_markup: openAppButton
-  });
+    await ctx.reply("✅ Ro'yxatdan o'tish muvaffaqiyatli yakunlandi!\nEndi siz Nova LC test platformasidan foydalanishingiz mumkin.", {
+      reply_markup: openAppButton
+    });
+  } catch (error) {
+    console.error('supabase upsert error:', error);
+    await ctx.reply("⚠️ Ulanishda muammo yuz berdi.\nIltimos, qayta urinib ko'ring yoki o'quv markaz bilan bog'laning.");
+  }
 });

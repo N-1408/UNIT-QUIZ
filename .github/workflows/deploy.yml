@@ -1,0 +1,36 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build API
+        run: npm run build --workspace apps/api
+        env:
+          BOT_TOKEN: testing-token
+          APP_ORIGIN: https://nova-lc-unit-quiz.example.com
+          SUPABASE_URL: https://example.supabase.co
+          SUPABASE_KEY: testing-key
+
+      - name: Build Web
+        run: npm run build --workspace apps/web
+        env:
+          VITE_API_URL: https://nova-lc-unit-quiz.example.com
