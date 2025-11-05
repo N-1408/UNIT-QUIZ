@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 
+const BOT_ID = (import.meta.env.VITE_TG_BOT_ID ?? "8324016944").toString();
+
 export default function LoginPage() {
   useEffect(() => {
     const container = document.getElementById("telegram-login");
@@ -10,7 +12,7 @@ export default function LoginPage() {
     const script = document.createElement("script");
     script.src = "https://telegram.org/js/telegram-widget.js?7";
     script.async = true;
-    script.setAttribute("data-telegram-login", "unitquiz_bot");
+    script.setAttribute("data-telegram-login", BOT_ID);
     script.setAttribute("data-size", "large");
     script.setAttribute("data-userpic", "false");
     script.setAttribute("data-auth-url", "https://unit-quiz.onrender.com/api/telegram-login");
