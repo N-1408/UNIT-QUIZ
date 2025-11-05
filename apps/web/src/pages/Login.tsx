@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
-const API_URL = (import.meta.env.VITE_API_URL ?? "https://unit-quiz.onrender.com").replace(
+const AUTH_URL = (import.meta.env.VITE_TG_AUTH_URL ?? "https://unit-quiz.onrender.com").replace(
   /\/$/,
   ""
 );
@@ -9,17 +8,17 @@ const API_URL = (import.meta.env.VITE_API_URL ?? "https://unit-quiz.onrender.com
 type ViewMode = "checking" | "miniapp" | "browser";
 
 export default function Login() {
-  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ViewMode>("checking");
-  const [status, setStatus] = useState("Verifying your Telegram session...");
+  const [status, setStatus] = useState("Authenticating with Telegram...");
   const [error, setError] = useState<string | null>(null);
-  const [showSpinner, setShowSpinner] = useState(false);
+  const [showSpinner, setShowSpinner] = useState(true);
 
   const runAuth = useCallback(async () => {
     const tg = window.Telegram?.WebApp;
     if (!tg) {
       setViewMode("browser");
-      setError("This app can only be opened inside Telegram.");
+      setError("Please open this app inside Telegram.");
+      setShowSpinner(false);
       return;
     }
 
@@ -29,23 +28,13 @@ export default function Login() {
     tg.ready?.();
     tg.expand?.();
 
-    const initData = tg.initData ?? "";
-    const rawUser = tg.initDataUnsafe?.user;
-
-    if (!initData || !rawUser) {
-      setStatus("We couldn’t detect your Telegram profile.");
-      setError("Try closing and reopening the mini app from Telegram.");
+    const initData = buildInitDataPayload(tg);
+    if (!initData) {
+      setStatus("We couldn't detect your Telegram session.");
+      setError("Please reopen the mini app from Telegram.");
+      setShowSpinner(false);
       return;
     }
-
-    const user = {
-      id: rawUser.id,
-      first_name: rawUser.first_name ?? "",
-      last_name: rawUser.last_name ?? undefined,
-      username: rawUser.username ?? undefined,
-      photo_url: rawUser.photo_url ?? undefined,
-      language_code: rawUser.language_code ?? undefined,
-    };
 
     setStatus("Connecting to UNIT QUIZ...");
     setShowSpinner(true);
@@ -53,32 +42,38 @@ export default function Login() {
     const timeout = window.setTimeout(() => controller.abort(), 1500);
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/telegram/webapp`, {
+      const response = await fetch(`${AUTH_URL}/auth/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ initData, user }),
+        body: JSON.stringify({ initData }),
         signal: controller.signal,
       });
 
       window.clearTimeout(timeout);
 
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || `Auth request failed (${response.status})`);
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.ok) {
+        throw new Error(data?.reason || `Auth request failed (${response.status})`);
       }
 
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
       setStatus("Welcome back! Redirecting...");
-      window.setTimeout(() => navigate("/tests", { replace: true }), 250);
+      window.setTimeout(() => {
+        window.location.href = "/";
+      }, 250);
     } catch (err) {
       window.clearTimeout(timeout);
       console.error("Telegram login failed", err);
-      setStatus("We couldn’t confirm your Telegram session.");
+      setStatus("We couldn't confirm your Telegram session.");
       setError("Please try again from Telegram.");
     } finally {
       window.setTimeout(() => setShowSpinner(false), 600);
     }
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     void runAuth();
@@ -96,6 +91,7 @@ export default function Login() {
       onRetry={() => {
         setStatus("Retrying your Telegram session...");
         setError(null);
+        setShowSpinner(true);
         void runAuth();
       }}
     />
@@ -178,7 +174,8 @@ function BrowserBlock({ message }: BrowserBlockProps) {
           Open in Telegram to continue
         </h1>
         <p className="max-w-md text-sm text-slate-600">
-          {message ?? "UNIT QUIZ lives inside the Telegram Mini App. Launch it from Telegram for the most secure and seamless experience."}
+          {message ??
+            "UNIT QUIZ lives inside the Telegram Mini App. Launch it from Telegram for the most secure and seamless experience."}
         </p>
         <a
           className="group inline-flex items-center gap-2 rounded-full bg-[#229ED9] px-7 py-3 text-sm font-semibold text-white shadow-[0_26px_60px_rgba(34,158,217,0.35)] transition hover:shadow-[0_26px_65px_rgba(34,158,217,0.45)]"
@@ -206,4 +203,29 @@ function BrowserBlock({ message }: BrowserBlockProps) {
       </div>
     </div>
   );
+}
+
+function buildInitDataPayload(tg: NonNullable<typeof window.Telegram>["WebApp"]): string | null {
+  if (!tg) return null;
+  if (tg.initData && tg.initData.length > 0) {
+    return tg.initData;
+  }
+
+  const unsafe = tg.initDataUnsafe;
+  if (!unsafe) return null;
+
+  try {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(unsafe)) {
+      if (value === undefined || value === null) continue;
+      params.set(
+        key,
+        typeof value === "object" ? JSON.stringify(value) : String(value ?? "")
+      );
+    }
+    return params.toString();
+  } catch (error) {
+    console.error("Failed to build initData payload", error);
+    return null;
+  }
 }

@@ -10,66 +10,82 @@ const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 const COOKIE_NAME = 'qid';
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-router.post('/telegram-login', async (req: Request, res: Response) => {
-  const rawBody = req.body ?? {};
-  const normalized: Record<string, string> = {};
-  for (const [key, value] of Object.entries(rawBody)) {
-    normalized[key] = String(value ?? '');
+type TelegramInitUser = {
+  id: number;
+  first_name?: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+  language_code?: string;
+};
+
+router.post('/auth/verify', async (req: Request, res: Response) => {
+  try {
+    const { initData } = req.body ?? {};
+
+    const initDataString = normalizeInitData(initData);
+    if (!initDataString) {
+      return res.json({ ok: false, reason: 'missing_init_data' });
+    }
+
+    const params = new URLSearchParams(initDataString);
+    const hash = params.get('hash');
+    if (!hash) {
+      return res.json({ ok: false, reason: 'missing_hash' });
+    }
+
+    const dataCheckString = buildDataCheckString(params);
+    if (!verifyHash(dataCheckString, hash)) {
+      return res.json({ ok: false, reason: 'invalid_hash' });
+    }
+
+    const userPayload = extractUser(params);
+    if (!userPayload) {
+      return res.json({ ok: false, reason: 'user_missing' });
+    }
+
+    const fullName = buildFullName(userPayload.first_name, userPayload.last_name);
+    const { data: student, error } = await supabase
+      .from('students')
+      .upsert(
+        {
+          tg_id: String(userPayload.id),
+          full_name: fullName,
+          username: userPayload.username ?? null,
+          photo_url: userPayload.photo_url ?? null
+        },
+        { onConflict: 'tg_id' }
+      )
+      .select()
+      .single();
+
+    if (error || !student) {
+      console.error('auth/verify upsert error:', error);
+      return res.status(500).json({ ok: false, reason: 'upsert_failed' });
+    }
+
+    const token = jwt.sign({ tg_id: student.tg_id }, env.SUPABASE_JWT_SECRET, { expiresIn: '7d' });
+
+    res.cookie(COOKIE_NAME, token, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      maxAge: COOKIE_MAX_AGE
+    });
+
+    return res.json({
+      ok: true,
+      user: {
+        tg_id: student.tg_id,
+        full_name: student.full_name,
+        username: student.username,
+        photo_url: student.photo_url
+      }
+    });
+  } catch (error) {
+    console.error('auth/verify error:', error);
+    return res.status(500).json({ ok: false, reason: 'server_error' });
   }
-
-  const requiredFields = ['id', 'auth_date', 'hash'];
-  if (requiredFields.some((field) => !normalized[field])) {
-    return res.status(400).json({ error: 'missing_fields' });
-  }
-
-  const hash = normalized.hash;
-  const dataCheckString = Object.keys(normalized)
-    .filter((key) => key !== 'hash')
-    .sort()
-    .map((key) => `${key}=${normalized[key]}`)
-    .join('\n');
-
-  const secret = crypto.createHash('sha256').update(env.BOT_TOKEN).digest();
-  const hmac = crypto.createHmac('sha256', secret).update(dataCheckString).digest('hex');
-
-  if (hmac !== hash) {
-    return res.status(403).json({ error: 'invalid_hash' });
-  }
-
-  const tgId = String(normalized.id);
-  const fullName = buildFullName(normalized.first_name, normalized.last_name);
-  const username = normalized.username ? normalized.username : null;
-  const photoUrl = normalized.photo_url ? normalized.photo_url : null;
-
-  const { data: student, error } = await supabase
-    .from('students')
-    .upsert(
-      {
-        tg_id: tgId,
-        full_name: fullName,
-        username,
-        photo_url: photoUrl
-      },
-      { onConflict: 'tg_id' }
-    )
-    .select()
-    .single();
-
-  if (error || !student) {
-    console.error('telegram-login upsert error:', error);
-    return res.status(500).json({ error: 'upsert_failed' });
-  }
-
-  const token = jwt.sign({ tg_id: student.tg_id }, env.SUPABASE_JWT_SECRET, { expiresIn: '7d' });
-
-  res.cookie(COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: 'none',
-    secure: true,
-    maxAge: COOKIE_MAX_AGE
-  });
-
-  return res.redirect(`${env.APP_ORIGIN.replace(/\/$/, '')}/tests`);
 });
 
 router.get('/auth/me', async (req: Request, res: Response) => {
@@ -117,4 +133,60 @@ function buildFullName(first?: string, last?: string) {
   const firstClean = first?.trim();
   const lastClean = last?.trim();
   return [firstClean, lastClean].filter(Boolean).join(' ') || null;
+}
+
+function normalizeInitData(initData: unknown): string | null {
+  if (!initData) return null;
+  if (typeof initData === 'string') {
+    return initData.trim() || null;
+  }
+
+  if (typeof initData === 'object') {
+    try {
+      const params = new URLSearchParams();
+      for (const [key, value] of Object.entries(initData as Record<string, unknown>)) {
+        params.set(
+          key,
+          typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value ?? '')
+        );
+      }
+      return params.toString();
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+}
+
+function buildDataCheckString(params: URLSearchParams) {
+  return Array.from(params.entries())
+    .filter(([key]) => key !== 'hash')
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${value}`)
+    .join('\n');
+}
+
+function verifyHash(dataCheckString: string, hash: string) {
+  const secretKey = crypto.createHmac('sha256', 'WebAppData').update(env.BOT_TOKEN).digest();
+  const calculatedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+  return calculatedHash === hash;
+}
+
+function extractUser(params: URLSearchParams): TelegramInitUser | null {
+  const userJson = params.get('user');
+  if (!userJson) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(userJson) as TelegramInitUser;
+    if (!parsed?.id) {
+      return null;
+    }
+    return parsed;
+  } catch (error) {
+    console.error('Failed to parse Telegram user', error);
+    return null;
+  }
 }
