@@ -1,4 +1,4 @@
-﻿import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { haptic } from "../lib/tg";
 import { useI18n } from "../i18n";
 
@@ -6,7 +6,8 @@ export default function Header() {
   const nav = useNavigate();
   const loc = useLocation();
   const { t } = useI18n();
-  const showBack = !["/", "/rating", "/settings"].includes(loc.pathname);
+  const rootPaths = ["/tests", "/rating", "/settings"];
+  const showBack = !rootPaths.includes(loc.pathname);
 
   return (
     <header
@@ -44,3 +45,5 @@ export default function Header() {
     </header>
   );
 }
+
+

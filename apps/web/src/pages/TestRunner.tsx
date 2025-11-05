@@ -1,93 +1,90 @@
-ï»¿import { useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Clock3 } from "lucide-react";
 import { haptic } from "../lib/tg";
-import { useI18n } from "../i18n";
 
-type OptionKey = "A" | "B" | "C" | "D";
-type Option = { key: OptionKey; text: string };
-type Question = { id: string; text: string; options: Option[]; correct?: OptionKey };
+const API_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 
-const DURATION = 600;
+type QuestionOption = {
+  key: string;
+  text: string;
+};
+
+type Question = {
+  id: string;
+  text: string;
+  options: QuestionOption[];
+};
+
+type TestDetail = {
+  id: string;
+  title: string;
+  unit: string;
+  durationSec: number;
+  questions: Question[];
+};
+
 export default function TestRunner() {
   const { id } = useParams();
-  const { t } = useI18n();
-  const [secondsLeft, setSecondsLeft] = useState<number>(DURATION);
-  const [answers, setAnswers] = useState<Record<string, OptionKey | undefined>>({});
-  const timerRef = useRef<number | null>(null);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
 
-  const questions: Question[] = useMemo(
-    () => [
-      {
-        id: "q1",
-        text: 'Which word completes the sentence: "I ____ to school yesterday."',
-        options: [
-          { key: "A", text: "go" },
-          { key: "B", text: "went" },
-          { key: "C", text: "going" },
-          { key: "D", text: "gone" }
-        ],
-        correct: "B"
-      },
-      {
-        id: "q2",
-        text: 'Choose the synonym of "rapid".',
-        options: [
-          { key: "A", text: "slow" },
-          { key: "B", text: "fast" },
-          { key: "C", text: "late" },
-          { key: "D", text: "weak" }
-        ],
-        correct: "B"
+  const { data, isLoading, isError, refetch } = useQuery<TestDetail>({
+    queryKey: ['test', id],
+    enabled: Boolean(id),
+    queryFn: async () => {
+      const response = await fetch(`${API_URL}/api/tests/${id}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('failed_to_fetch');
       }
-    ],
-    []
-  );
+      return response.json();
+    }
+  });
 
-  useEffect(() => {
-    if (timerRef.current !== null) return;
-    timerRef.current = window.setInterval(() => {
-      setSecondsLeft((seconds) => (seconds > 0 ? seconds - 1 : 0));
-    }, 1000);
-    return () => {
-      if (timerRef.current !== null) window.clearInterval(timerRef.current);
-    };
-  }, []);
+  if (isLoading) {
+    return <div className="p-4 text-sm text-[var(--muted)]">Loading test…</div>;
+  }
 
-  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
-  const ss = String(secondsLeft % 60).padStart(2, "0");
+  if (isError || !data) {
+    return (
+      <div className="p-4 text-sm text-red-600">
+        Failed to load test.{' '}
+        <button type="button" className="underline" onClick={() => refetch()}>
+          Retry
+        </button>
+      </div>
+    );
+  }
 
-  function pick(questionId: string, key: OptionKey) {
+  const durationMinutes = Math.round(data.durationSec / 60);
+
+  const handlePick = (questionId: string, optionKey: string) => {
     haptic.tap();
-    setAnswers((prev) => ({ ...prev, [questionId]: key }));
-  }
+    setAnswers((prev) => ({ ...prev, [questionId]: optionKey }));
+  };
 
-  function submit() {
-    let score = 0;
-    questions.forEach((question) => {
-      if (answers[question.id] && question.correct && answers[question.id] === question.correct) {
-        score++;
-      }
-    });
+  const handleSubmit = () => {
     haptic.success();
-    alert(`${t("mockSaved")} (${score}/${questions.length})`);
-  }
+    alert('Responses saved (demo).');
+  };
 
   return (
     <div className="mx-auto max-w-md px-4 pb-32 pt-6">
       <div className="mb-4 flex items-center justify-between">
-        <div className="text-sm" style={{ color: "var(--muted)" }}>
-          Test ID: {id ?? "demo"}
+        <div className="text-sm" style={{ color: 'var(--muted)' }}>
+          {data.title}
         </div>
         <span className="badge badge-time">
-          <Clock3 size={14} /> {mm}:{ss}
+          <Clock3 size={14} /> {durationMinutes} min
         </span>
       </div>
 
       <div className="space-y-4">
-        {questions.map((question, index) => (
+        {data.questions.map((question, index) => (
           <div key={question.id} className="card space-y-3">
-            <div className="font-medium" style={{ color: "var(--fg)" }}>
+            <div className="font-medium" style={{ color: 'var(--fg)' }}>
               {index + 1}. {question.text}
             </div>
             <div className="space-y-2">
@@ -96,18 +93,18 @@ export default function TestRunner() {
                 return (
                   <button
                     key={option.key}
-                    onClick={() => pick(question.id, option.key)}
+                    onClick={() => handlePick(question.id, option.key)}
                     className={`tap flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-3 text-left transition ${
                       active
-                        ? "border-[#222] bg-[#000] text-[var(--brand-yellow)]"
-                        : "border-[var(--divider)] bg-[var(--card)] hover:bg-[var(--elev)]"
+                        ? 'border-[#222] bg-[#000] text-[var(--brand-yellow)]'
+                        : 'border-[var(--divider)] bg-[var(--card)] hover:bg-[var(--elev)]'
                     }`}
                   >
                     <span
                       className={`flex h-6 w-6 items-center justify-center rounded-full border text-xs font-semibold ${
                         active
-                          ? "border-[var(--brand-yellow)] bg-[rgba(255,207,0,0.14)] text-[var(--brand-yellow)]"
-                          : "border-[var(--divider)]"
+                          ? 'border-[var(--brand-yellow)] bg-[rgba(255,207,0,0.14)] text-[var(--brand-yellow)]'
+                          : 'border-[var(--divider)]'
                       }`}
                     >
                       {option.key}
@@ -122,25 +119,13 @@ export default function TestRunner() {
       </div>
 
       <div className="h-24" />
-      <div
-        className="fixed inset-x-0 bottom-0 z-10 border-t"
-        style={{ background: 'var(--bg)', borderColor: 'var(--divider)' }}
-      >
+      <div className="fixed inset-x-0 bottom-0 z-10 border-t" style={{ background: 'var(--bg)', borderColor: 'var(--divider)' }}>
         <div className="mx-auto max-w-md p-3">
-          <button
-            onClick={() => {
-              haptic.tap();
-              submit();
-            }}
-            className="btn btn-primary tap w-full"
-          >
-            {t("submit")}
+          <button onClick={handleSubmit} className="btn btn-primary tap w-full">
+            Submit
           </button>
         </div>
       </div>
     </div>
   );
 }
-
-
-

@@ -12,7 +12,7 @@ type TabItem = {
 };
 
 const tabs: TabItem[] = [
-  { to: "/", labelKey: "tests", icon: CheckSquare, end: true },
+  { to: "/tests", labelKey: "tests", icon: CheckSquare, end: true },
   { to: "/rating", labelKey: "ranking", icon: Trophy },
   { to: "/settings", labelKey: "settings", icon: SettingsIcon }
 ];
