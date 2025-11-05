@@ -33,7 +33,7 @@ bot.command("start", async (ctx) => {
   const existing = await getStudentByTgId(telegramId);
 
   if (!existing.success) {
-    console.error("Supabase lookup error:", existing.error);
+    console.error("Supabase lookup error:", existing.message);
     await ctx.reply(REGISTRATION_ERROR_MESSAGE);
     return;
   }
@@ -81,7 +81,7 @@ bot.on("message:contact", async (ctx) => {
   const result = await getOrCreateStudent(telegramId, fullName, username, phone);
 
   if (!result.success) {
-    console.error("\u274C Supabase insert failed:", result.error, result.details ?? "");
+    console.error("\u274C Supabase insert failed:", result.message);
     await ctx.reply(REGISTRATION_ERROR_MESSAGE);
     return;
   }

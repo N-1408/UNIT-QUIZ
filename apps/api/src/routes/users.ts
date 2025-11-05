@@ -19,7 +19,7 @@ router.get('/users/:telegramId', async (req, res) => {
     const result = await getStudentByTgId(numericId);
 
     if (!result.success) {
-      console.error('get user error:', result.error, result.details ?? '');
+      console.error('get user error:', result.message);
       return res.status(500).json({ ok: false, error: 'internal_error' });
     }
 

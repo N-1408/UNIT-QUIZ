@@ -1,17 +1,14 @@
 import { supabase } from "./supabaseClient.js";
 
-type ServiceSuccess<T> = {
-  success: true;
-  data: T;
-};
-
-type ServiceFailure = {
-  success: false;
-  error: string;
-  details?: unknown;
-};
-
-export type ServiceResult<T> = ServiceSuccess<T> | ServiceFailure;
+export type ServiceResult<T> =
+  | {
+      success: true;
+      data: T;
+    }
+  | {
+      success: false;
+      message: string;
+    };
 
 export type StudentRecord = {
   id: number;
@@ -76,12 +73,18 @@ export type ExamWithQuestions = {
   }>;
 };
 
-const handleError = (scope: string, error: unknown): ServiceFailure => {
+const createError = <T>(scope: string, error: unknown): ServiceResult<T> => {
+  const message =
+    error && typeof error === "object" && "message" in error
+      ? String((error as { message: unknown }).message)
+      : "Unexpected Supabase error";
+
   console.error(`[Supabase] ${scope} error:`, error);
-  if (error && typeof error === "object" && "message" in error) {
-    return { success: false, error: String((error as { message: unknown }).message), details: error };
-  }
-  return { success: false, error: "Unexpected Supabase error", details: error };
+
+  return {
+    success: false,
+    message
+  };
 };
 
 export async function getStudentByTgId(tg_id: number): Promise<ServiceResult<StudentRecord | null>> {
@@ -92,7 +95,7 @@ export async function getStudentByTgId(tg_id: number): Promise<ServiceResult<Stu
     .maybeSingle();
 
   if (error) {
-    return handleError("getStudentByTgId", error);
+    return createError("getStudentByTgId", error);
   }
 
   return { success: true, data: data as StudentRecord | null };
@@ -126,7 +129,7 @@ export async function getOrCreateStudent(
     }
 
     if (Object.keys(updates).length === 0) {
-      return existing as ServiceResult<StudentRecord>;
+      return { success: true, data: existing.data };
     }
 
     const { data, error } = await supabase
@@ -137,11 +140,11 @@ export async function getOrCreateStudent(
       .maybeSingle();
 
     if (error) {
-      return handleError("getOrCreateStudent:update", error);
+      return createError("getOrCreateStudent:update", error);
     }
 
     if (!data) {
-      return { success: false, error: "Failed to update student record" };
+      return { success: false, message: "Failed to update student record" };
     }
 
     return { success: true, data: data as StudentRecord };
@@ -161,11 +164,11 @@ export async function getOrCreateStudent(
     .maybeSingle();
 
   if (error) {
-    return handleError("getOrCreateStudent:insert", error);
+    return createError("getOrCreateStudent:insert", error);
   }
 
   if (!data) {
-    return { success: false, error: "Failed to create student record" };
+    return { success: false, message: "Failed to create student record" };
   }
 
   return { success: true, data: data as StudentRecord };
@@ -182,11 +185,11 @@ export async function createAttempt(student_tg_id: number, exam_id: number): Pro
   const { data, error } = await supabase.from("attempts").insert(payload).select("*").maybeSingle();
 
   if (error) {
-    return handleError("createAttempt", error);
+    return createError("createAttempt", error);
   }
 
   if (!data) {
-    return { success: false, error: "Failed to create attempt" };
+    return { success: false, message: "Failed to create attempt" };
   }
 
   return { success: true, data: data as AttemptRecord };
@@ -207,11 +210,11 @@ export async function submitAttempt(
   const { data, error } = await supabase.from("attempts").update(payload).eq("id", attempt_id).select("*").maybeSingle();
 
   if (error) {
-    return handleError("submitAttempt", error);
+    return createError("submitAttempt", error);
   }
 
   if (!data) {
-    return { success: false, error: "Attempt not found" };
+    return { success: false, message: "Attempt not found" };
   }
 
   return { success: true, data: data as AttemptRecord };
@@ -237,11 +240,11 @@ export async function saveAnswer(
     .maybeSingle();
 
   if (error) {
-    return handleError("saveAnswer", error);
+    return createError("saveAnswer", error);
   }
 
   if (!data) {
-    return { success: false, error: "Failed to save answer" };
+    return { success: false, message: "Failed to save answer" };
   }
 
   return { success: true, data: data as AttemptAnswerRecord };
@@ -286,7 +289,7 @@ export async function getExamWithQuestions(exam_id: number): Promise<ServiceResu
     .maybeSingle();
 
   if (error) {
-    return handleError("getExamWithQuestions", error);
+    return createError("getExamWithQuestions", error);
   }
 
   return { success: true, data: (data as ExamWithQuestions) ?? null };
@@ -298,7 +301,7 @@ export async function getStudentAttempts(student_tg_id: number): Promise<Service
   });
 
   if (error) {
-    return handleError("getStudentAttempts", error);
+    return createError("getStudentAttempts", error);
   }
 
   return { success: true, data: (data as AttemptRecord[]) ?? [] };
