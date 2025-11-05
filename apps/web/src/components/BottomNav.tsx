@@ -1,4 +1,4 @@
-﻿import { NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
 import { CheckSquare, Trophy, Settings as SettingsIcon } from "lucide-react";
 import { haptic } from "../lib/tg";
@@ -14,7 +14,7 @@ type TabItem = {
 const tabs: TabItem[] = [
   { to: "/tests", labelKey: "tests", icon: CheckSquare, end: true },
   { to: "/rating", labelKey: "ranking", icon: Trophy },
-  { to: "/settings", labelKey: "settings", icon: SettingsIcon }
+  { to: "/settings", labelKey: "settings", icon: SettingsIcon },
 ];
 
 export default function BottomNav() {
@@ -30,6 +30,7 @@ export default function BottomNav() {
               <div className={`${base} tap ${isActive ? "active" : ""}`}>
                 <tab.icon size={20} />
                 <span className="text-xs font-medium uppercase tracking-wide">{t(tab.labelKey)}</span>
+                {isActive ? <span className="indicator mt-1 w-8" /> : <span className="indicator mt-1 w-8 opacity-0" />}
               </div>
             )}
           </NavLink>

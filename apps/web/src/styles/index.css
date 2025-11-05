@@ -140,26 +140,31 @@ button:disabled {
 
 .section-title {
   font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
+  line-height: 1.2;
+  font-weight: 600;
 }
 
 .section-sub {
   color: var(--muted);
 }
 
+.section-accent {
+  width: 56px;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--brand-yellow);
+}
+
 .pill {
-  padding: 8px 12px;
-  border-radius: 12px;
-  border: 1px solid var(--divider);
-  font-size: 0.9rem;
-  transition: all var(--dur-1) var(--ease);
+  @apply px-3 py-2 rounded-xl border text-sm transition;
+  border-color: var(--divider);
 }
 
 .pill-active {
-  background: #000;
-  color: var(--brand-yellow);
-  border-color: #222;
+  color: var(--fg);
+  background: color-mix(in oklab, var(--brand-yellow) 28%, var(--bg) 72%);
+  border-color: var(--brand-yellow);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--brand-yellow) 35%, transparent);
 }
 
 .bottom-nav {
@@ -172,12 +177,15 @@ button:disabled {
   position: relative;
 }
 
-.bottom-nav a.active {
+.bottom-nav .active {
   color: var(--brand-yellow);
-  animation: dropletPop var(--dur-2) var(--ease);
 }
 
-
+.bottom-nav .indicator {
+  height: 3px;
+  border-radius: 9999px;
+  background: var(--brand-yellow);
+}
 
 .bottom-nav a:active {
   transform: translateY(1px) scale(.98);

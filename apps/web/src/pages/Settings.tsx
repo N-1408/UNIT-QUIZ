@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ProtectedRoute from "../components/ProtectedRoute";
+import UserHeader from "../components/UserHeader";
 import Switch from "../components/Switch";
 import { getTheme, setTheme } from "../lib/theme";
 import { haptic } from "../lib/tg";
@@ -26,72 +28,79 @@ export default function SettingsPage() {
     haptic.tap();
     await fetch(`${API_URL}/api/auth/logout`, {
       method: "POST",
-      credentials: "include"
+      credentials: "include",
     });
     window.location.href = "/login";
   };
 
   return (
-    <div className="mx-auto max-w-md space-y-6 p-4 pb-24">
-      <h1 className="text-xl font-semibold">{t("settings")}</h1>
+    <ProtectedRoute>
+      <div className="mx-auto flex max-w-md flex-col gap-4 p-4 pb-24">
+        <UserHeader />
 
-      <section className="card space-y-4 p-4">
-        <h2 className="font-medium">{t("languageCardTitle")}</h2>
-        <div className="flex flex-wrap gap-2">
-          {LANGUAGE_OPTIONS.map((option) => (
-            <button
-              key={option.code}
-              type="button"
-              className={`pill tap ${lang === option.code ? "pill-active" : ""}`}
-              onClick={() => {
+        <h1 className="section-title">{t("settings")}</h1>
+        <div className="section-accent mt-1" />
+
+        <section className="card space-y-4 p-4">
+          <h2 className="font-medium">{t("languageCardTitle")}</h2>
+          <div className="flex flex-wrap gap-2">
+            {LANGUAGE_OPTIONS.map((option) => (
+              <button
+                key={option.code}
+                type="button"
+                className={`pill tap ${lang === option.code ? "pill-active" : ""}`}
+                onClick={() => {
+                  haptic.tap();
+                  setLang(option.code);
+                }}
+              >
+                {t(option.labelKey)}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="card space-y-3 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-medium">{t("darkTheme")}</h2>
+              <p className="text-xs text-[var(--muted)]">{dark ? "Dark mode on" : "Light mode on"}</p>
+            </div>
+            <Switch
+              checked={dark}
+              onChange={(value) => {
                 haptic.tap();
-                setLang(option.code);
+                setDarkState(value);
               }}
-            >
-              {t(option.labelKey)}
-            </button>
-          ))}
-        </div>
-      </section>
+              label="theme toggle"
+            />
+          </div>
+        </section>
 
-      <section className="card space-y-3 p-4">
-        <h2 className="font-medium">{t("darkTheme")}</h2>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-[var(--muted)]">{dark ? "Dark" : "Light"}</span>
-          <Switch
-            checked={dark}
-            onChange={(value) => {
+        <section className="card space-y-3 p-4">
+          <h2 className="font-medium">Account</h2>
+          <p className="text-sm text-[var(--muted)]">Log out from this device.</p>
+          <button type="button" className="btn btn-ghost tap w-full" onClick={handleLogout}>
+            Logout
+          </button>
+        </section>
+
+        <section className="card space-y-3 p-4">
+          <h2 className="font-medium">Teacher panel</h2>
+          <p className="text-sm text-[var(--muted)]">Access the teacher tools.</p>
+          <button
+            type="button"
+            className="btn btn-primary tap w-full"
+            onClick={() => {
               haptic.tap();
-              setDarkState(value);
+              navigate("/teacher");
             }}
-            label="theme toggle"
-          />
-        </div>
-      </section>
-
-      <section className="card space-y-3 p-4">
-        <h2 className="font-medium">Account</h2>
-        <p className="text-sm text-[var(--muted)]">Log out from this device.</p>
-        <button type="button" className="btn btn-ghost tap w-full" onClick={handleLogout}>
-          Logout
-        </button>
-      </section>
-
-      <section className="card space-y-3 p-4">
-        <h2 className="font-medium">Teacher panel</h2>
-        <p className="text-sm text-[var(--muted)]">Access the teacher tools.</p>
-        <button
-          type="button"
-          className="btn btn-primary tap w-full"
-          onClick={() => {
-            haptic.tap();
-            navigate("/teacher");
-          }}
-        >
-          {t("openTeacher")}
-        </button>
-      </section>
-    </div>
+          >
+            {t("openTeacher")}
+          </button>
+        </section>
+      </div>
+    </ProtectedRoute>
   );
 }
 

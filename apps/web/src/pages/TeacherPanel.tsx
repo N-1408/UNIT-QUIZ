@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { haptic } from "../lib/tg";
 import { useI18n } from "../i18n";
+import ProtectedRoute from "../components/ProtectedRoute";
+import UserHeader from "../components/UserHeader";
 
 const DEFAULT_PASSWORD = "NKN09";
 const PASSWORD_KEY = "internation:teacherPassword";
@@ -332,52 +334,57 @@ export default function TeacherPanel() {
 
   if (!isAllowed) {
     return (
-      <div className="min-h-screen bg-[var(--bg)] px-4 py-10 text-[var(--fg)]">
-        <div className="mx-auto flex max-w-sm flex-col gap-4 rounded-2xl border border-[var(--divider)] bg-[var(--card)] px-6 py-8 shadow-sm">
-          <div className="flex items-center gap-2 text-[var(--brand-yellow)]">
-            <ShieldCheck className="h-5 w-5" />
-            <span className="text-xs uppercase tracking-wide">Teacher's gate</span>
+      <ProtectedRoute>
+        <div className="mx-auto flex min-h-screen max-w-md flex-col gap-4 bg-[var(--bg)] px-4 pb-24 pt-6 text-sm text-[var(--fg)]">
+          <UserHeader />
+          <div className="mx-auto mt-5 flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-[var(--divider)] bg-[var(--card)] px-6 py-8 shadow-sm">
+            <div className="flex items-center gap-2 text-[var(--brand-yellow)]">
+              <ShieldCheck className="h-5 w-5" />
+              <span className="text-xs uppercase tracking-wide">Teacher's gate</span>
+            </div>
+            <h1 className="text-2xl font-semibold">{t("teacherPanel")}</h1>
+            <p className="text-sm section-sub">{t("teacherPanelNote")}</p>
+            <form onSubmit={handleLogin} className="flex flex-col gap-3">
+              <input
+                value={password}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  setError("");
+                }}
+                placeholder="NKN09"
+                className="rounded-xl border border-[var(--divider)] bg-[var(--bg)] px-3 py-3 text-sm outline-none focus:border-[var(--brand-yellow)]/70 focus:ring-1 focus:ring-[var(--brand-yellow)]/70"
+                type="password"
+              />
+              {error && (
+                <div className="flex items-center gap-2 text-xs text-state-red">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>{error}</span>
+                </div>
+              )}
+              <button className="btn btn-primary tap rounded-xl" type="submit">
+                {t("openTeacher")}
+              </button>
+            </form>
           </div>
-          <h1 className="text-2xl font-semibold">{t("teacherPanel")}</h1>
-          <p className="text-sm section-sub">{t("teacherPanelNote")}</p>
-          <form onSubmit={handleLogin} className="flex flex-col gap-3">
-            <input
-              value={password}
-              onChange={(event) => {
-                setPassword(event.target.value);
-                setError("");
-              }}
-              placeholder="NKN09"
-              className="rounded-xl border border-[var(--divider)] bg-[var(--bg)] px-3 py-3 text-sm outline-none focus:border-[var(--brand-yellow)]/70 focus:ring-1 focus:ring-[var(--brand-yellow)]/70"
-              type="password"
-            />
-            {error && (
-              <div className="flex items-center gap-2 text-xs text-state-red">
-                <AlertCircle className="h-4 w-4" />
-                <span>{error}</span>
-              </div>
-            )}
-            <button className="btn btn-primary tap" type="submit">
-              {t("openTeacher")}
-            </button>
-          </form>
         </div>
-      </div>
+      </ProtectedRoute>
     );
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-3xl flex-col gap-4 bg-[var(--bg)] px-4 pb-28 pt-6 text-[var(--fg)]">
-      <header className="card">
-        <div className="flex items-center gap-2 text-[var(--brand-yellow)]">
-          <ShieldCheck className="h-5 w-5" />
-          <span className="text-xs uppercase tracking-wide">inter-nation.uz / teacher</span>
-        </div>
-        <h1 className="mt-2 text-2xl font-semibold">{t("teacherPanel")}</h1>
-        <p className="mt-1 section-sub text-sm">{t("teacherPanelNote")}</p>
-      </header>
+    <ProtectedRoute>
+      <div className="mx-auto flex min-h-screen max-w-3xl flex-col gap-5 bg-[var(--bg)] px-4 pb-28 pt-6 text-sm text-[var(--fg)]">
+        <UserHeader />
+        <header className="card mt-5">
+          <div className="flex items-center gap-2 text-[var(--brand-yellow)]">
+            <ShieldCheck className="h-5 w-5" />
+            <span className="text-xs uppercase tracking-wide">inter-nation.uz / teacher</span>
+          </div>
+          <h1 className="mt-2 text-2xl font-semibold">{t("teacherPanel")}</h1>
+          <p className="mt-1 section-sub text-sm">{t("teacherPanelNote")}</p>
+        </header>
 
-      <section className="card space-y-4">
+        <section className="card mt-5 space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold">{t("testsTitle")}</h2>
@@ -472,7 +479,7 @@ export default function TeacherPanel() {
         </ul>
       </section>
 
-      <section className="card space-y-3">
+      <section className="card mt-5 space-y-3">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-lg font-semibold">{t("groups")}</h2>
           <button type="button" onClick={addGroup} className="btn btn-primary tap">
@@ -520,7 +527,7 @@ export default function TeacherPanel() {
         </ul>
       </section>
 
-      <section className="card space-y-3">
+      <section className="card mt-5 space-y-3">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-lg font-semibold">{t("teachers")}</h2>
           <button type="button" onClick={addTeacher} className="btn btn-primary tap">
@@ -565,7 +572,7 @@ export default function TeacherPanel() {
         </ul>
       </section>
 
-      <section className="card space-y-4">
+      <section className="card mt-5 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">{t("students")}</h2>
           <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
@@ -630,7 +637,7 @@ export default function TeacherPanel() {
         </ul>
       </section>
 
-      <section className="card space-y-4">
+      <section className="card mt-5 space-y-4">
         <h2 className="text-lg font-semibold">{t("security")}</h2>
         <p className="section-sub text-sm">{t("changePassword")}</p>
         <form onSubmit={handlePasswordChange} className="mt-2 grid gap-3 sm:grid-cols-2">
@@ -681,7 +688,7 @@ export default function TeacherPanel() {
         </div>
       </section>
 
-      <section className="card space-y-3">
+      <section className="card mt-5 space-y-3">
         <div className="flex items-center gap-2 text-[var(--brand-yellow)]">
           <Users className="h-5 w-5" />
           <h2 className="text-lg font-semibold">{t("topStudents")}</h2>
@@ -855,5 +862,6 @@ export default function TeacherPanel() {
         </div>
       )}
     </div>
+  </ProtectedRoute>
   );
 }
