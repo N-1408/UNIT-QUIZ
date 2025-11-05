@@ -1,22 +1,20 @@
-export type TelegramUser = NonNullable<
-  NonNullable<
-    NonNullable<ReturnType<typeof getTelegramWebApp>>["initDataUnsafe"]
-  >["user"]
->;
-
-export const getTelegramWebApp = () => window.Telegram?.WebApp ?? null;
-
-export type TelegramUser = NonNullable<
-  NonNullable<
-    NonNullable<ReturnType<typeof getTelegramWebApp>>["initDataUnsafe"]
-  >["user"]
->;
+export interface TelegramUser {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+  auth_date?: number;
+  hash?: string;
+}
 
 type TelegramInitResult = {
   tg: ReturnType<typeof getTelegramWebApp>;
   initData: string;
   user: TelegramUser | null;
 };
+
+export const getTelegramWebApp = () => window.Telegram?.WebApp ?? null;
 
 export const initTelegramApp = (): TelegramInitResult => {
   const tg = getTelegramWebApp();
