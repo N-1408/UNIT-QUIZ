@@ -44,7 +44,8 @@ bot.command("start", async (ctx) => {
       return;
     }
   } catch (error) {
-    console.error("supabase lookup error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Supabase lookup error:", message);
     await ctx.reply(
       "WARNING: Ulanishda muammo yuz berdi.\nIltimos, qayta urinib ko'ring yoki o'quv markaz bilan bog'laning."
     );
@@ -90,9 +91,10 @@ bot.on("message:contact", async (ctx) => {
       }
     );
   } catch (error) {
-    console.error("supabase upsert error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Supabase insert error:", message);
     await ctx.reply(
-      "WARNING: Ulanishda muammo yuz berdi.\nIltimos, qayta urinib ko'ring yoki o'quv markaz bilan bog'laning."
+      "⚠️ WARNING: Ulanishda muammo yuz berdi.\nIltimos, qayta urinib ko'ring yoki o'quv markaz bilan bog'laning."
     );
   }
 });
