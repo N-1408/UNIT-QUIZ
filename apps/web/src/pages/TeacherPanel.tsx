@@ -17,12 +17,10 @@ import {
 } from "lucide-react";
 import { haptic } from "../lib/tg";
 import { useI18n } from "../i18n";
-import ProtectedRoute from "../components/ProtectedRoute";
-import UserHeader from "../components/UserHeader";
 
 const DEFAULT_PASSWORD = "NKN09";
-const PASSWORD_KEY = "internation:teacherPassword";
-const TEACHER_FLAG_KEY = "internation:isTeacher";
+const PASSWORD_KEY = "nova-lc:teacherPassword";
+const TEACHER_FLAG_KEY = "nova-lc:isTeacher";
 
 type Group = { id: string; title: string; teacherId?: string };
 type Teacher = { id: string; name: string };
@@ -72,25 +70,25 @@ export default function TeacherPanel() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const [tests, setTests] = useLocal<TestItem[]>("internation:tests", [
+  const [tests, setTests] = useLocal<TestItem[]>("nova-lc:tests", [
     { id: "placement", title: "Starter Placement", unit: "Placement", tags: ["Reading", "Grammar"], lastUpdated: "2025-10-12" },
     { id: "unit-1", title: "Unit 1 - Academic Skills", unit: "Unit 1", tags: ["Listening"], lastUpdated: "2025-10-18" },
     { id: "speaking-lite", title: "Speaking Lite", unit: "Speaking Prep", tags: ["Speaking", "Audio"], lastUpdated: "2025-10-24" }
   ]);
 
-  const [teachers, setTeachers] = useLocal<Teacher[]>("internation:teachers", [
+  const [teachers, setTeachers] = useLocal<Teacher[]>("nova-lc:teachers", [
     { id: "t1", name: "Alisher aka" },
     { id: "t2", name: "Dilnoza opa" },
     { id: "t3", name: "Sardor aka" }
   ]);
 
-  const [groups, setGroups] = useLocal<Group[]>("internation:groups", [
+  const [groups, setGroups] = useLocal<Group[]>("nova-lc:groups", [
     { id: "g1", title: "CEFR Up A2", teacherId: "t1" },
     { id: "g2", title: "CEFR Up B1", teacherId: "t2" },
     { id: "g3", title: "CEFR Up B2", teacherId: "t3" }
   ]);
 
-  const [students, setStudents] = useLocal<Student[]>("internation:students", [
+  const [students, setStudents] = useLocal<Student[]>("nova-lc:students", [
     { id: "s1", name: "Javlon Abdullaev", groupId: "g1", bestScore: 82 },
     { id: "s2", name: "Madina Toxtayeva", groupId: "g1", bestScore: 91 },
     { id: "s3", name: "Bobur Musayev", groupId: "g2", bestScore: 77 },
@@ -334,9 +332,7 @@ export default function TeacherPanel() {
 
   if (!isAllowed) {
     return (
-      <ProtectedRoute>
-        <div className="mx-auto flex min-h-screen max-w-md flex-col gap-4 bg-[var(--bg)] px-4 pb-24 pt-6 text-sm text-[var(--fg)]">
-          <UserHeader />
+      <div className="mx-auto flex min-h-screen max-w-md flex-col gap-4 bg-[var(--bg)] px-4 pb-24 pt-6 text-sm text-[var(--fg)]">
           <div className="mx-auto mt-5 flex w-full max-w-sm flex-col gap-4 rounded-2xl border border-[var(--divider)] bg-[var(--card)] px-6 py-8 shadow-sm">
             <div className="flex items-center gap-2 text-[var(--brand-yellow)]">
               <ShieldCheck className="h-5 w-5" />
@@ -367,14 +363,11 @@ export default function TeacherPanel() {
             </form>
           </div>
         </div>
-      </ProtectedRoute>
     );
   }
 
   return (
-    <ProtectedRoute>
       <div className="mx-auto flex min-h-screen max-w-3xl flex-col gap-5 bg-[var(--bg)] px-4 pb-28 pt-6 text-sm text-[var(--fg)]">
-        <UserHeader />
         <header className="card mt-5">
           <div className="flex items-center gap-2 text-[var(--brand-yellow)]">
             <ShieldCheck className="h-5 w-5" />
@@ -862,6 +855,5 @@ export default function TeacherPanel() {
         </div>
       )}
     </div>
-  </ProtectedRoute>
   );
 }

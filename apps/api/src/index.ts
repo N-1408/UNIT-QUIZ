@@ -1,11 +1,10 @@
 import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import cookieParser from 'cookie-parser';
-import { Bot } from 'grammy';
 import { env } from './env.js';
 import testsRouter from './routes/tests.js';
-import authRouter from './routes/auth.js';
+import usersRouter from './routes/users.js';
+import { bot } from './bot.js';
 
 const app = express();
 app.enable('trust proxy');
@@ -17,47 +16,19 @@ app.use(
     credentials: true
   })
 );
-app.use(cookieParser());
 
 app.use((req, _res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   next();
 });
 
-app.get('/', (_req, res) => res.json({ ok: true, name: 'INTERNATION API' }));
+app.get('/', (_req, res) => res.json({ ok: true, name: 'Nova LC UNIT QUIZ API' }));
 app.get('/health', (_req, res) => res.json({ ok: true }));
-
-let bot: Bot | undefined;
-
-try {
-  if (env.BOT_TOKEN) {
-    bot = new Bot(env.BOT_TOKEN);
-
-    bot.catch((err) => console.error('grammy error:', err));
-
-    bot.command('start', async (ctx) => {
-      const url = env.APP_ORIGIN || 'https://example.com';
-      await ctx.reply('Assalomu alaykum! INTERNATION Mini App’ni ochish uchun tugmani bosing.', {
-        reply_markup: {
-          inline_keyboard: [[{ text: 'Open INTERNATION', web_app: { url } }]]
-        }
-      });
-    });
-  } else {
-    console.warn('TELEGRAM_BOT_TOKEN is missing');
-  }
-} catch (error) {
-  console.error('Bot init constructor error:', error);
-}
 
 app.post('/telegram/webhook', async (req, res) => {
   try {
     console.log('Webhook update:', JSON.stringify(req.body));
-    if (bot) {
-      await bot.handleUpdate(req.body);
-    } else {
-      console.warn('Webhook called but bot is undefined');
-    }
+    await bot.handleUpdate(req.body);
     res.sendStatus(200);
   } catch (error) {
     console.error('handleUpdate error:', error);
@@ -66,7 +37,7 @@ app.post('/telegram/webhook', async (req, res) => {
 });
 
 app.use('/api', testsRouter);
-app.use('/api', authRouter);
+app.use('/api', usersRouter);
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Global error:', err);
@@ -75,10 +46,8 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 
 const port = Number(env.PORT) || 8787;
 
-if (bot) {
-  await bot.init();
-  console.log(`Bot initialized as @${bot.botInfo?.username}`);
-}
+await bot.init();
+console.log(`Bot initialized as @${bot.botInfo?.username}`);
 
 app.listen(port, () => {
   console.log(`API listening on :${port}`);

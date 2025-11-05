@@ -2,11 +2,8 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Clock3 } from "lucide-react";
-import ProtectedRoute from "../components/ProtectedRoute";
-import UserHeader from "../components/UserHeader";
 import { haptic } from "../lib/tg";
-
-const API_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
+import { buildApiUrl } from "../lib/api";
 
 type QuestionOption = {
   key: string;
@@ -35,42 +32,34 @@ export default function TestRunner() {
     queryKey: ["test", id],
     enabled: Boolean(id),
     queryFn: async () => {
-      const response = await fetch(`${API_URL}/api/tests/${id}`, {
-        credentials: "include",
-      });
+      const response = await fetch(buildApiUrl(`/api/tests/${id}`));
       if (!response.ok) {
         throw new Error("failed_to_fetch");
       }
-      return response.json();
-    },
+      return response.json() as Promise<TestDetail>;
+    }
   });
 
   if (isLoading) {
     return (
-      <ProtectedRoute>
-        <div className="mx-auto max-w-md px-4 pb-32 pt-6">
-          <UserHeader />
-          <div className="mt-5 rounded-2xl border border-[var(--divider)] bg-[var(--card)] px-4 py-3 text-sm text-[var(--muted)]">
-            Loading test...
-          </div>
+      <div className="mx-auto max-w-md px-4 pb-32 pt-6">
+        <div className="rounded-2xl border border-[var(--divider)] bg-[var(--card)] px-4 py-3 text-sm text-[var(--muted)]">
+          Test ma'lumotlari yuklanmoqda...
         </div>
-      </ProtectedRoute>
+      </div>
     );
   }
 
   if (isError || !data) {
     return (
-      <ProtectedRoute>
-        <div className="mx-auto max-w-md px-4 pb-32 pt-6">
-          <UserHeader />
-          <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700">
-            Failed to load test.{" "}
-            <button type="button" className="underline" onClick={() => refetch()}>
-              Retry
-            </button>
-          </div>
+      <div className="mx-auto max-w-md px-4 pb-32 pt-6">
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700">
+          Testni yuklashda xatolik.{" "}
+          <button type="button" className="underline" onClick={() => refetch()}>
+            Qayta urinish
+          </button>
         </div>
-      </ProtectedRoute>
+      </div>
     );
   }
 
@@ -83,68 +72,71 @@ export default function TestRunner() {
 
   const handleSubmit = () => {
     haptic.success();
-    alert("Responses saved (demo).");
+    alert("Javoblar saqlandi (demo).");
   };
 
   return (
-    <ProtectedRoute>
-      <div className="mx-auto max-w-md px-4 pb-32 pt-6">
-        <UserHeader />
-        <div className="mt-5 flex items-center justify-between">
-          <div className="text-sm" style={{ color: "var(--muted)" }}>
+    <div className="mx-auto max-w-md px-4 pb-32 pt-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-[var(--muted)]">{data.unit}</p>
+          <h1 className="text-lg font-semibold" style={{ color: "var(--fg)" }}>
             {data.title}
-          </div>
-          <span className="badge badge-time">
-            <Clock3 size={14} /> {durationMinutes} min
-          </span>
+          </h1>
         </div>
+        <span className="badge badge-time">
+          <Clock3 size={14} /> {durationMinutes} min
+        </span>
+      </div>
 
-        <div className="mt-4 space-y-4">
-          {data.questions.map((question, index) => (
-            <div key={question.id} className="card space-y-3">
-              <div className="font-medium" style={{ color: "var(--fg)" }}>
-                {index + 1}. {question.text}
-              </div>
-              <div className="space-y-2">
-                {question.options.map((option) => {
-                  const active = answers[question.id] === option.key;
-                  return (
-                    <button
-                      key={option.key}
-                      onClick={() => handlePick(question.id, option.key)}
-                      className={`tap flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-3 text-left transition ${
+      <div className="mt-5 space-y-4">
+        {data.questions.map((question, index) => (
+          <div key={question.id} className="card space-y-3">
+            <div className="font-medium" style={{ color: "var(--fg)" }}>
+              {index + 1}. {question.text}
+            </div>
+            <div className="space-y-2">
+              {question.options.map((option) => {
+                const active = answers[question.id] === option.key;
+                return (
+                  <button
+                    key={option.key}
+                    onClick={() => handlePick(question.id, option.key)}
+                    className={`tap flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-3 text-left transition ${
+                      active
+                        ? "border-transparent bg-[linear-gradient(135deg,_var(--brand-primary),_var(--brand-secondary))] text-white shadow-[0_12px_28px_rgba(255,95,0,0.2)]"
+                        : "border-[var(--divider)] bg-[var(--card)] hover:bg-[color-mix(in_oklab,_var(--fg)_6%,_transparent)]"
+                    }`}
+                  >
+                    <span
+                      className={`flex h-6 w-6 items-center justify-center rounded-full border text-xs font-semibold ${
                         active
-                          ? "border-[#222] bg-[#000] text-[var(--brand-yellow)]"
-                          : "border-[var(--divider)] bg-[var(--card)] hover:bg-[var(--elev)]"
+                          ? "border-white bg-white/20 text-white"
+                          : "border-[var(--divider)] text-[var(--muted)]"
                       }`}
                     >
-                      <span
-                        className={`flex h-6 w-6 items-center justify-center rounded-full border text-xs font-semibold ${
-                          active
-                            ? "border-[var(--brand-yellow)] bg-[rgba(255,207,0,0.14)] text-[var(--brand-yellow)]"
-                            : "border-[var(--divider)]"
-                        }`}
-                      >
-                        {option.key}
-                      </span>
-                      <span className="flex-1">{option.text}</span>
-                    </button>
-                  );
-                })}
-              </div>
+                      {option.key}
+                    </span>
+                    <span className="flex-1">{option.text}</span>
+                  </button>
+                );
+              })}
             </div>
-          ))}
-        </div>
-
-        <div className="h-24" />
-        <div className="fixed inset-x-0 bottom-0 z-10 border-t" style={{ background: "var(--bg)", borderColor: "var(--divider)" }}>
-          <div className="mx-auto max-w-md p-3">
-            <button onClick={handleSubmit} className="btn btn-primary tap w-full">
-              Submit
-            </button>
           </div>
+        ))}
+      </div>
+
+      <div className="h-24" />
+      <div
+        className="fixed inset-x-0 bottom-0 z-10 border-t bg-[color-mix(in_oklab,_var(--bg)_80%,_white)]"
+        style={{ borderColor: "var(--divider)" }}
+      >
+        <div className="mx-auto max-w-md p-3">
+          <button onClick={handleSubmit} className="btn btn-primary tap w-full">
+            Javoblarni jo'natish
+          </button>
         </div>
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }

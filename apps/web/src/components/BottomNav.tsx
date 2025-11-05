@@ -18,7 +18,7 @@ const tabs: TabItem[] = [
 ];
 
 export default function BottomNav() {
-  const base = "flex h-full flex-col items-center justify-center gap-1 text-[13px]";
+  const base = "flex h-full flex-col items-center justify-center gap-1 text-[13px] text-white/70";
   const { t } = useI18n();
 
   return (
@@ -27,7 +27,7 @@ export default function BottomNav() {
         {tabs.map((tab) => (
           <NavLink key={tab.to} to={tab.to} end={!!tab.end} className="flex-1" onClick={() => haptic.tap()}>
             {({ isActive }) => (
-              <div className={`${base} tap ${isActive ? "active" : ""}`}>
+              <div className={`${base} tap ${isActive ? "active text-white" : ""}`}>
                 <tab.icon size={20} />
                 <span className="text-xs font-medium uppercase tracking-wide">{t(tab.labelKey)}</span>
                 {isActive ? <span className="indicator mt-1 w-8" /> : <span className="indicator mt-1 w-8 opacity-0" />}

@@ -1,32 +1,69 @@
-# UNIT-QUIZ Monorepo
+# Nova LC - UNIT QUIZ
 
-CEFR Up Mini Test loyihasi uchun 1-bosqich skeleti tayyor. Telegram Mini App (frontend) va grammY webhook (backend) yagona monorepo ichida joylashgan.
+Nova LC o'quvchilari uchun yaratilgan yengil va tezkor Telegram Mini App. Monorepo ikkita asosiy bo'limdan iborat:
 
-## Holat
+- `apps/web`: React + Vite asosidagi Nova LC brendli Telegram WebApp.
+- `apps/api`: Express + grammY webhook serveri va kontakt orqali avtorizatsiya.
 
-- 1-bosqich yakun: skeleton tayyor; keyingi bosqich — Supabase + deploy.
-- Hozircha local o‘rnatish shart emas. Keyingi bosqich: Vercel (web), Render (api) yoki Supabase Edge (webhook), Supabase (DB).
-- Env kalitlarni faqat hosting panelida to‘ldiramiz.
+## Asosiy imkoniyatlar
+
+- **Send Contact login**: botdagi `/start` buyrug'idan so'ng foydalanuvchi telefon raqamini yuboradi va bir marta ro'yxatdan o'tadi.
+- **Foydalanuvchi bazasi**: `users.json` fayli `telegram_id`, ism, username va telefon raqamini saqlaydi.
+- **Telegram WebApp integratsiyasi**: UI foydalanuvchini faqat Telegram ID orqali taniydi, header'da ism va avatar ko'rsatiladi.
+- **Nova LC dizayni**: #FF5F00 → #FF7B33 gradient tugmalar, Inter / SF Pro Rounded shriftlari, yumaloq burchaklar va soft soya.
 
 ## Tuzilma
 
 ```
 /
-├─ apps/web      # Telegram Mini App (React + Vite + Tailwind)
-├─ apps/api      # Node.js (Express + grammY) webhook server
-├─ db            # Supabase jadval stublari
-└─ docs          # Texnik topshiriq va import qo‘llanma
+├─ apps/
+│  ├─ api/   # Express webhook + grammY bot
+│  └─ web/   # Telegram WebApp (React)
+├─ db/       # users.json fayli shu yerda saqlanadi
+└─ docs/     # Qo'shimcha hujjatlar
 ```
 
-## Skriptlar
+## Muhit o'zgaruvchilari
 
-- `npm run format` – Prettier bilan kodni formatlash.
-- `npm run lint` – Hozircha `skip`.
-- Frontend: `apps/web` ichida `npm run dev|build|preview`.
-- Backend: `apps/api` ichida `npm run dev|build|start`.
+.env namunasi `.env.example` faylida:
+
+```
+VITE_API_URL=http://localhost:8787
+BOT_TOKEN=__PUT_TELEGRAM_BOT_TOKEN_HERE__
+APP_ORIGIN=https://nova-lc-unit-quiz.vercel.app
+DATABASE_URL=./db/users.json
+PORT=8787
+```
+
+> `DATABASE_URL` bo'sh qoldirilsa, backend avtomatik ravishda `db/users.json` faylini yaratadi.
+
+## Ishga tushirish
+
+1. **Backend** (`apps/api`):
+   ```bash
+   npm install
+   npm run dev
+   ```
+   `/telegram/webhook` endpoint'ini HTTPS orqali Telegram botga ulang (masalan, ngrok yoki Render).
+
+2. **Frontend** (`apps/web`):
+   ```bash
+   npm install
+   npm run dev
+   ```
+   Lokal Vite serverini Telegram WebApp sifatida ishlatish uchun `https://` tunnel tavsiya qilinadi.
+
+## Autentikatsiya oqimi
+
+1. Foydalanuvchi botda `/start` yuboradi.
+2. Agar foydalanuvchi bazada bo'lmasa, bot `Raqamni yuborish (Send Contact)` tugmasini ko'rsatadi.
+3. Kontakt yuborilgach:
+   - backend `users` fayliga foydalanuvchi ma'lumotlarini yozadi;
+   - bot `Ilovani ochish` WebApp tugmasini yuboradi.
+4. WebApp ochilganda `Telegram.WebApp.initDataUnsafe.user.id` orqali foydalanuvchi aniqlanadi va `/api/users/:id` dan ma'lumot olinadi.
 
 ## Keyingi qadamlar
 
-1. Supabase sxemasini to‘ldirish va real ma’lumot bilan sinash.
-2. Deploy pipeline: Vercel (frontend) + Render/Supabase Edge Functions (backend).
-3. Telegram initData verify va autentikatsiya jarayonini ishlab chiqish.
+- Testlar va reyting API larini real ma'lumotlar bilan bog'lash.
+- Render/Vercel deployment jarayonini yakunlash.
+- Nova LC uchun analitika va monitoring qo'shish.

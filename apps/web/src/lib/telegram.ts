@@ -1,15 +1,16 @@
-import WebApp from '@twa-dev/sdk';
+import WebApp from "@twa-dev/sdk";
 
 export function initializeTelegramWebApp() {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   try {
     WebApp.ready();
     WebApp.expand();
-    WebApp.setHeaderColor('#ffffff');
+    WebApp.setHeaderColor("#ff5f00");
+    WebApp.setBackgroundColor("#ffffff");
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.warn('Telegram WebApp init skipped:', error);
+    console.warn("Telegram WebApp init skipped:", error);
   }
 }
 
@@ -18,6 +19,6 @@ export function closeTelegramWebApp() {
     WebApp.close();
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.warn('Telegram WebApp close skipped:', error);
+    console.warn("Telegram WebApp close skipped:", error);
   }
 }
