@@ -32,7 +32,7 @@ app.use((req, _res, next) => {
 });
 
 app.get('/', (_req, res) => res.json({ ok: true, name: 'Nova LC UNIT QUIZ API' }));
-app.get('/health', (_req, res) => res.json({ ok: true }));
+app.get('/health', (_req, res) => res.status(200).send('OK'));
 
 app.post('/telegram/webhook', async (req, res) => {
   try {
@@ -53,11 +53,11 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ ok: false, error: 'internal' });
 });
 
-const port = Number(env.PORT) || 8787;
+const port = Number(process.env.PORT ?? env.PORT ?? 3000);
 
 await bot.init();
 console.log(`Bot initialized as @${bot.botInfo?.username}`);
 
 app.listen(port, () => {
-  console.log(`API listening on :${port}`);
+  console.log(`✅ Server running on port ${port}`);
 });
