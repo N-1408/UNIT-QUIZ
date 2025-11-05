@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ExamList } from "@/components/exams/ExamList";
 import type { ExamSummary } from "@/components/exams/ExamCard";
+import { cn } from "@/lib/utils";
 
 const MOCK_DATA: Record<"upcoming" | "open" | "closed", ExamSummary[]> = {
   upcoming: [
@@ -44,9 +45,12 @@ export const ExamsPage = () => {
               key={filter.id}
               type="button"
               onClick={() => setActiveFilter(filter.id)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                isActive ? "bg-brand text-brand-ink" : "bg-surface-2 text-muted"
-              }`}
+              className={cn(
+                "rounded-full px-4 py-2 text-sm font-medium transition duration-soft ease-fluid",
+                isActive
+                  ? "bg-gradient-to-r from-brand to-[#ff7b33] text-white shadow-lg shadow-brand/30"
+                  : "border border-white/10 bg-white/10 text-muted backdrop-blur hover:border-brand/40 hover:text-slate-100"
+              )}
             >
               {filter.label}
             </button>

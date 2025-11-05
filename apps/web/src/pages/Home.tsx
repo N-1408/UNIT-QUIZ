@@ -29,23 +29,23 @@ export const HomePage = () => {
 
   const stats = useMemo(
     () => [
-      { label: "Bugun OPEN", value: "2 ta", hint: "Yulduzlar safida bo'ling" },
-      { label: "Oxirgi natija", value: "87%", hint: "Bu raqamni oshirib yuboramizmi?" },
-      { label: "O'rtacha vaqt", value: "42 min", hint: "Choy ham ayni shu paytda tayyor bo'ladi" }
+      { label: "Bugun OPEN", value: "2 ta", hint: "Yulduzlar safida bo'ling", icon: "??" },
+      { label: "Oxirgi natija", value: "87%", hint: "Bu raqamni oshirib yuboramizmi?", icon: "??" },
+      { label: "O'rtacha vaqt", value: "42 min", hint: "Choy ham ayni shu paytda tayyor bo'ladi", icon: "??" }
     ],
     []
   );
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="rounded-3xl bg-mesh-primary p-6 text-slate-50 shadow-lg">
+      <section className="rounded-3xl bg-mesh-primary p-6 text-slate-50 shadow-lg backdrop-blur-xl">
         <h1 className="text-3xl font-semibold">{t("home.greet", { name })}</h1>
-        <p className="mt-2 text-sm">{t("home.subtitle")}</p>
+        <p className="mt-2 text-sm text-white/70">{t("home.subtitle")}</p>
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
         {stats.map((stat) => (
-          <StatCard key={stat.label} label={stat.label} value={stat.value} hint={stat.hint} />
+          <StatCard key={stat.label} label={stat.label} value={stat.value} hint={stat.hint} icon={stat.icon} />
         ))}
       </section>
 

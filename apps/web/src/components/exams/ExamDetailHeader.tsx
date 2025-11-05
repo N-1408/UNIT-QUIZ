@@ -18,7 +18,7 @@ export const ExamDetailHeader = ({
   startsAt,
   status
 }: ExamDetailHeaderProps) => (
-  <section className="flex flex-col gap-4 rounded-3xl bg-card/80 p-6 shadow-sm ring-1 ring-stroke">
+  <section className="flex flex-col gap-4 rounded-3xl bg-card/80 p-6 shadow-md ring-1 ring-stroke">
     <div className="flex flex-col gap-2">
       <h1 className="text-3xl font-semibold text-slate-100">{title}</h1>
       <p className="text-sm text-muted">Davomiylik: {formatDuration(durationMinutes)}</p>
@@ -48,11 +48,11 @@ export const ExamDetailHeader = ({
         status === "closed" && "bg-surface-2 text-muted"
       )}
     >
-      {status === "open" && "OPEN - Qani ko'ramiz, kim haqiqiy yulduz ⭐️"}
-      {status === "closed" && "📕 Imtihon yakunlangan. Natijangizni 'Results'da ko'rasiz."}
+      {status === "open" && "OPEN � Qani ko'ramiz, kim haqiqiy yulduz ??"}
+      {status === "closed" && "?? Imtihon yakunlangan. Natijangizni 'Results'da ko'rasiz."}
       {status === "upcoming" && startsAt ? (
         <span className="flex items-center gap-2">
-          ⏱ <Countdown target={startsAt} /> - sabr qiling, sal qoldi :)
+          ? <Countdown target={startsAt} /> � sabr qiling, sal qoldi :)
         </span>
       ) : null}
     </div>

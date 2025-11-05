@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { ExamDetailHeader } from "@/components/exams/ExamDetailHeader";
-import { cn } from "@/lib/utils";
 
 const RULES = [
   "Telefonni flight mode'ga o'tkazing",
@@ -39,15 +38,13 @@ export const ExamDetailPage = () => {
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
-          className={cn(
-            "rounded-3xl bg-brand px-6 py-3 text-sm font-semibold text-brand-ink shadow-md transition hover:bg-brand/90"
-          )}
+          className="rounded-full bg-gradient-to-br from-brand to-[#ff7b33] px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/30 transition duration-soft ease-fluid hover:shadow-brand/40"
         >
           Boshlash
         </button>
         <button
           type="button"
-          className="rounded-3xl border border-stroke px-6 py-3 text-sm font-medium text-muted transition hover:border-brand hover:text-slate-100"
+          className="rounded-full border border-white/10 px-6 py-3 text-sm font-medium text-slate-200 shadow-sm backdrop-blur transition duration-soft ease-fluid hover:border-brand/40 hover:text-slate-100"
         >
           Savollar bilan tanishish
         </button>

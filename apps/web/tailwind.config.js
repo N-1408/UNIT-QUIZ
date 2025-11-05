@@ -20,7 +20,8 @@ export default {
         muted: "var(--muted)"
       },
       backgroundImage: {
-        "mesh-primary": "radial-gradient(circle at 20% 20%, var(--mesh-1), transparent 60%), radial-gradient(circle at 80% 0%, var(--mesh-2), transparent 55%), radial-gradient(circle at 50% 100%, var(--mesh-3), transparent 65%)"
+        "mesh-primary":
+          "radial-gradient(120% 120% at 0% 0%, rgba(255,95,0,0.35) 0%, transparent 55%), radial-gradient(80% 120% at 100% 0%, rgba(14,165,233,0.45) 0%, transparent 60%), radial-gradient(90% 120% at 50% 100%, rgba(96,165,250,0.4) 0%, transparent 65%)"
       },
       fontFamily: {
         sans: ["Inter", "SF Pro Display", ...fontFamily.sans]
@@ -31,9 +32,19 @@ export default {
         "3xl": "calc(var(--radius-2xl) + 4px)"
       },
       boxShadow: {
-        sm: "0 4px 12px rgba(15, 17, 21, 0.12)",
-        md: "0 12px 28px rgba(15, 17, 21, 0.16)",
-        lg: "0 18px 44px rgba(15, 17, 21, 0.22)"
+        sm: "0 8px 20px rgba(15, 17, 21, 0.10)",
+        md: "0 16px 40px rgba(15, 17, 21, 0.18)",
+        lg: "0 24px 60px rgba(15, 17, 21, 0.25)",
+        glass: "0 18px 42px rgba(14, 22, 34, 0.22)"
+      },
+      dropShadow: {
+        glow: ["0 8px 18px rgba(255, 95, 0, 0.25)", "0 12px 32px rgba(34, 211, 238, 0.15)"]
+      },
+      transitionDuration: {
+        soft: "300ms"
+      },
+      transitionTimingFunction: {
+        fluid: "cubic-bezier(0.4, 0, 0.2, 1)"
       },
       keyframes: {
         "accordion-down": {

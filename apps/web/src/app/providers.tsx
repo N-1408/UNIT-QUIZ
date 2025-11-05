@@ -17,6 +17,7 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
+    document.body.classList.toggle("dark", theme === "dark");
   }, [theme]);
 
   useEffect(() => {

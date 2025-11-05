@@ -11,36 +11,41 @@ const NAV_ITEMS = [
 ] as const;
 
 export const BottomNav = () => (
-  <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-stroke/70 bg-surface/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-lg backdrop-blur md:hidden">
-    <ul className="flex items-center justify-between">
-      {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
-        <li key={to} className="flex-1">
-          <NavLink
-            to={to}
-            onClick={() => triggerHaptic("light")}
-            className={({ isActive }: { isActive: boolean }) =>
-              cn(
-                "flex flex-col items-center gap-1 rounded-2xl p-3 text-xs font-medium transition",
-                isActive ? "text-brand" : "text-muted hover:text-slate-100"
-              )
-            }
-          >
-            {({ isActive }: { isActive: boolean }) => (
-              <>
-                <span
-                  className={cn(
-                    "flex h-9 w-9 items-center justify-center rounded-2xl border border-transparent",
-                    isActive ? "bg-brand/20 text-brand" : "bg-surface-2 text-slate-300"
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                </span>
-                <span>{label}</span>
-              </>
-            )}
-          </NavLink>
-        </li>
-      ))}
-    </ul>
+  <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-40 md:hidden">
+    <div className="pointer-events-auto mx-auto mb-4 w-full max-w-md px-4">
+      <div className="rounded-[28px] border border-white/10 bg-surface/70 px-3 py-2 shadow-glass backdrop-blur-xl dark:border-white/5">
+        <ul className="flex items-center justify-between">
+          {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+            <li key={to} className="flex-1">
+              <NavLink
+                to={to}
+                onClick={() => triggerHaptic("light")}
+                className={({ isActive }: { isActive: boolean }) =>
+                  cn(
+                    "flex flex-col items-center gap-1 rounded-2xl p-3 text-xs font-medium transition duration-soft ease-fluid",
+                    isActive ? "text-brand" : "text-muted hover:text-slate-100"
+                  )
+                }
+              >
+                {({ isActive }: { isActive: boolean }) => (
+                  <>
+                    <span
+                      className={cn(
+                        "flex h-9 w-9 items-center justify-center rounded-2xl border border-white/5 bg-white/10 shadow-sm backdrop-blur",
+                        isActive && "border-brand/40 bg-brand/15 text-brand drop-shadow-glow"
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <span>{label}</span>
+                  </>
+                )}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="h-[env(safe-area-inset-bottom)]" />
+    </div>
   </nav>
 );

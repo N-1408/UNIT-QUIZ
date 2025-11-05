@@ -8,10 +8,16 @@ type ExamListProps = {
 
 export const ExamList = ({
   items,
-  emptyMessage = "Hali rejada imtihon yo'q. Ammo siz baribir zo'rsiz 😎"
+  emptyMessage = "Hali rejada imtihon yo'q. Ammo bu vaqtni dam olishga sarflab qo'ying ??"
 }: ExamListProps) => {
   if (!items.length) {
-    return <EmptyState title={emptyMessage} />;
+    return (
+      <EmptyState
+        title={emptyMessage}
+        description="Qahva tayyorlab, o'zingizni rag'batlantirib turing. Yangi testlar yaqin!"
+        icon="???"
+      />
+    );
   }
 
   return (

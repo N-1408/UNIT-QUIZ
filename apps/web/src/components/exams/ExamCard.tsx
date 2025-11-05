@@ -18,16 +18,16 @@ type ExamCardProps = {
 };
 
 const STATUS_COPY: Record<ExamStatus, string> = {
-  upcoming: "⏳ Hali tayyorlanishga vaqt bor",
-  open: "⭐️ Qani ko'ramiz, kim haqiqiy yulduz",
-  closed: "📕 Yakunlangan, natijani ko'ring"
+  upcoming: "? Hali tayyorlanishga vaqt bor",
+  open: "?? Qani ko'ramiz, kim haqiqiy yulduz",
+  closed: "?? Yakunlangan, natijani ko'ring"
 };
 
 export const ExamCard = ({ exam, className }: ExamCardProps) => (
   <Link
     to={`/exams/${exam.id}`}
     className={cn(
-      "group flex flex-col gap-4 rounded-3xl bg-card/80 p-5 shadow-sm ring-1 ring-stroke transition hover:-translate-y-0.5 hover:shadow-lg",
+      "group flex flex-col gap-4 rounded-3xl bg-card/80 p-5 shadow-md ring-1 ring-stroke transition duration-soft ease-fluid hover:-translate-y-0.5 hover:shadow-lg",
       className
     )}
   >
@@ -38,7 +38,7 @@ export const ExamCard = ({ exam, className }: ExamCardProps) => (
         </h3>
         <p className="text-sm text-muted">{STATUS_COPY[exam.status]}</p>
       </div>
-      <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-brand/20 text-brand">
+      <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-brand shadow-sm backdrop-blur">
         <Star className="h-4 w-4" />
       </span>
     </div>

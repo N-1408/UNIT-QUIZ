@@ -12,7 +12,7 @@ type StatCardProps = {
 export const StatCard = ({ label, value, hint, icon, className }: StatCardProps) => (
   <article
     className={cn(
-      "flex flex-col gap-3 rounded-3xl bg-card/80 p-5 shadow-sm ring-1 ring-stroke backdrop-blur transition hover:shadow-md",
+      "flex flex-col gap-3 rounded-3xl border border-white/10 bg-white/10 p-5 shadow-lg shadow-black/20 backdrop-blur-xl transition duration-soft ease-fluid hover:-translate-y-0.5 hover:shadow-black/30 dark:border-white/5",
       className
     )}
   >

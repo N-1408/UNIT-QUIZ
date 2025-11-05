@@ -37,8 +37,32 @@
 }
 
 body {
-  @apply min-h-screen bg-surface text-slate-900 antialiased transition-colors duration-200 ease-in-out dark:bg-surface dark:text-slate-100;
+  position: relative;
+  min-height: 100vh;
+  @apply bg-surface text-slate-900 antialiased transition-colors duration-soft ease-fluid dark:bg-surface dark:text-slate-100;
   font-feature-settings: "liga" 1, "kern" 1;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: -10% -20% -30% -20%;
+  z-index: -2;
+  opacity: 0.9;
+  background: radial-gradient(120% 120% at 10% -10%, rgba(255, 95, 0, 0.35) 0%, transparent 55%),
+    radial-gradient(90% 120% at 100% 0%, rgba(14, 165, 233, 0.35) 0%, transparent 60%),
+    radial-gradient(120% 140% at 50% 110%, rgba(96, 165, 250, 0.38) 0%, transparent 70%);
+  filter: blur(0px);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(135deg, rgba(15, 17, 21, 0.6), rgba(15, 17, 21, 0.35));
+  mix-blend-mode: multiply;
+  pointer-events: none;
 }
 
 #root {

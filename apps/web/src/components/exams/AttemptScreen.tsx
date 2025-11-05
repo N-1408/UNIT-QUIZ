@@ -20,7 +20,7 @@ const OptionButton = ({ active, className, children, ...rest }: OptionButtonProp
   <button
     type="button"
     className={cn(
-      "w-full rounded-2xl border border-stroke bg-surface-2 px-4 py-3 text-left text-sm text-slate-200 transition hover:border-brand hover:text-slate-50",
+      "w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-left text-sm text-slate-200 shadow-sm backdrop-blur transition duration-soft ease-fluid hover:border-brand/40 hover:text-slate-50",
       active && "border-brand bg-brand/20 text-brand",
       className
     )}
@@ -66,7 +66,7 @@ export const AttemptScreen = ({ questions, onSubmit }: AttemptScreenProps) => {
           type="button"
           disabled={currentIndex === 0}
           onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
-          className="rounded-2xl bg-surface-2 px-4 py-2 text-sm font-medium text-muted transition enabled:hover:text-slate-100 disabled:opacity-50"
+          className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-muted shadow-sm backdrop-blur transition duration-soft ease-fluid enabled:hover:border-brand/40 enabled:hover:text-slate-100 disabled:opacity-50"
         >
           Oldingi
         </button>
@@ -74,7 +74,7 @@ export const AttemptScreen = ({ questions, onSubmit }: AttemptScreenProps) => {
           <button
             type="button"
             onClick={onSubmit}
-            className="rounded-2xl bg-brand px-5 py-2 text-sm font-semibold text-brand-ink shadow-md transition hover:bg-brand/90"
+            className="rounded-full bg-gradient-to-r from-brand to-[#ff7b33] px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-brand/30 transition duration-soft ease-fluid hover:shadow-brand/40"
           >
             Topshiramizmi?
           </button>
@@ -82,7 +82,7 @@ export const AttemptScreen = ({ questions, onSubmit }: AttemptScreenProps) => {
             type="button"
             disabled={currentIndex >= questions.length - 1}
             onClick={() => setCurrentIndex(Math.min(questions.length - 1, currentIndex + 1))}
-            className="rounded-2xl bg-surface-2 px-4 py-2 text-sm font-medium text-muted transition enabled:hover:text-slate-100 disabled:opacity-50"
+            className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-muted shadow-sm backdrop-blur transition duration-soft ease-fluid enabled:hover:border-brand/40 enabled:hover:text-slate-100 disabled:opacity-50"
           >
             Keyingi
           </button>
