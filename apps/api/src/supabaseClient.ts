@@ -1,28 +1,25 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('❌ Supabase environment variables missing!');
-  console.error('SUPABASE_URL:', SUPABASE_URL ? '✅' : '❌');
-  console.error('SUPABASE_SERVICE_ROLE_KEY:', SUPABASE_KEY ? '✅' : '❌');
-  process.exit(1);
+  console.error("\u274C Supabase env variables missing!");
+  console.log("SUPABASE_URL:", SUPABASE_URL ? "\u2705 OK" : "\u274C Missing");
+  console.log("SUPABASE_KEY:", SUPABASE_KEY ? "\u2705 OK" : "\u274C Missing");
 }
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function testConnection() {
+// Connection test
+(async () => {
   try {
-    const { error } = await supabase.from('users').select('id').limit(1);
-    if (error) {
-      throw error;
-    }
-    console.log('✅ Supabase connection successful!');
+    const { error } = await supabase.from("users").select("id").limit(1);
+    if (error) throw error;
+    console.log("\u2705 Supabase connection successful!");
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error('❌ Supabase connection failed:', message);
+    console.error("\u274C Supabase test failed:", (err as Error).message);
   }
-}
-
-void testConnection();
+})();

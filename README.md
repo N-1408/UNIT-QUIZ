@@ -24,9 +24,11 @@ VITE_API_URL=http://localhost:8787
 
 BOT_TOKEN=__PUT_TELEGRAM_BOT_TOKEN_HERE__
 APP_ORIGIN=https://unitquiz.vercel.app
+ADMIN_CHANNEL_ID=
 SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=__PUT_SUPABASE_SERVICE_ROLE_KEY__
-PORT=8787
+SUPABASE_SERVICE_ROLE_KEY=__PUT_SUPABASE_SERVICE_ROLE_KEY__
+SUPABASE_ANON_KEY=
+SUPABASE_JWT_SECRET=
 ```
 
 > Supabase service role key faqat backendda ishlatiladi. Frontend uchun kerak bolsa alohida anon key qoshish mumkin.
@@ -68,4 +70,4 @@ npm run dev
 ## Keyingi qadamlarga oid eslatmalar
 
 - Reyting/test API larini Supabase yoki boshqa manbaga boglash.
-- Render va Vercel autodeploy uchun kerakli secrets (BOT_TOKEN, SUPABASE_URL, SUPABASE_KEY va boshqalar) ni GitHub repository secrets orqali ulash.
+- Render va Vercel autodeploy uchun kerakli secrets (BOT_TOKEN, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY va boshqalar) ni GitHub repository secrets orqali ulash.

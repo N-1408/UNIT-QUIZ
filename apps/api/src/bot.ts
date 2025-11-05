@@ -4,6 +4,8 @@ import { getUserById, upsertUser } from "./users.js";
 
 const WEB_APP_URL = "https://unitquiz.vercel.app";
 const DOMAIN_WARNING = "WARNING: BotFather domeningizni yangilang -> /setdomain -> https://unitquiz.vercel.app";
+const REGISTRATION_ERROR_MESSAGE =
+  "\u26A0\uFE0F WARNING: Ulanishda muammo yuz berdi.\nIltimos, qayta urinib ko\u2018ring yoki o\u2018quv markaz bilan bog\u2018laning.";
 
 if (env.APP_ORIGIN !== WEB_APP_URL) {
   console.warn(DOMAIN_WARNING);
@@ -44,11 +46,8 @@ bot.command("start", async (ctx) => {
       return;
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("Supabase lookup error:", message);
-    await ctx.reply(
-      "WARNING: Ulanishda muammo yuz berdi.\nIltimos, qayta urinib ko'ring yoki o'quv markaz bilan bog'laning."
-    );
+    console.error("Supabase lookup error:", (error as Error).message);
+    await ctx.reply(REGISTRATION_ERROR_MESSAGE);
     return;
   }
 
@@ -91,11 +90,9 @@ bot.on("message:contact", async (ctx) => {
       }
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error("Supabase insert error:", message);
-    await ctx.reply(
-      "⚠️ WARNING: Ulanishda muammo yuz berdi.\nIltimos, qayta urinib ko'ring yoki o'quv markaz bilan bog'laning."
-    );
+    console.error("Supabase insert error:", (error as Error).message);
+    await ctx.reply(REGISTRATION_ERROR_MESSAGE);
+    return;
   }
 });
 
@@ -106,5 +103,3 @@ bot.command("test", async (ctx) => {
     }
   });
 });
-
-

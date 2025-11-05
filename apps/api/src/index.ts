@@ -1,5 +1,4 @@
-import express from 'express';
-import type { Request, Response, NextFunction } from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import cors from 'cors';
 import { env } from './env.js';
 import testsRouter from './routes/tests.js';
@@ -10,9 +9,12 @@ console.log('Server starting...');
 console.log('Environment check:');
 console.log({
   SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
-  SUPABASE_KEY: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY),
+  SUPABASE_SERVICE_ROLE_KEY: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+  SUPABASE_ANON_KEY: Boolean(process.env.SUPABASE_ANON_KEY),
+  SUPABASE_JWT_SECRET: Boolean(process.env.SUPABASE_JWT_SECRET),
   BOT_TOKEN: Boolean(process.env.BOT_TOKEN),
-  PORT: process.env.PORT || 'default'
+  APP_ORIGIN: Boolean(process.env.APP_ORIGIN),
+  ADMIN_CHANNEL_ID: Boolean(process.env.ADMIN_CHANNEL_ID)
 });
 
 const app = express();
@@ -53,11 +55,11 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ ok: false, error: 'internal' });
 });
 
-const port = Number(process.env.PORT ?? env.PORT ?? 3000);
+const port = process.env.PORT || 8080;
 
 await bot.init();
 console.log(`Bot initialized as @${bot.botInfo?.username}`);
 
 app.listen(port, () => {
-  console.log(`✅ Server running on port ${port}`);
+  console.log(`\u2705 Server running on port ${port}`);
 });
