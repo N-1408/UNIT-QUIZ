@@ -10,8 +10,13 @@ router.get('/users/:telegramId', async (req, res) => {
     return res.status(400).json({ ok: false, error: 'missing_telegram_id' });
   }
 
+  const numericId = Number(telegramId);
+  if (!Number.isFinite(numericId)) {
+    return res.status(400).json({ ok: false, error: 'invalid_telegram_id' });
+  }
+
   try {
-    const user = await getUserById(telegramId);
+    const user = await getUserById(numericId);
 
     if (!user) {
       return res.status(404).json({ ok: false, error: 'user_not_found' });
@@ -22,11 +27,12 @@ router.get('/users/:telegramId', async (req, res) => {
     const lastName = rest.length ? rest.join(' ') : null;
 
     return res.json({
-      telegramId: user.id,
+      telegramId: String(user.tg_id),
+      tgId: user.tg_id,
       fullName: user.full_name,
       firstName,
       lastName,
-      phoneNumber: null,
+      phoneNumber: user.phone_number ?? null,
       createdAt: user.created_at
     });
   } catch (error) {

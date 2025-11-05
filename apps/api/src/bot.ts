@@ -4,8 +4,7 @@ import { supabase } from "./supabaseClient.js";
 
 const WEB_APP_URL = "https://unitquiz.vercel.app";
 const DOMAIN_WARNING = "WARNING: BotFather domeningizni yangilang -> /setdomain -> https://unitquiz.vercel.app";
-const REGISTRATION_ERROR_MESSAGE =
-  "\u26A0\uFE0F WARNING: Ulanishda muammo yuz berdi.\nIltimos, qayta urinib ko\u2018ring yoki o\u2018quv markaz bilan bog\u2018laning.";
+const REGISTRATION_ERROR_MESSAGE = "\u26A0\uFE0F Ulanishda muammo yuz berdi, iltimos qayta urinib ko\u2018ring.";
 const REGISTRATION_SUCCESS_MESSAGE = "\u2705 Ro'yxatdan o'tish muvaffaqiyatli yakunlandi!";
 
 if (env.APP_ORIGIN !== WEB_APP_URL) {
@@ -29,16 +28,16 @@ bot.command("start", async (ctx) => {
     return;
   }
 
-  const telegramId = String(from.id);
+  const telegramId = from.id;
 
   try {
     const { data: existingStudent, error: existingError } = await supabase
       .from("students")
-      .select("id")
-      .eq("id", telegramId)
-      .single();
+      .select("tg_id, full_name")
+      .eq("tg_id", telegramId)
+      .maybeSingle();
 
-    if (existingError && existingError.code !== "PGRST116") {
+    if (existingError) {
       console.error("Supabase lookup error:", existingError.message);
       console.error("Error details:", JSON.stringify(existingError, Object.getOwnPropertyNames(existingError), 2));
       await ctx.reply(REGISTRATION_ERROR_MESSAGE);
@@ -82,14 +81,25 @@ bot.on("message:contact", async (ctx) => {
   }
 
   try {
-    const firstName = contact.first_name || from.first_name || "";
-    const lastName = contact.last_name ?? from.last_name ?? "";
-    const fullName = `${firstName}${lastName ? ` ${lastName}` : ""}`.trim();
+    const telegramId = from.id;
+    const firstName = from.first_name || contact.first_name || "";
+    const lastName = from.last_name || contact.last_name || "";
+    const fullName = `${firstName}${lastName ? ` ${lastName}` : ""}`.trim() || `Telegram user ${telegramId}`;
+    const phone = contact.phone_number ?? null;
 
-    const { data, error } = await supabase.from("students").upsert({
-      id: from.id.toString(),
-      full_name: fullName
-    });
+    console.log("\uD83D\uDCDE Received contact:", phone ?? "no phone");
+
+    const { data, error } = await supabase
+      .from("students")
+      .upsert(
+        {
+          tg_id: telegramId,
+          full_name: fullName,
+          phone_number: phone
+        },
+        { onConflict: "tg_id" }
+      )
+      .select();
 
     if (error) {
       console.error("\u274C Supabase insert failed:", error.message);
@@ -98,7 +108,7 @@ bot.on("message:contact", async (ctx) => {
       return;
     }
 
-    console.log("\u2705 Student added successfully:", data);
+    console.log("\u2705 Student upserted:", data);
 
     await ctx.reply(REGISTRATION_SUCCESS_MESSAGE, {
       reply_markup: {

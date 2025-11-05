@@ -17,7 +17,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 (async () => {
   try {
     console.log("\uD83D\uDD0D Checking Supabase connection...");
-    const { error: testError } = await supabase.from("students").select("id").limit(1);
+    const { error: testError } = await supabase.from("students").select("tg_id").limit(1);
     if (testError) {
       console.error("\u274C Supabase test failed:", testError.message);
     } else {
