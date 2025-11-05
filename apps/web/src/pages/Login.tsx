@@ -1,43 +1,37 @@
 import { useEffect } from "react";
 
-const BOT_ID = (import.meta.env.VITE_TG_BOT_ID ?? "8324016944").toString();
+const BOT_USERNAME = (import.meta.env.VITE_TG_BOT_USERNAME ?? "unit_quiz_bot").toString();
+const AUTH_URL = (import.meta.env.VITE_TG_AUTH_URL ?? "https://unit-quiz.onrender.com/api/auth/telegram").toString();
 
-export default function LoginPage() {
+export default function Login() {
   useEffect(() => {
-    const container = document.getElementById("telegram-login");
+    const container = document.getElementById("telegram-login-container");
     if (!container) return;
 
     container.innerHTML = "";
 
     const script = document.createElement("script");
-    script.src = "https://telegram.org/js/telegram-widget.js?7";
     script.async = true;
-    script.setAttribute("data-telegram-login", BOT_ID);
+    script.src = "https://telegram.org/js/telegram-widget.js?22";
+    script.setAttribute("data-telegram-login", BOT_USERNAME);
     script.setAttribute("data-size", "large");
+    script.setAttribute("data-radius", "8");
     script.setAttribute("data-userpic", "false");
-    script.setAttribute("data-auth-url", "https://unit-quiz.onrender.com/api/telegram-login");
     script.setAttribute("data-request-access", "write");
+    script.setAttribute("data-auth-url", AUTH_URL);
 
     container.appendChild(script);
   }, []);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[var(--bg)] px-4">
-      <div
-        className="w-full max-w-sm rounded-xl border border-[var(--divider)] bg-white p-8 text-center shadow-lg"
-        style={{ background: "var(--card)", color: "var(--fg)" }}
-      >
-        <div className="mb-4 flex justify-center">
-          <img src="https://telegram.org/img/website_icon.svg" alt="Telegram" className="h-14 w-14" />
-        </div>
-        <h1 className="text-2xl font-bold" style={{ color: "var(--fg)" }}>
-          Login with Telegram
-        </h1>
-        <p className="mt-2 text-sm" style={{ color: "var(--muted)" }}>
-          We use Telegram OAuth to keep your account secure.
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--bg)] px-6 text-[var(--fg)]">
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl font-semibold">Login with Telegram</h1>
+        <p className="mt-2 text-sm text-[var(--muted)]">
+          Use your Telegram account to securely sign in.
         </p>
-        <div id="telegram-login" className="mt-6 flex justify-center" />
       </div>
+      <div id="telegram-login-container" className="flex justify-center" />
     </div>
   );
 }
