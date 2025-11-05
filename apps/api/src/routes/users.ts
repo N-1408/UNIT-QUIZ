@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getUserById } from '../users.js';
+import { getStudentByTgId } from '../supabaseService.js';
 
 const router = Router();
 
@@ -16,7 +16,14 @@ router.get('/users/:telegramId', async (req, res) => {
   }
 
   try {
-    const user = await getUserById(numericId);
+    const result = await getStudentByTgId(numericId);
+
+    if (!result.success) {
+      console.error('get user error:', result.error, result.details ?? '');
+      return res.status(500).json({ ok: false, error: 'internal_error' });
+    }
+
+    const user = result.data;
 
     if (!user) {
       return res.status(404).json({ ok: false, error: 'user_not_found' });
@@ -32,7 +39,10 @@ router.get('/users/:telegramId', async (req, res) => {
       fullName: user.full_name,
       firstName,
       lastName,
+      tgUsername: user.tg_username ?? null,
       phoneNumber: user.phone_number ?? null,
+      lang: user.lang ?? null,
+      role: user.role ?? null,
       createdAt: user.created_at
     });
   } catch (error) {

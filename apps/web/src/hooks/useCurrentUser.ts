@@ -14,11 +14,15 @@ export type TelegramUser =
 
 export type UserProfile = {
   telegramId: string;
+  tgId: number;
   fullName: string | null;
   firstName: string | null;
   lastName: string | null;
+  tgUsername: string | null;
   phoneNumber: string | null;
-  createdAt: string;
+  lang: string | null;
+  role: string | null;
+  createdAt: string | null;
 };
 
 export class NotRegisteredError extends Error {
@@ -61,15 +65,42 @@ export function useCurrentUser() {
         throw new Error(message || "failed_to_load_profile");
       }
 
-      const raw = (await response.json()) as Partial<UserProfile> & { fullName?: string | null };
+      const raw = (await response.json()) as Partial<UserProfile> & {
+        tgId?: number;
+        tgUsername?: string | null;
+        lang?: string | null;
+        role?: string | null;
+        fullName?: string | null;
+      };
+
+      const fullName = raw.fullName ?? null;
+      const providedFirst = raw.firstName ?? null;
+      const providedLast = raw.lastName ?? null;
+
+      let inferredFirst: string | null = providedFirst;
+      let inferredLast: string | null = providedLast;
+
+      if ((!providedFirst || !providedLast) && fullName) {
+        const segments = fullName.trim().split(/\s+/);
+        if (!providedFirst && segments.length > 0) {
+          inferredFirst = segments[0] ?? null;
+        }
+        if (!providedLast && segments.length > 1) {
+          inferredLast = segments.slice(1).join(" ") || null;
+        }
+      }
 
       return {
         telegramId: raw.telegramId ?? telegramId,
-        fullName: raw.fullName ?? null,
-        firstName: raw.firstName ?? null,
-        lastName: raw.lastName ?? null,
+        tgId: raw.tgId ?? Number(telegramId),
+        fullName,
+        firstName: inferredFirst,
+        lastName: inferredLast,
+        tgUsername: raw.tgUsername ?? null,
         phoneNumber: raw.phoneNumber ?? null,
-        createdAt: raw.createdAt ?? ''
+        lang: raw.lang ?? null,
+        role: raw.role ?? null,
+        createdAt: raw.createdAt ?? null
       };
     },
     enabled: Boolean(telegramId),

@@ -1,6 +1,6 @@
 import { Bot, Keyboard } from "grammy";
 import { env } from "./env.js";
-import { supabase } from "./supabaseClient.js";
+import { getOrCreateStudent, getStudentByTgId } from "./supabaseService.js";
 
 const WEB_APP_URL = "https://unitquiz.vercel.app";
 const DOMAIN_WARNING = "WARNING: BotFather domeningizni yangilang -> /setdomain -> https://unitquiz.vercel.app";
@@ -30,31 +30,20 @@ bot.command("start", async (ctx) => {
 
   const telegramId = from.id;
 
-  try {
-    const { data: existingStudent, error: existingError } = await supabase
-      .from("students")
-      .select("tg_id, full_name")
-      .eq("tg_id", telegramId)
-      .maybeSingle();
+  const existing = await getStudentByTgId(telegramId);
 
-    if (existingError) {
-      console.error("Supabase lookup error:", existingError.message);
-      console.error("Error details:", JSON.stringify(existingError, Object.getOwnPropertyNames(existingError), 2));
-      await ctx.reply(REGISTRATION_ERROR_MESSAGE);
-      return;
-    }
-
-    if (existingStudent) {
-      await ctx.reply(`\uD83D\uDC4B Yana sizmi, ${from.first_name ?? "do'stimiz"}? \uD83D\uDE0A\nSiz allaqachon tizimdasiz!`, {
-        reply_markup: {
-          inline_keyboard: [[{ text: "Ilovani ochish", web_app: { url: WEB_APP_URL } }]]
-        }
-      });
-      return;
-    }
-  } catch (error) {
-    console.error("Supabase lookup error:", (error as Error).message);
+  if (!existing.success) {
+    console.error("Supabase lookup error:", existing.error);
     await ctx.reply(REGISTRATION_ERROR_MESSAGE);
+    return;
+  }
+
+  if (existing.data) {
+    await ctx.reply(`\uD83D\uDC4B Yana sizmi, ${from.first_name ?? "do'stimiz"}? \uD83D\uDE0A\nSiz allaqachon tizimdasiz!`, {
+      reply_markup: {
+        inline_keyboard: [[{ text: "Ilovani ochish", web_app: { url: WEB_APP_URL } }]]
+      }
+    });
     return;
   }
 
@@ -80,48 +69,30 @@ bot.on("message:contact", async (ctx) => {
     return;
   }
 
-  try {
-    const telegramId = from.id;
-    const firstName = from.first_name || contact.first_name || "";
-    const lastName = from.last_name || contact.last_name || "";
-    const fullName = `${firstName}${lastName ? ` ${lastName}` : ""}`.trim() || `Telegram user ${telegramId}`;
-    const phone = contact.phone_number ?? null;
+  const telegramId = from.id;
+  const firstName = from.first_name || contact.first_name || "";
+  const lastName = from.last_name || contact.last_name || "";
+  const fullName = `${firstName}${lastName ? ` ${lastName}` : ""}`.trim() || `Telegram user ${telegramId}`;
+  const username = from.username ?? null;
+  const phone = contact.phone_number ?? null;
 
-    console.log("\uD83D\uDCDE Received contact:", phone ?? "no phone");
+  console.log("\uD83D\uDCDE Received contact:", phone ?? "no phone");
 
-    const { data, error } = await supabase
-      .from("students")
-      .upsert(
-        {
-          tg_id: telegramId,
-          full_name: fullName,
-          phone_number: phone
-        },
-        { onConflict: "tg_id" }
-      )
-      .select();
+  const result = await getOrCreateStudent(telegramId, fullName, username, phone);
 
-    if (error) {
-      console.error("\u274C Supabase insert failed:", error.message);
-      console.error("Error details:", JSON.stringify(error, null, 2));
-      await ctx.reply(REGISTRATION_ERROR_MESSAGE);
-      return;
-    }
-
-    console.log("\u2705 Student upserted:", data);
-
-    await ctx.reply(REGISTRATION_SUCCESS_MESSAGE, {
-      reply_markup: {
-        inline_keyboard: [[{ text: "Ilovani ochish", web_app: { url: WEB_APP_URL } }]]
-      }
-    });
-  } catch (error) {
-    const err = error as Error;
-    console.error("\u274C Supabase insert failed:", err.message);
-    console.error("Error details:", JSON.stringify(err, Object.getOwnPropertyNames(err), 2));
+  if (!result.success) {
+    console.error("\u274C Supabase insert failed:", result.error, result.details ?? "");
     await ctx.reply(REGISTRATION_ERROR_MESSAGE);
     return;
   }
+
+  console.log("\u2705 Student upserted:", [result.data]);
+
+  await ctx.reply(REGISTRATION_SUCCESS_MESSAGE, {
+    reply_markup: {
+      inline_keyboard: [[{ text: "Ilovani ochish", web_app: { url: WEB_APP_URL } }]]
+    }
+  });
 });
 
 bot.command("test", async (ctx) => {
