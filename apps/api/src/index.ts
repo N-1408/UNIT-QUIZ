@@ -6,6 +6,15 @@ import testsRouter from './routes/tests.js';
 import usersRouter from './routes/users.js';
 import { bot } from './bot.js';
 
+console.log('Server starting...');
+console.log('Environment check:');
+console.log({
+  SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
+  SUPABASE_KEY: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY),
+  BOT_TOKEN: Boolean(process.env.BOT_TOKEN),
+  PORT: process.env.PORT || 'default'
+});
+
 const app = express();
 app.enable('trust proxy');
 app.use(express.json({ limit: '2mb' }));
