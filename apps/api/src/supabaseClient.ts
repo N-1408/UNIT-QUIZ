@@ -16,9 +16,13 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // Connection test
 (async () => {
   try {
-    const { error } = await supabase.from("users").select("id").limit(1);
-    if (error) throw error;
-    console.log("\u2705 Supabase connection successful!");
+    console.log("\uD83D\uDD0D Checking Supabase connection...");
+    const { error: testError } = await supabase.from("students").select("id").limit(1);
+    if (testError) {
+      console.error("\u274C Supabase test failed:", testError.message);
+    } else {
+      console.log("\u2705 Supabase connection successful.");
+    }
   } catch (err) {
     console.error("\u274C Supabase test failed:", (err as Error).message);
   }

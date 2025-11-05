@@ -1,43 +1,21 @@
-import { supabase } from './supabaseClient.js';
+import { supabase } from "./supabaseClient.js";
 
-export type SupabaseUser = {
+export type SupabaseStudent = {
   id: string;
-  first_name: string | null;
-  last_name: string | null;
-  phone_number: string | null;
+  full_name: string;
   created_at: string;
 };
 
-type CreateUserInput = {
-  id: string;
-  firstName: string;
-  lastName?: string | null;
-  phoneNumber: string;
-};
-
 export async function getUserById(id: string) {
-  const { data, error } = await supabase.from('users').select('id, first_name, last_name, phone_number, created_at').eq('id', id).maybeSingle();
+  const { data, error } = await supabase
+    .from("students")
+    .select("id, full_name, created_at")
+    .eq("id", id)
+    .maybeSingle();
 
   if (error) {
     throw error;
   }
 
-  return data as SupabaseUser | null;
-}
-
-export async function upsertUser(input: CreateUserInput) {
-  const payload = {
-    id: input.id,
-    first_name: input.firstName,
-    last_name: input.lastName ?? null,
-    phone_number: input.phoneNumber
-  };
-
-  const { error, data } = await supabase.from('users').upsert(payload, { onConflict: 'id' }).select().maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data as SupabaseUser | null;
+  return data as SupabaseStudent | null;
 }

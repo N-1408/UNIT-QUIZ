@@ -8,12 +8,12 @@ Nova LC oquvchilari uchun ishlab chiqilgan Telegram Mini App. Monorepo quyidagi 
 ## Auth oqimi (Send Contact + Supabase)
 
 1. Foydalanuvchi botga `/start` yuboradi.
-2. Agar foydalanuvchi Supabase `users` jadvalida topilmasa, bot "Raqamni yuborish (Send Contact)" tugmasini korsatadi.
+2. Agar foydalanuvchi Supabase `students` jadvalida topilmasa, bot "Raqamni yuborish (Send Contact)" tugmasini korsatadi.
 3. Foydalanuvchi kontakt yuboradi:
-   - Telegram `user_id` Supabase `users.id` sifatida saqlanadi (`first_name`, `last_name`, `phone_number` maydonlari bilan).
+   - Telegram `user_id` Supabase `students.id` sifatida saqlanadi (`full_name` maydoni bilan).
    - Bot royxatdan otish tasdigini yuboradi va Mini App havolasini korsatadi.
 4. Agar foydalanuvchi allaqachon mavjud bolsa, bot bevosita "Ilovani ochish" tugmasini qaytaradi.
-5. Frontend WebApp ochilgach, Telegram WebApp kontekstdan `user.id` oladi va `/api/users/:id` orqali Supabase dagi malumotni oladi.
+5. Frontend WebApp ochilgach, Telegram WebApp kontekstdan `user.id` oladi va `/api/users/:id` orqali Supabase `students` jadvalidagi malumotni oladi.
 
 ## Muhit ozgaruvchilari
 

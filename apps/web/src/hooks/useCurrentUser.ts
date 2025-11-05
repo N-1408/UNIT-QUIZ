@@ -14,6 +14,7 @@ export type TelegramUser =
 
 export type UserProfile = {
   telegramId: string;
+  fullName: string | null;
   firstName: string | null;
   lastName: string | null;
   phoneNumber: string | null;
@@ -60,10 +61,11 @@ export function useCurrentUser() {
         throw new Error(message || "failed_to_load_profile");
       }
 
-      const raw = (await response.json()) as Partial<UserProfile>;
+      const raw = (await response.json()) as Partial<UserProfile> & { fullName?: string | null };
 
       return {
         telegramId: raw.telegramId ?? telegramId,
+        fullName: raw.fullName ?? null,
         firstName: raw.firstName ?? null,
         lastName: raw.lastName ?? null,
         phoneNumber: raw.phoneNumber ?? null,

@@ -17,11 +17,16 @@ router.get('/users/:telegramId', async (req, res) => {
       return res.status(404).json({ ok: false, error: 'user_not_found' });
     }
 
+    const segments = (user.full_name ?? '').trim().split(/\s+/).filter(Boolean);
+    const [firstName = null, ...rest] = segments;
+    const lastName = rest.length ? rest.join(' ') : null;
+
     return res.json({
       telegramId: user.id,
-      firstName: user.first_name,
-      lastName: user.last_name,
-      phoneNumber: user.phone_number,
+      fullName: user.full_name,
+      firstName,
+      lastName,
+      phoneNumber: null,
       createdAt: user.created_at
     });
   } catch (error) {
