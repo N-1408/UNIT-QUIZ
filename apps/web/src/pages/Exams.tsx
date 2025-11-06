@@ -2,6 +2,7 @@
 import { useTranslation } from "react-i18next";
 import { ExamList } from "@/components/exams/ExamList";
 import type { ExamSummary } from "@/components/exams/ExamCard";
+import { PageContainer } from "@/components/layout/Page";
 import { cn } from "@/lib/utils";
 
 const MOCK_DATA: Record<"upcoming" | "open" | "closed", ExamSummary[]> = {
@@ -37,7 +38,7 @@ export const ExamsPage = () => {
   const [activeFilter, setActiveFilter] = useState<(typeof FILTERS)[number]["id"]>("open");
 
   return (
-    <div className="flex flex-col gap-4">
+    <PageContainer className="gap-5">
       <div className="flex flex-col gap-2">
         <h2 className="text-base font-semibold text-text-primary">
           {t("exams.title", { defaultValue: "Kayfiyatga qarab tanlang, hammasi tayyor." })}
@@ -69,6 +70,6 @@ export const ExamsPage = () => {
       </div>
 
       <ExamList items={MOCK_DATA[activeFilter]} />
-    </div>
+    </PageContainer>
   );
 };

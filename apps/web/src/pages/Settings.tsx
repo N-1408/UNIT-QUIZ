@@ -2,12 +2,13 @@
 import { LanguageRadio } from "@/components/settings/LanguageRadio";
 import { ThemeToggle } from "@/components/settings/ThemeToggle";
 import { ProfilePanel } from "@/components/settings/ProfilePanel";
+import { PageContainer } from "@/components/layout/Page";
 
 export const SettingsPage = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col gap-4">
+    <PageContainer className="gap-4">
       <div className="flex flex-col gap-1">
         <h2 className="text-base font-semibold text-text-primary">
           {t("settings.title", { defaultValue: "Sozlamalar" })}
@@ -23,6 +24,6 @@ export const SettingsPage = () => {
         <LanguageRadio />
         <ThemeToggle />
       </section>
-    </div>
+    </PageContainer>
   );
 };

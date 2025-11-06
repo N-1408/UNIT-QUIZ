@@ -1,6 +1,15 @@
 import { fontFamily } from "tailwindcss/defaultTheme";
 import animatePlugin from "tailwindcss-animate";
 
+const withOpacity = (variable) => {
+  return ({ opacityValue }) => {
+    if (opacityValue !== undefined) {
+      return `rgb(var(${variable}) / ${opacityValue})`;
+    }
+    return `rgb(var(${variable}))`;
+  };
+};
+
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
@@ -8,30 +17,48 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: "var(--brand)",
-        "brand-light": "var(--brand-light)",
-        "brand-dark": "var(--brand-dark)",
-        "brand-ink": "var(--brand-ink)",
-        background: "var(--background)",
-        surface: "var(--surface)",
-        "surface-alt": "var(--surface-alt)",
-        "surface-soft": "var(--surface-soft)",
-        border: "var(--border)",
-        "border-strong": "var(--border-strong)",
-        "text-primary": "var(--text-primary)",
-        "text-secondary": "var(--text-secondary)",
-        "text-muted": "var(--text-muted)",
-        "accent-green": "var(--accent-green)",
-        "accent-blue": "var(--accent-blue)",
-        "accent-purple": "var(--accent-purple)",
-        "accent-teal": "var(--accent-teal)",
-        "accent-amber": "var(--accent-amber)",
-        "accent-pink": "var(--accent-pink)",
-        "accent-cyan": "var(--accent-cyan)",
-        "accent-lime": "var(--accent-lime)",
-        "accent-indigo": "var(--accent-indigo)",
-        "accent-sky": "var(--accent-sky)",
-        "accent-red": "var(--accent-red)"
+        brand: {
+          DEFAULT: withOpacity("--color-brand-primary"),
+          primary: withOpacity("--color-brand-primary"),
+          gradient1: withOpacity("--color-brand-gradient1"),
+          gradient2: withOpacity("--color-brand-gradient2"),
+          light: withOpacity("--color-brand-light"),
+          dark: withOpacity("--color-brand-dark"),
+          ink: withOpacity("--color-brand-ink")
+        },
+        ui: {
+          background: withOpacity("--color-ui-background"),
+          surface: withOpacity("--color-ui-surface"),
+          "surface-alt": withOpacity("--color-ui-surface-alt"),
+          "surface-soft": withOpacity("--color-ui-surface-soft"),
+          border: withOpacity("--color-ui-border"),
+          "border-strong": withOpacity("--color-ui-border-strong"),
+          shadow: withOpacity("--color-ui-shadow"),
+          info: withOpacity("--color-ui-info"),
+          success: withOpacity("--color-ui-success"),
+          warning: withOpacity("--color-ui-warning"),
+          danger: withOpacity("--color-ui-danger"),
+          accent1: withOpacity("--color-ui-accent1"),
+          accent2: withOpacity("--color-ui-accent2"),
+          accent3: withOpacity("--color-ui-accent3")
+        },
+        text: {
+          primary: withOpacity("--color-text-primary"),
+          secondary: withOpacity("--color-text-secondary"),
+          muted: withOpacity("--color-text-muted")
+        },
+        border: withOpacity("--color-ui-border"),
+        background: withOpacity("--color-ui-background"),
+        surface: withOpacity("--color-ui-surface"),
+        "surface-alt": withOpacity("--color-ui-surface-alt"),
+        "surface-soft": withOpacity("--color-ui-surface-soft"),
+        "text-primary": withOpacity("--color-text-primary"),
+        "text-secondary": withOpacity("--color-text-secondary"),
+        "text-muted": withOpacity("--color-text-muted"),
+        "accent-green": withOpacity("--color-ui-success"),
+        "accent-blue": withOpacity("--color-ui-info"),
+        "accent-amber": withOpacity("--color-ui-warning"),
+        "accent-red": withOpacity("--color-ui-danger")
       },
       fontFamily: {
         sans: ["Inter", "SF Pro Display", ...fontFamily.sans]

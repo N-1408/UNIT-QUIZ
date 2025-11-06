@@ -34,7 +34,7 @@ export const AppShell = () => {
   const showHeader = location.pathname !== "/";
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-[#FAFAFA] text-text-primary transition-colors duration-soft ease-fluid dark:text-text-primary">
+    <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-ui-background text-text-primary transition-colors duration-soft ease-fluid">
       {showHeader ? (
         <Header title={info.title} subtitle={info.subtitle} showBack />
       ) : (

@@ -16,11 +16,20 @@ type TelegramInitData = {
   user?: TelegramUser;
 };
 
+type TelegramThemeParams = {
+  bg_color?: string;
+  text_color?: string;
+  hint_color?: string;
+  secondary_bg_color?: string;
+  button_color?: string;
+  button_text_color?: string;
+};
+
 type TelegramWebApp = {
   ready: () => void;
   expand: () => void;
   colorScheme: "light" | "dark";
-  themeParams?: Record<string, unknown>;
+  themeParams?: TelegramThemeParams;
   initDataUnsafe?: TelegramInitData;
   onEvent: (event: string, callback: () => void) => void;
   offEvent: (event: string, callback: () => void) => void;
@@ -53,15 +62,22 @@ export const initTelegramWebApp = () => {
   }
 };
 
-export const syncTelegramTheme = (
-  listener: (payload: { colorScheme: "light" | "dark" }) => void
-) => {
+export type TelegramThemePayload = {
+  colorScheme: "light" | "dark";
+  themeParams?: TelegramThemeParams;
+};
+
+export const syncTelegramTheme = (listener: (payload: TelegramThemePayload) => void) => {
   if (!webApp) {
-    listener({ colorScheme: "light" });
+    listener({ colorScheme: "light", themeParams: undefined });
     return () => undefined;
   }
 
-  const handler = () => listener({ colorScheme: webApp!.colorScheme ?? "light" });
+  const handler = () =>
+    listener({
+      colorScheme: webApp!.colorScheme ?? "light",
+      themeParams: webApp?.themeParams
+    });
   handler();
   webApp.onEvent("themeChanged", handler);
   return () => webApp?.offEvent("themeChanged", handler);

@@ -1,19 +1,19 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { PageContainer } from "@/components/layout/Page";
 import { triggerHaptic } from "@/lib/telegram";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuth";
 
 const emojis = {
-  wave: "👋",
-  coffee: "☕️",
-  rocket: "🚀",
-  flame: "🔥",
-  medal: "🏅",
-  bulb: "💡",
-  sparkle: "✨"
+  wave: "\u{1F44B}",
+  coffee: "\u{2615}\u{FE0F}",
+  rocket: "\u{1F680}",
+  flame: "\u{1F525}",
+  medal: "\u{1F3C5}",
+  bulb: "\u{1F4A1}",
+  sparkle: "\u{2728}"
 } as const;
 
 const containerVariants = {
@@ -67,43 +67,54 @@ const wordGameDeck = [
   }
 ] as const;
 
+const widgetPalette = [
+  {
+    title: "Faol kunlaringiz",
+    highlight: `${emojis.flame} 4 kun`,
+    description: "Ketma-ket harakat motivatsiyani yuqorida ushlab turadi.",
+    accent: "from-ui-accent2 via-[#FFE5CC] to-ui-accent2"
+  },
+  {
+    title: "Eng yuqori ball",
+    highlight: `${emojis.medal} 92%`,
+    description: "Listening Sprint natijangiz rekordni yangilashga tayyor.",
+    accent: "from-ui-accent1 via-[#E7F0FF] to-ui-accent1"
+  }
+] as const;
+
 export const HomePage = () => {
   const { session } = useAuthStore();
   const rawName =
     (session as { full_name?: string } | null)?.full_name ?? session?.fullName ?? "do'stimiz";
   const displayName = rawName.trim() || "do'stimiz";
 
-  const subtitleOptions = [
-    `Bugun sinovlarmi yoki choy ichamizmi? ${emojis.coffee}`,
-    `Yangi natijalarga tayyormisiz? ${emojis.rocket}`,
-    "Imtihonlar sizni sog'indi."
-  ];
-
-  const subtitle = subtitleOptions[displayName.length % subtitleOptions.length] ?? subtitleOptions[0];
-
-  const widgets = useMemo(
+  const subtitleOptions = useMemo(
     () => [
-      {
-        title: "Faol kunlaringiz",
-        highlight: `${emojis.flame} 4 kun`,
-        description: "Ketma-ket harakat motivatsiyani yuqorida ushlab turadi.",
-        accent: "from-[#FFF5ED] via-[#FFEBDD] to-[#FFE2D5]"
-      },
-      {
-        title: "Eng yuqori ball",
-        highlight: `${emojis.medal} 92%`,
-        description: "Listening Sprint natijangiz rekordni yangilashga tayyor.",
-        accent: "from-[#F3F6FF] via-[#E8EFFF] to-[#DDE7FF]"
-      }
+      `Bugun sinovlarmi yoki choy ichamizmi? ${emojis.coffee}`,
+      `Yangi natijalarga tayyormisiz? ${emojis.rocket}`,
+      "Imtihonlar sizni sog'indi."
     ],
     []
   );
+
+  const subtitle = subtitleOptions[displayName.length % subtitleOptions.length] ?? subtitleOptions[0];
 
   const [cardIndex, setCardIndex] = useState(0);
   const [selection, setSelection] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
 
   const currentCard = wordGameDeck[cardIndex % wordGameDeck.length];
+  const selectedOption = selection
+    ? currentCard.options.find((option) => option.label === selection)
+    : undefined;
+  const isCorrectSelection = Boolean(showFeedback && selectedOption?.correct);
+  const isWrongSelection = Boolean(showFeedback && selection && !selectedOption?.correct);
+
+  const feedbackCopy = isCorrectSelection
+    ? "Zo'r! Shunday ritm bilan tez orada yangi rekordlar sizniki bo'ladi."
+    : isWrongSelection
+      ? "Bu safar biroz chalkashdi. Yangi so'z yana imkoniyat beradi."
+      : "Tanlang va aniqligini tekshirib ko'ring.";
 
   const handleOptionClick = (label: string, correct: boolean) => {
     triggerHaptic(correct ? "light" : "medium");
@@ -127,7 +138,7 @@ export const HomePage = () => {
       >
         <motion.section
           variants={itemVariants}
-          className="rounded-[20px] bg-white/95 p-6 text-left shadow-[0_4px_12px_rgba(0,0,0,0.04)] backdrop-blur-sm"
+          className="rounded-[20px] bg-ui-surface/95 p-6 text-left shadow-[0_4px_12px_rgba(0,0,0,0.04)] backdrop-blur-sm"
         >
           <div className="flex flex-col gap-3">
             <h1 className="text-2xl font-semibold text-text-primary">
@@ -137,7 +148,7 @@ export const HomePage = () => {
             <Link
               to="/exams"
               onClick={() => triggerHaptic("light")}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand px-4 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(82,114,255,0.28)] transition duration-200 ease-out hover:bg-brand-dark active:scale-[0.97]"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-4 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(255,107,0,0.25)] transition duration-200 ease-out hover:brightness-105 active:scale-[0.97]"
             >
               <span className="text-[1.1em]">{emojis.rocket}</span>
               Boshlaymiz!
@@ -146,13 +157,13 @@ export const HomePage = () => {
         </motion.section>
 
         <motion.section variants={itemVariants} className="flex flex-col gap-4">
-          {widgets.map((widget, index) => (
+          {widgetPalette.map((widget, index) => (
             <motion.div
               key={widget.title}
               variants={itemVariants}
               transition={{ delay: index * 0.06 }}
               className={cn(
-                "rounded-[20px] border border-white/60 bg-gradient-to-br p-5 shadow-[0_4px_12px_rgba(0,0,0,0.04)]",
+                "rounded-[20px] border border-ui-border/70 bg-gradient-to-br p-5 shadow-[0_4px_12px_rgba(0,0,0,0.04)]",
                 widget.accent
               )}
             >
@@ -167,22 +178,22 @@ export const HomePage = () => {
 
         <motion.section
           variants={itemVariants}
-          className="flex items-start gap-3 rounded-[20px] bg-white/95 p-5 shadow-[0_4px_12px_rgba(0,0,0,0.04)] backdrop-blur-sm"
+          className="flex items-start gap-3 rounded-[20px] bg-ui-surface/95 p-5 shadow-[0_4px_12px_rgba(0,0,0,0.04)] backdrop-blur-sm"
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-light text-lg text-brand shadow-[0_4px_12px_rgba(82,114,255,0.18)]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-light text-lg text-brand-primary shadow-[0_4px_12px_rgba(255,107,0,0.22)]">
             {emojis.bulb}
           </span>
           <div className="flex flex-col gap-1.5">
             <h3 className="text-sm font-semibold text-text-primary">Bugungi ilhom</h3>
             <p className="text-sm text-text-secondary">
-              Qadam tashlang, qolganini biz birgalikda o‘rganamiz.
+              Qadam tashlang, qolganini biz birgalikda o'rganamiz.
             </p>
           </div>
         </motion.section>
 
         <motion.section
           variants={itemVariants}
-          className="flex flex-col gap-4 rounded-[20px] bg-white/95 p-5 shadow-[0_4px_12px_rgba(0,0,0,0.04)] backdrop-blur-sm"
+          className="flex flex-col gap-4 rounded-[20px] bg-ui-surface/95 p-5 shadow-[0_4px_12px_rgba(0,0,0,0.04)] backdrop-blur-sm"
         >
           <div className="flex items-center justify-between gap-2">
             <div>
@@ -191,61 +202,113 @@ export const HomePage = () => {
                 Word Spark
               </h3>
               <p className="text-xs text-text-secondary">
-                Mini o‘yin: yangi so‘zlarni sokin ritmda yodda saqlang.
+                Mini o'yin: yangi so'zlarni sokin ritmda yodda saqlang.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 rounded-[16px] bg-gradient-to-br from-[#FFF8F0] via-[#F6F8FF] to-[#EEF3FF] p-4">
-            <div className="flex items-center justify-between text-sm font-semibold text-text-primary">
-              <span>{currentCard.word}</span>
-              <span className="text-xs text-text-secondary">{currentCard.prompt}</span>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              {currentCard.options.map(({ label, correct }) => {
-                const isSelected = selection === label;
-                const isCorrect = showFeedback && correct;
-                const isWrong = showFeedback && isSelected && !correct;
-
-                return (
-                  <button
-                    key={label}
-                    type="button"
-                    onClick={() => handleOptionClick(label, correct)}
-                    className={cn(
-                      "flex items-center justify-between rounded-[14px] border border-transparent bg-white/90 px-4 py-2 text-sm transition duration-150 ease-in-out",
-                      "hover:bg-white hover:shadow-[0_4px_12px_rgba(82,114,255,0.12)]",
-                      isSelected && !showFeedback && "border-brand bg-brand-light/70 text-brand",
-                      isCorrect &&
-                        "border-green-500 bg-green-50 text-green-700 shadow-[0_8px_18px_rgba(34,197,94,0.18)]",
-                      isWrong &&
-                        "border-red-400 bg-red-50 text-red-600 shadow-[0_8px_18px_rgba(248,113,113,0.16)]"
-                    )}
-                  >
-                    <span>{label}</span>
-                    {isCorrect ? "✅" : isWrong ? "❌" : null}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="rounded-[14px] bg-white/70 px-3 py-2 text-xs text-text-secondary">
-              {showFeedback ? currentCard.tip : "Tanlang va aniqligini tekshirib ko‘ring."}
-            </div>
-
-            <button
-              type="button"
-              disabled={!showFeedback}
-              onClick={handleNextCard}
-              className="self-end rounded-full bg-brand px-4 py-2 text-xs font-semibold text-white shadow-[0_4px_12px_rgba(82,114,255,0.28)] transition duration-150 ease-in-out hover:bg-brand-dark disabled:opacity-40"
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentCard.word}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="flex flex-col gap-3 rounded-[16px] bg-gradient-to-br from-ui-accent2/60 via-[#F6F8FF] to-ui-accent1/70 p-4"
             >
-              Keyingi so‘z ➜
-            </button>
-          </div>
+              <div className="flex items-center justify-between text-sm font-semibold text-text-primary">
+                <span>{currentCard.word}</span>
+                <span className="text-xs text-text-secondary">{currentCard.prompt}</span>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {currentCard.options.map(({ label, correct }) => {
+                  const isSelected = selection === label;
+                  const isCorrect = showFeedback && correct;
+                  const isWrong = showFeedback && isSelected && !correct;
+
+                  return (
+                    <motion.button
+                      key={label}
+                      type="button"
+                      onClick={() => handleOptionClick(label, correct)}
+                      className={cn(
+                        "flex items-center justify-between rounded-[14px] border border-transparent bg-ui-surface px-4 py-2 text-sm transition duration-150 ease-in-out",
+                        isSelected && !showFeedback && "border-brand-primary/60 bg-brand-light/70 text-brand-primary",
+                        isCorrect &&
+                          "border-ui-success/70 bg-ui-success/10 text-ui-success shadow-[0_8px_18px_rgba(52,199,89,0.18)]",
+                        isWrong &&
+                          "border-ui-danger/60 bg-ui-danger/10 text-ui-danger shadow-[0_8px_18px_rgba(255,59,48,0.16)]"
+                      )}
+                      whileHover={{ scale: 1.04 }}
+                      whileTap={{ scale: 0.97 }}
+                      transition={{ type: "spring", stiffness: 420, damping: 30 }}
+                    >
+                      <span>{label}</span>
+                      <AnimatePresence mode="wait">
+                        {isCorrect ? (
+                          <motion.span
+                            key="correct"
+                            initial={{ scale: 0.6, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.6, opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 24 }}
+                            className="ml-2"
+                          >
+                            ✅
+                          </motion.span>
+                        ) : null}
+                        {isWrong ? (
+                          <motion.span
+                            key="wrong"
+                            initial={{ scale: 0.6, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.6, opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 24 }}
+                            className="ml-2"
+                          >
+                            ❌
+                          </motion.span>
+                        ) : null}
+                      </AnimatePresence>
+                    </motion.button>
+                  );
+                })}
+              </div>
+
+              <div className="rounded-[14px] bg-ui-surface/70 px-3 py-2 text-xs text-text-secondary">
+                {showFeedback ? currentCard.tip : "Tanlang va aniqligini tekshirib ko'ring."}
+              </div>
+
+              <motion.span
+                key={feedbackCopy}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className={cn(
+                  "text-xs font-medium",
+                  isCorrectSelection ? "text-ui-success" : isWrongSelection ? "text-ui-danger" : "text-text-secondary"
+                )}
+              >
+                {feedbackCopy}
+              </motion.span>
+
+              <button
+                type="button"
+                disabled={!showFeedback}
+                onClick={handleNextCard}
+                className={cn(
+                  "self-end rounded-full bg-gradient-to-r from-brand-gradient1 to-brand-gradient2 px-4 py-2 text-xs font-semibold text-brand-ink shadow-[0_4px_12px_rgba(255,138,0,0.28)] transition duration-150 ease-in-out",
+                  "enabled:hover:brightness-110 enabled:active:scale-[0.98] disabled:opacity-40"
+                )}
+              >
+                Keyingi so'z \u279C
+              </button>
+            </motion.div>
+          </AnimatePresence>
         </motion.section>
       </motion.div>
     </PageContainer>
   );
 };
-

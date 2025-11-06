@@ -1,6 +1,7 @@
 ﻿import { useTranslation } from "react-i18next";
 import { ResultCard } from "@/components/results/ResultCard";
 import { ResultTable } from "@/components/results/ResultTable";
+import { PageContainer } from "@/components/layout/Page";
 
 const MOCK_ROWS = [
   { id: 1, title: "Listening Sprint", score: 87, attempts: 1, takenAt: new Date() },
@@ -11,7 +12,7 @@ export const ResultsPage = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col gap-5">
+    <PageContainer className="gap-5">
       <div className="flex flex-col gap-1">
         <h2 className="text-base font-semibold text-text-primary">
           {t("results.title", { defaultValue: "Ko'rib chiqing, bu sizning yutuq tarixi. \uD83C\uDFC6" })}
@@ -29,6 +30,6 @@ export const ResultsPage = () => {
       </div>
 
       <ResultTable rows={MOCK_ROWS} />
-    </div>
+    </PageContainer>
   );
 };
