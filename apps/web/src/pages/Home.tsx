@@ -87,13 +87,15 @@ export const HomePage = () => {
     () => [
       {
         title: "📅 Faol kunlaringiz",
-        description: `${emojis.flame} 4 kun ketma-ket faolsiz!`,
-        gradient: "from-[#fff4ec] via-[#ffe7d7] to-[#ffd9bf]"
+        highlight: `${emojis.flame} 4 kun`,
+        description: "Ketma-ket faollik bilan motivatsiyani ushlab turing.",
+        accent: "bg-gradient-to-r from-[#fff4ec] to-[#ffe0c9]"
       },
       {
         title: "🏅 Eng yuqori ball",
-        description: `${emojis.medal} 92% Listening Sprint`,
-        gradient: "from-[#f4f6ff] via-[#edf1ff] to-[#e5eaff]"
+        highlight: `${emojis.medal} 92%`,
+        description: "Listening Sprint natijangizga yangi rekord qo‘shing.",
+        accent: "bg-gradient-to-r from-[#f2f5ff] to-[#e9f0ff]"
       }
     ],
     []
@@ -141,32 +143,31 @@ export const HomePage = () => {
         </div>
       </motion.section>
 
-      <motion.section variants={itemVariants} className="grid grid-cols-2 gap-3">
-        {widgets.map((widget, index) => (
-          <motion.div
-            key={widget.title}
-            variants={itemVariants}
-            transition={{ delay: index * 0.08 }}
-          >
-            <div
-              className={`rounded-[18px] bg-gradient-to-br ${widget.gradient} p-[1px] shadow-elev-sm`}
+      <motion.section variants={itemVariants} className="flex flex-col gap-3">
+        <span className="text-xs font-semibold uppercase tracking-[0.08em] text-text-secondary">
+          Bugungi ko‘rsatkichlar
+        </span>
+        <div className="grid grid-cols-2 gap-3">
+          {widgets.map((widget, index) => (
+            <motion.div
+              key={widget.title}
+              variants={itemVariants}
+              transition={{ delay: index * 0.08 }}
+              className={cn("flex h-full flex-col gap-3 rounded-[18px] p-4 shadow-elev-sm", widget.accent)}
             >
-              <div className="flex h-full flex-col gap-2 rounded-[17px] bg-white/92 p-4">
-                <h3 className="text-sm font-semibold text-text-primary/90">
-                  {widget.title}
-                </h3>
-                <p className="text-sm text-text-secondary/90">
-                  {widget.description}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+              <h3 className="text-sm font-semibold text-text-primary/90">
+                {widget.title}
+              </h3>
+              <span className="text-lg font-semibold text-text-primary">{widget.highlight}</span>
+              <p className="text-xs text-text-secondary/90">{widget.description}</p>
+            </motion.div>
+          ))}
+        </div>
       </motion.section>
 
       <motion.section
         variants={itemVariants}
-        className="flex items-start gap-3 rounded-[20px] border border-border bg-surface p-5 shadow-elev-sm"
+        className="flex items-start gap-3 rounded-[20px] bg-white p-5 shadow-elev-sm"
       >
         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-light text-brand">
           {emojis.bulb}
@@ -181,7 +182,7 @@ export const HomePage = () => {
 
       <motion.section
         variants={itemVariants}
-        className="flex flex-col gap-4 rounded-[22px] border border-border bg-surface p-5 shadow-elev-sm"
+        className="flex flex-col gap-4 rounded-[22px] bg-white p-5 shadow-elev-sm"
       >
         <div className="flex items-center justify-between gap-2">
           <div>
@@ -194,7 +195,7 @@ export const HomePage = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-[18px] bg-background/80 p-4">
+        <div className="flex flex-col gap-3 rounded-[18px] bg-gradient-to-br from-[#fff7ef] to-[#f6fbff] p-4">
           <div className="flex items-center justify-between text-sm font-semibold text-text-primary">
             <span>{currentCard.word}</span>
             <span className="text-xs text-text-secondary">{currentCard.prompt}</span>
