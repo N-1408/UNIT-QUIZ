@@ -35,8 +35,7 @@ export const BackButton = ({ fallbackPath = "/", className }: BackButtonProps) =
       aria-label="Orqaga"
       onClick={handleBack}
       className={cn(
-        "flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-slate-100 shadow-md backdrop-blur-xl transition duration-soft ease-fluid hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:border-white/5",
-        "md:hover:-translate-x-0.5 md:hover:shadow-md",
+        "flex h-11 w-11 items-center justify-center rounded-full border border-stroke/60 bg-surface text-text-secondary shadow-elev-sm transition duration-swift ease-fluid hover:-translate-x-0.5 hover:bg-surface-alt hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-light focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-95",
         className
       )}
     >

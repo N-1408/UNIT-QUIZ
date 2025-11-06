@@ -13,7 +13,7 @@ export const ExamDetailPage = () => {
   const startsAt = useMemo(() => new Date(Date.now() + 1000 * 60 * 15), []);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <ExamDetailHeader
         title={`Imtihon #${examId ?? "???"}`}
         durationMinutes={45}
@@ -23,13 +23,13 @@ export const ExamDetailPage = () => {
         status="upcoming"
       />
 
-      <section className="rounded-3xl bg-card/80 p-6 shadow-sm ring-1 ring-stroke">
-        <h2 className="text-lg font-semibold text-slate-100">Qoidalar</h2>
-        <ul className="mt-4 space-y-3 text-sm text-muted">
+      <section className="rounded-[28px] border border-stroke/70 bg-surface shadow-elev-sm p-6">
+        <h2 className="text-lg font-semibold text-text-primary">Qoidalar</h2>
+        <ul className="mt-4 space-y-3 text-sm text-text-secondary">
           {RULES.map((rule) => (
-            <li key={rule} className="flex items-start gap-2">
-              <span className="mt-1 text-brand">-</span>
-              <span className="leading-relaxed">{rule}</span>
+            <li key={rule} className="flex items-start gap-3 leading-relaxed">
+              <span className="mt-1 text-brand">•</span>
+              <span>{rule}</span>
             </li>
           ))}
         </ul>
@@ -38,13 +38,13 @@ export const ExamDetailPage = () => {
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
-          className="rounded-full bg-gradient-to-br from-brand to-[#ff7b33] px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/30 transition duration-soft ease-fluid hover:shadow-brand/40"
+          className="rounded-full bg-brand px-7 py-3 text-sm font-semibold text-brand-ink shadow-elev-sm transition duration-swift ease-fluid hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-light focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:scale-95"
         >
           Boshlash
         </button>
         <button
           type="button"
-          className="rounded-full border border-white/10 px-6 py-3 text-sm font-medium text-slate-200 shadow-sm backdrop-blur transition duration-soft ease-fluid hover:border-brand/40 hover:text-slate-100"
+          className="rounded-full border border-stroke/70 px-6 py-3 text-sm font-medium text-text-secondary transition duration-swift ease-fluid hover:border-brand/30 hover:text-text-primary active:scale-95"
         >
           Savollar bilan tanishish
         </button>

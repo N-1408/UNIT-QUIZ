@@ -33,7 +33,7 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <Suspense fallback={<div className="p-6 text-sm text-muted">Yuklanmoqda...</div>}>
+      <Suspense fallback={<div className="p-6 text-sm text-text-secondary">Yuklanmoqda...</div>}>
         {children}
       </Suspense>
     </I18nextProvider>

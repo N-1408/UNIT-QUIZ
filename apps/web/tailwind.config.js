@@ -9,19 +9,35 @@ export default {
     extend: {
       colors: {
         brand: "var(--brand)",
+        "brand-hover": "var(--brand-hover)",
+        "brand-light": "var(--brand-light)",
         "brand-ink": "var(--brand-ink)",
+        background: "var(--background)",
         surface: "var(--surface)",
-        "surface-2": "var(--surface-2)",
-        card: "var(--card)",
+        "surface-alt": "var(--surface-alt)",
         stroke: "var(--stroke)",
+        "text-primary": "var(--text-primary)",
+        "text-secondary": "var(--text-secondary)",
+        "text-muted": "var(--text-muted)",
         ok: "var(--ok)",
         warn: "var(--warn)",
         danger: "var(--danger)",
-        muted: "var(--muted)"
+        info: "var(--info)",
+        "accent-blue": "var(--accent-blue)",
+        "accent-purple": "var(--accent-purple)",
+        "accent-teal": "var(--accent-teal)",
+        "accent-pink": "var(--accent-pink)",
+        "accent-cyan": "var(--accent-cyan)",
+        "accent-lime": "var(--accent-lime)",
+        "accent-gray": "var(--accent-gray)",
+        "accent-gold": "var(--accent-gold)",
+        "accent-sky": "var(--accent-sky)"
       },
       backgroundImage: {
-        "mesh-primary":
-          "radial-gradient(120% 120% at 0% 0%, rgba(255,95,0,0.35) 0%, transparent 55%), radial-gradient(80% 120% at 100% 0%, rgba(14,165,233,0.45) 0%, transparent 60%), radial-gradient(90% 120% at 50% 100%, rgba(96,165,250,0.4) 0%, transparent 65%)"
+        "mesh-brand": "var(--mesh-brand)",
+        "mesh-soft": "var(--mesh-soft)",
+        "mesh-blue": "var(--mesh-blue)",
+        "mesh-orange": "var(--mesh-orange)"
       },
       fontFamily: {
         sans: ["Inter", "SF Pro Display", ...fontFamily.sans]
@@ -29,19 +45,16 @@ export default {
       borderRadius: {
         xl: "var(--radius-xl)",
         "2xl": "var(--radius-2xl)",
-        "3xl": "calc(var(--radius-2xl) + 4px)"
+        "3xl": "var(--radius-3xl)"
       },
       boxShadow: {
-        sm: "0 8px 20px rgba(15, 17, 21, 0.10)",
-        md: "0 16px 40px rgba(15, 17, 21, 0.18)",
-        lg: "0 24px 60px rgba(15, 17, 21, 0.25)",
-        glass: "0 18px 42px rgba(14, 22, 34, 0.22)"
-      },
-      dropShadow: {
-        glow: ["0 8px 18px rgba(255, 95, 0, 0.25)", "0 12px 32px rgba(34, 211, 238, 0.15)"]
+        "elev-sm": "var(--shadow-sm)",
+        "elev-md": "var(--shadow-md)",
+        "elev-lg": "var(--shadow-lg)"
       },
       transitionDuration: {
-        soft: "300ms"
+        swift: "150ms",
+        soft: "220ms"
       },
       transitionTimingFunction: {
         fluid: "cubic-bezier(0.4, 0, 0.2, 1)"

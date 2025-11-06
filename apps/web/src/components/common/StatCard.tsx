@@ -12,15 +12,19 @@ type StatCardProps = {
 export const StatCard = ({ label, value, hint, icon, className }: StatCardProps) => (
   <article
     className={cn(
-      "flex flex-col gap-3 rounded-3xl border border-white/10 bg-white/10 p-5 shadow-lg shadow-black/20 backdrop-blur-xl transition duration-soft ease-fluid hover:-translate-y-0.5 hover:shadow-black/30 dark:border-white/5",
+      "group flex flex-col gap-4 rounded-[28px] border border-stroke/70 bg-surface p-5 shadow-elev-sm transition duration-swift ease-fluid hover:-translate-y-0.5 hover:shadow-elev-md",
       className
     )}
   >
-    <div className="flex items-center justify-between gap-3 text-sm text-muted">
+    <div className="flex items-center justify-between gap-3 text-sm font-medium text-text-secondary">
       <span>{label}</span>
-      {icon}
+      {icon ? (
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-light text-lg shadow-elev-sm">
+          {icon}
+        </span>
+      ) : null}
     </div>
-    <div className="text-3xl font-semibold tracking-tight text-slate-50">{value}</div>
-    {hint ? <p className="text-xs text-muted">{hint}</p> : null}
+    <div className="text-3xl font-semibold tracking-tight text-text-primary">{value}</div>
+    {hint ? <p className="text-xs text-text-secondary">{hint}</p> : null}
   </article>
 );

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { BackButton } from "@/components/common/BackButton";
 import { cn } from "@/lib/utils";
 
@@ -10,24 +10,45 @@ type HeaderProps = {
   className?: string;
 };
 
-export const Header = ({ title, subtitle, actions, showBack = true, className }: HeaderProps) => (
-  <header
-    className={cn(
-      "sticky top-0 z-40 px-4 pb-4 pt-[calc(env(safe-area-inset-top)+1.25rem)] md:px-6 lg:px-10",
-      className
-    )}
-  >
-    <div className="relative flex flex-col gap-4 rounded-3xl border border-white/10 bg-surface/40 p-4 shadow-glass backdrop-blur-xl before:absolute before:inset-0 before:-z-10 before:rounded-3xl before:bg-gradient-to-br before:from-white/12 before:to-white/4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          {showBack ? <BackButton /> : null}
-          <div className="flex flex-col">
-            <span className="text-xl font-semibold tracking-tight text-slate-100">{title}</span>
-            {subtitle ? <span className="text-sm text-muted">{subtitle}</span> : null}
+export const Header = ({ title, subtitle, actions, showBack = true, className }: HeaderProps) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 6);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <header
+      className={cn(
+        "sticky top-0 z-40 px-4 pb-4 pt-[calc(env(safe-area-inset-top)+1rem)] transition duration-swift ease-fluid md:px-6 lg:px-12",
+        isScrolled && "backdrop-blur-md",
+        className
+      )}
+    >
+      <div
+        className={cn(
+          "flex flex-col gap-4 rounded-[26px] px-4 py-4 transition duration-swift ease-fluid",
+          isScrolled
+            ? "border border-stroke/70 bg-surface/90 shadow-elev-sm"
+            : "border border-transparent"
+        )}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            {showBack ? <BackButton /> : null}
+            <div className="flex flex-col">
+              <span className="text-xl font-semibold leading-tight text-text-primary">{title}</span>
+              {subtitle ? (
+                <span className="text-sm text-text-secondary">{subtitle}</span>
+              ) : null}
+            </div>
           </div>
+          {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
         </div>
-        {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
       </div>
-    </div>
-  </header>
-);
+    </header>
+  );
+};

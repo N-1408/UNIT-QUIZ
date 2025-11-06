@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ExamList } from "@/components/exams/ExamList";
 import type { ExamSummary } from "@/components/exams/ExamCard";
 import { cn } from "@/lib/utils";
@@ -32,11 +33,23 @@ const FILTERS = [
 ] as const;
 
 export const ExamsPage = () => {
+  const { t } = useTranslation();
   const [activeFilter, setActiveFilter] =
     useState<(typeof FILTERS)[number]["id"]>("open");
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-lg font-semibold text-text-primary">
+          {t("exams.title", { defaultValue: "Imtihonlar ro‘yxati" })}
+        </h2>
+        <p className="text-sm text-text-secondary">
+          {t("exams.subtitle", {
+            defaultValue: "Kayfiyatga mosini tanlang, start uchun hammasi tayyor."
+          })}
+        </p>
+      </div>
+
       <div className="flex gap-2 overflow-x-auto pb-1">
         {FILTERS.map((filter) => {
           const isActive = filter.id === activeFilter;
@@ -46,10 +59,10 @@ export const ExamsPage = () => {
               type="button"
               onClick={() => setActiveFilter(filter.id)}
               className={cn(
-                "rounded-full px-4 py-2 text-sm font-medium transition duration-soft ease-fluid",
+                "whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition duration-swift ease-fluid",
                 isActive
-                  ? "bg-gradient-to-r from-brand to-[#ff7b33] text-white shadow-lg shadow-brand/30"
-                  : "border border-white/10 bg-white/10 text-muted backdrop-blur hover:border-brand/40 hover:text-slate-100"
+                  ? "border-brand/50 bg-brand text-brand-ink shadow-elev-sm"
+                  : "border-stroke/60 bg-surface-alt text-text-secondary hover:border-brand/30 hover:text-text-primary"
               )}
             >
               {filter.label}

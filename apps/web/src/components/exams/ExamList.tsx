@@ -8,20 +8,20 @@ type ExamListProps = {
 
 export const ExamList = ({
   items,
-  emptyMessage = "Hali rejada imtihon yo'q. Ammo bu vaqtni dam olishga sarflab qo'ying ??"
+  emptyMessage = "Hali rejada imtihon yo‘q, lekin siz baribir zo‘rsiz 😎"
 }: ExamListProps) => {
   if (!items.length) {
     return (
       <EmptyState
         title={emptyMessage}
-        description="Qahva tayyorlab, o'zingizni rag'batlantirib turing. Yangi testlar yaqin!"
-        icon="???"
+        description="Qahva tayyorlab qo‘ying, tez orada yangi sinovlar keladi."
+        icon="📬"
       />
     );
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
       {items.map((exam) => (
         <ExamCard key={exam.id} exam={exam} />
       ))}
