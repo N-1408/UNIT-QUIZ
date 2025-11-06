@@ -1,10 +1,21 @@
 ﻿import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
 import { StatCard } from "@/components/common/StatCard";
-import { ExamList } from "@/components/exams/ExamList";
-import type { ExamSummary } from "@/components/exams/ExamCard";
+import { ExamCard, type ExamSummary } from "@/components/exams/ExamCard";
 import { useAuthStore } from "@/store/useAuth";
+
+const emoji = {
+  wave: String.fromCodePoint(0x1f44b),
+  coffee: String.fromCodePoint(0x2615, 0xfe0f),
+  rocket: String.fromCodePoint(0x1f680),
+  medal: String.fromCodePoint(0x1f3c5),
+  memo: String.fromCodePoint(0x1f4dd),
+  book: String.fromCodePoint(0x1f4da),
+  wink: String.fromCodePoint(0x1f609)
+};
+
+const arrowRight = String.fromCharCode(0x2192);
 
 const MOCK_EXAMS: ExamSummary[] = [
   {
@@ -20,63 +31,144 @@ const MOCK_EXAMS: ExamSummary[] = [
     startsAt: null,
     durationMinutes: 60,
     status: "open"
+  },
+  {
+    id: 3,
+    title: "Grammar Clinic",
+    startsAt: null,
+    durationMinutes: 35,
+    status: "open"
   }
 ];
 
+const pageVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: "easeOut", staggerChildren: 0.12 }
+  }
+};
+
+const blockVariants = {
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.28, ease: "easeOut" } }
+};
+
 export const HomePage = () => {
-  const { t } = useTranslation();
   const session = useAuthStore((state) => state.session);
-  const rawName = session?.fullName?.split(" ")[0] ?? "do'stimiz";
-  const name = rawName || "do'stimiz";
+  const displayName = session?.fullName?.trim() || "do'stimiz";
 
-  const greeting = t("home.greet", {
-    name,
-    defaultValue: `Salom, ${name}! \uD83D\uDC4B`
-  });
+  const subtitleOptions = [
+    `Bugun o'zingizni sinovdan o'tkazamizmi yoki choy ichamizmi? ${emoji.coffee}`,
+    `Yangi natijalarga tayyormisiz? ${emoji.rocket}`,
+    "Imtihonlar sizni sog'indi."
+  ];
+  const subtitle =
+    subtitleOptions[displayName.length % subtitleOptions.length] ??
+    subtitleOptions[0];
 
-  const subtitle = t("home.subtitle", {
-    defaultValue: "Bugun o'zingizni sinab ko'rasizmi yoki choy ichamizmi? \u2615\uFE0F"
-  });
+  const latestScore = "87%";
+  const openExams = useMemo(
+    () => MOCK_EXAMS.filter((exam) => exam.status === "open").slice(0, 2),
+    []
+  );
+  const lastExamTitle = openExams[0]?.title ?? "Hali yo'q";
 
   const stats = useMemo(
     () => [
-      { label: "Bugun OPEN", value: "2 ta", hint: "Ikki sinov ochiq turibdi.", icon: "\u23F0" },
-      { label: "Natijalar", value: "87%", hint: "Oxirgi yutuq darajasi.", icon: "\u2728" },
-      { label: "Kayfiyat", value: "Yuqori", hint: "Telegram ham shunday deydi.", icon: "\uD83C\uDF1F" }
+      {
+        label: "So'nggi natijangiz",
+        value: latestScore,
+        hint: "Oxirgi yutuq darajasi.",
+        icon: emoji.medal
+      },
+      {
+        label: "Oxirgi imtihon",
+        value: lastExamTitle,
+        hint: "Eng so'nggi urinish.",
+        icon: emoji.memo
+      }
     ],
-    []
+    [latestScore, lastExamTitle]
   );
 
   return (
-    <div className="flex flex-col gap-5">
-      <section className="rounded-[24px] border border-border bg-surface/95 p-4 shadow-elev-sm">
+    <motion.div
+      className="flex flex-col gap-6 pb-24"
+      variants={pageVariants}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.section
+        variants={blockVariants}
+        className="rounded-[24px] border border-border bg-surface/95 p-5 shadow-elev-sm"
+      >
         <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between text-xs uppercase tracking-wide text-text-secondary">
-            <span>Bosh sahifa</span>
-          </div>
-          <h1 className="text-xl font-semibold text-text-primary">{greeting}</h1>
+          <h1 className="text-2xl font-semibold text-text-primary">
+            {`Salom, ${displayName}! ${emoji.wave}`}
+          </h1>
           <p className="text-sm text-text-secondary">{subtitle}</p>
           <Link
             to="/exams"
-            className="inline-flex w-fit items-center gap-2 rounded-full border border-brand/20 bg-brand px-4 py-2 text-xs font-semibold text-brand-ink shadow-elev-sm transition duration-swift ease-fluid hover:bg-brand-dark active:scale-[0.97]"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand px-4 py-3 text-sm font-semibold text-brand-ink shadow-elev-sm transition duration-swift ease-fluid hover:bg-brand-dark active:scale-[0.98]"
           >
-            \uD83D\uDE80 Keling, sinovdan o'tamiz!
+            {emoji.rocket} Keling, boshlaymiz!
           </Link>
         </div>
-      </section>
+      </motion.section>
 
-      <section className="grid grid-cols-3 gap-2 sm:gap-3">
-        {stats.map((stat) => (
-          <StatCard key={stat.label} label={stat.label} value={stat.value} hint={stat.hint} icon={stat.icon} />
+      <motion.section variants={blockVariants} className="grid grid-cols-2 gap-3">
+        {stats.map((stat, index) => (
+          <motion.div
+            key={stat.label}
+            variants={blockVariants}
+            transition={{ delay: index * 0.08 }}
+          >
+            <StatCard
+              label={stat.label}
+              value={stat.value}
+              hint={stat.hint}
+              icon={stat.icon}
+            />
+          </motion.div>
         ))}
-      </section>
+      </motion.section>
 
-      <section className="flex flex-col gap-3">
-        <div className="flex items-center justify-between text-sm text-text-secondary">
-          <span>{t("home.examsHint", { defaultValue: "Kayfiyatga qarab tanlang, hammasi tayyor." })}</span>
+      <motion.section variants={blockVariants} className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-base font-semibold text-text-primary">
+            {`${emoji.book} Siz uchun ochiq testlar`}
+          </h2>
+          <Link
+            to="/exams"
+            className="text-sm font-semibold text-brand transition duration-swift ease-fluid hover:text-brand-dark"
+          >
+            {`Barchasini ko'rish ${arrowRight}`}
+          </Link>
         </div>
-        <ExamList items={MOCK_EXAMS} />
-      </section>
-    </div>
+
+        {openExams.length ? (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {openExams.map((exam, index) => (
+              <motion.div
+                key={exam.id}
+                variants={blockVariants}
+                transition={{ delay: index * 0.1 }}
+              >
+                <ExamCard exam={exam} className="min-w-[160px]" />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            variants={blockVariants}
+            className="rounded-[20px] border border-border bg-surface/90 px-4 py-6 text-sm text-text-secondary shadow-elev-sm"
+          >
+            {`Hozircha imtihon yo'q, lekin tez orada bo'ladi ${emoji.wink}`}
+          </motion.div>
+        )}
+      </motion.section>
+    </motion.div>
   );
 };
