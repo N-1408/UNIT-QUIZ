@@ -1,8 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Outlet, useLocation } from "react-router-dom";
-import { Header } from "@/components/layout/Header";
-import { Page } from "@/components/layout/Page";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { Header } from "@/components/layout/Header";
 
 const TITLES: Record<string, { title: string; subtitle?: string }> = {
   "/": {
@@ -35,7 +34,7 @@ export const AppShell = () => {
   const showHeader = location.pathname !== "/";
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-gradient-to-b from-surface-soft via-background to-background text-text-primary transition-colors duration-soft ease-fluid dark:text-text-primary">
+    <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-[#FAFAFA] text-text-primary transition-colors duration-soft ease-fluid dark:text-text-primary">
       {showHeader ? (
         <Header title={info.title} subtitle={info.subtitle} showBack />
       ) : (
@@ -49,11 +48,9 @@ export const AppShell = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -18 }}
           transition={{ duration: 0.15, ease: "easeInOut" }}
-          className="flex flex-1"
+          className="flex flex-1 justify-center"
         >
-          <Page>
-            <Outlet />
-          </Page>
+          <Outlet />
         </motion.div>
       </AnimatePresence>
       <BottomNav />

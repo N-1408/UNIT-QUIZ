@@ -1,15 +1,16 @@
-import { cn } from "@/lib/utils";
 import type { PropsWithChildren } from "react";
+import { cn } from "@/lib/utils";
 
-type PageProps = PropsWithChildren<{
+type PageContainerProps = PropsWithChildren<{
   className?: string;
 }>;
 
-export const Page = ({ className, children }: PageProps) => (
+export const PageContainer = ({ className, children }: PageContainerProps) => (
   <main
     className={cn(
-      "safe-area relative mx-auto flex w-full max-w-[1040px] flex-1 flex-col gap-5 px-5 pb-[calc(env(safe-area-inset-bottom)+6rem)] pt-4 sm:px-6 lg:gap-8 lg:px-12 lg:pb-14",
-      "md:rounded-[28px] md:border md:border-border md:bg-surface md:shadow-elev-md",
+      "relative mx-auto flex w-full max-w-[480px] flex-1 flex-col gap-6",
+      "px-[clamp(16px,4vw,28px)] py-[clamp(12px,2vh,24px)]",
+      "pb-[calc(env(safe-area-inset-bottom)+110px)]",
       className
     )}
   >
