@@ -13,8 +13,8 @@ const NAV_ITEMS = [
 
 export const BottomNav = () => (
   <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-50 md:hidden">
-    <div className="pointer-events-auto mx-auto w-full max-w-sm px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-2">
-      <div className="flex h-14 w-full items-center justify-between rounded-full border border-border bg-surface shadow-elev-md px-2">
+    <div className="pointer-events-auto mx-auto w-full max-w-sm px-5 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-2">
+      <div className="flex h-14 w-full items-center justify-between rounded-full border border-border bg-surface/90 px-2 shadow-elev-md backdrop-blur-lg">
         {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
@@ -26,11 +26,12 @@ export const BottomNav = () => (
               <motion.div
                 layout
                 className={cn(
-                  "flex h-10 items-center justify-center gap-2 rounded-full px-3 text-xs font-medium transition duration-swift ease-fluid",
+                  "flex h-10 items-center justify-center gap-2 rounded-full px-3 text-xs font-medium transition duration-200 ease-in-out",
                   isActive ? "bg-brand-light text-brand shadow-elev-sm" : "text-text-secondary"
                 )}
-                animate={{ scale: isActive ? 1 : 0.96 }}
-                transition={{ duration: 0.15, ease: "easeInOut" }}
+                animate={{ scale: isActive ? 1.05 : 1 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                whileTap={{ scale: 0.95 }}
               >
                 <Icon
                   className={cn(
