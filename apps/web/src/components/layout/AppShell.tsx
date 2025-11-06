@@ -32,9 +32,15 @@ export const AppShell = () => {
       subtitle: "Nova LC imtihon ekotizimi"
     } as const);
 
+  const showHeader = location.pathname !== "/";
+
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-gradient-to-b from-surface-soft via-background to-background text-text-primary transition-colors duration-soft ease-fluid dark:text-text-primary">
-      <Header title={info.title} subtitle={info.subtitle} showBack={location.pathname !== "/"} />
+      {showHeader ? (
+        <Header title={info.title} subtitle={info.subtitle} showBack />
+      ) : (
+        <div className="h-[env(safe-area-inset-top)]" />
+      )}
 
       <AnimatePresence mode="wait" initial={false}>
         <motion.div

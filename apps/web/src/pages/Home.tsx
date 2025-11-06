@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import { useAuthStore } from "@/store/useAuth";
 
 const emojis = {
-  wave: String.fromCodePoint(0x1f44b),
-  coffee: String.fromCodePoint(0x2615, 0xfe0f),
-  rocket: String.fromCodePoint(0x1f680),
+  wave: "👋",
+  coffee: "☕️",
+  rocket: "🚀",
   flame: "🔥",
   medal: "🏅",
   bulb: "💡",
@@ -32,7 +32,11 @@ const itemVariants = {
 
 export const HomePage = () => {
   const session = useAuthStore((state) => state.session);
-  const displayName = session?.fullName?.trim() || "do'stimiz";
+  const rawName =
+    (session as { full_name?: string } | null)?.full_name ??
+    session?.fullName ??
+    "do'stimiz";
+  const displayName = rawName.trim() || "do'stimiz";
 
   const subtitleOptions = [
     `Bugun sinovlarmi yoki choy ichamizmi? ${emojis.coffee}`,
@@ -84,7 +88,7 @@ export const HomePage = () => {
             to="/exams"
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand px-4 py-3 text-sm font-semibold text-white shadow-elev-md transition duration-200 ease-in-out hover:bg-brand-dark active:scale-[0.97]"
           >
-            🚀 Boshlaymiz!
+            {`${emojis.rocket} Boshlaymiz!`}
           </Link>
         </div>
       </motion.section>
