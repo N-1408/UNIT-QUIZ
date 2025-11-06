@@ -5,11 +5,23 @@ type TelegramBackButton = {
   offClick: (callback: () => void) => void;
 };
 
+type TelegramUser = {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+};
+
+type TelegramInitData = {
+  user?: TelegramUser;
+};
+
 type TelegramWebApp = {
   ready: () => void;
   expand: () => void;
   colorScheme: "light" | "dark";
   themeParams?: Record<string, unknown>;
+  initDataUnsafe?: TelegramInitData;
   onEvent: (event: string, callback: () => void) => void;
   offEvent: (event: string, callback: () => void) => void;
   BackButton: TelegramBackButton;
@@ -72,4 +84,12 @@ export const triggerHaptic = (type: "light" | "medium" | "heavy" = "light") => {
   } catch (error) {
     console.warn("Telegram haptic unavailable", error);
   }
+};
+
+export const getTelegramUser = (): TelegramUser | null => {
+  if (!webApp) {
+    const unsafe = window.Telegram?.WebApp?.initDataUnsafe;
+    return unsafe?.user ?? null;
+  }
+  return webApp.initDataUnsafe?.user ?? null;
 };
