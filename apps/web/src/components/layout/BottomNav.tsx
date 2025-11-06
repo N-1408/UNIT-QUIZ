@@ -18,8 +18,8 @@ const pillVariants = {
 
 export const BottomNav = () => (
   <nav className="fixed inset-x-0 bottom-0 z-50 md:hidden">
-    <div className="mx-auto w-full max-w-sm px-5 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-2">
-      <div className="flex h-14 w-full items-center justify-between rounded-full border border-border bg-white/95 px-3 shadow-elev-md backdrop-blur-xl">
+    <div className="mx-auto w-full max-w-[360px] px-5 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-2">
+      <div className="flex h-14 w-full items-center justify-between rounded-full border border-border/80 bg-white/95 px-3 shadow-elev-md backdrop-blur-xl">
         {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}

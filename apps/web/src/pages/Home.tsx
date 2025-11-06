@@ -120,14 +120,14 @@ export const HomePage = () => {
 
   return (
     <motion.div
-      className="flex flex-col gap-6 pb-[80px]"
+      className="mx-auto flex w-full max-w-[380px] flex-col gap-6 pb-[92px]"
       variants={containerVariants}
       initial="hidden"
       animate="show"
     >
       <motion.section
         variants={itemVariants}
-        className="rounded-[24px] bg-surface p-5 text-left shadow-elev-sm"
+        className="rounded-[26px] bg-white p-5 text-left shadow-elev-sm"
       >
         <div className="flex flex-col gap-3">
           <h1 className="text-2xl font-semibold text-text-primary">
@@ -153,7 +153,11 @@ export const HomePage = () => {
               key={widget.title}
               variants={itemVariants}
               transition={{ delay: index * 0.08 }}
-              className={cn("flex h-full flex-col gap-3 rounded-[18px] p-4 shadow-elev-sm", widget.accent)}
+              className={cn(
+                "flex h-full flex-col gap-3 rounded-[18px] p-4 shadow-elev-sm",
+                "bg-white",
+                widget.accent
+              )}
             >
               <h3 className="text-sm font-semibold text-text-primary/90">
                 {widget.title}
@@ -167,7 +171,7 @@ export const HomePage = () => {
 
       <motion.section
         variants={itemVariants}
-        className="flex items-start gap-3 rounded-[20px] bg-white p-5 shadow-elev-sm"
+        className="flex items-start gap-3 rounded-[22px] bg-white p-5 shadow-elev-sm"
       >
         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-light text-brand">
           {emojis.bulb}
@@ -182,7 +186,7 @@ export const HomePage = () => {
 
       <motion.section
         variants={itemVariants}
-        className="flex flex-col gap-4 rounded-[22px] bg-white p-5 shadow-elev-sm"
+        className="flex flex-col gap-4 rounded-[24px] bg-white p-5 shadow-elev-sm"
       >
         <div className="flex items-center justify-between gap-2">
           <div>
@@ -195,7 +199,7 @@ export const HomePage = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-[18px] bg-gradient-to-br from-[#fff7ef] to-[#f6fbff] p-4">
+        <div className="flex flex-col gap-3 rounded-[18px] bg-gradient-to-br from-[#fff8f0] to-[#f4f8ff] p-4">
           <div className="flex items-center justify-between text-sm font-semibold text-text-primary">
             <span>{currentCard.word}</span>
             <span className="text-xs text-text-secondary">{currentCard.prompt}</span>
