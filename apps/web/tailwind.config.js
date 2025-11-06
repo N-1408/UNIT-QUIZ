@@ -9,40 +9,35 @@ export default {
     extend: {
       colors: {
         brand: "var(--brand)",
-        "brand-hover": "var(--brand-hover)",
         "brand-light": "var(--brand-light)",
+        "brand-dark": "var(--brand-dark)",
         "brand-ink": "var(--brand-ink)",
         background: "var(--background)",
         surface: "var(--surface)",
         "surface-alt": "var(--surface-alt)",
-        stroke: "var(--stroke)",
+        "surface-soft": "var(--surface-soft)",
+        border: "var(--border)",
+        "border-strong": "var(--border-strong)",
         "text-primary": "var(--text-primary)",
         "text-secondary": "var(--text-secondary)",
         "text-muted": "var(--text-muted)",
-        ok: "var(--ok)",
-        warn: "var(--warn)",
-        danger: "var(--danger)",
-        info: "var(--info)",
+        "accent-green": "var(--accent-green)",
         "accent-blue": "var(--accent-blue)",
         "accent-purple": "var(--accent-purple)",
         "accent-teal": "var(--accent-teal)",
+        "accent-amber": "var(--accent-amber)",
         "accent-pink": "var(--accent-pink)",
         "accent-cyan": "var(--accent-cyan)",
         "accent-lime": "var(--accent-lime)",
-        "accent-gray": "var(--accent-gray)",
-        "accent-gold": "var(--accent-gold)",
-        "accent-sky": "var(--accent-sky)"
-      },
-      backgroundImage: {
-        "mesh-brand": "var(--mesh-brand)",
-        "mesh-soft": "var(--mesh-soft)",
-        "mesh-blue": "var(--mesh-blue)",
-        "mesh-orange": "var(--mesh-orange)"
+        "accent-indigo": "var(--accent-indigo)",
+        "accent-sky": "var(--accent-sky)",
+        "accent-red": "var(--accent-red)"
       },
       fontFamily: {
         sans: ["Inter", "SF Pro Display", ...fontFamily.sans]
       },
       borderRadius: {
+        lg: "var(--radius-lg)",
         xl: "var(--radius-xl)",
         "2xl": "var(--radius-2xl)",
         "3xl": "var(--radius-3xl)"

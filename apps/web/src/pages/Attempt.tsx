@@ -1,4 +1,4 @@
-import { AttemptScreen } from "@/components/exams/AttemptScreen";
+﻿import { AttemptScreen } from "@/components/exams/AttemptScreen";
 
 const MOCK_QUESTIONS = [
   {
@@ -14,11 +14,11 @@ const MOCK_QUESTIONS = [
 ];
 
 export const AttemptPage = () => (
-  <div className="flex flex-col gap-6">
+  <div className="flex flex-col gap-4">
     <div className="flex flex-col gap-1">
-      <h2 className="text-lg font-semibold text-text-primary">Boshlashga tayyormisiz?</h2>
+      <h2 className="text-base font-semibold text-text-primary">Boshlashga tayyormisiz?</h2>
       <p className="text-sm text-text-secondary">
-        Quyi savollarni ohista ko‘rib chiqing, javobni tanlaganda tugmalar yengil tebranar.
+        Javobni tanlaganda animatsiya yengil tebranar, shoshilmay davom eting.
       </p>
     </div>
     <AttemptScreen questions={MOCK_QUESTIONS} onSubmit={() => console.log("submit attempt")} />

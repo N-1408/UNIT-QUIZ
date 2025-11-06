@@ -13,7 +13,7 @@ type ResultTableProps = {
 };
 
 export const ResultTable = ({ rows }: ResultTableProps) => (
-  <div className="overflow-hidden rounded-[32px] border border-stroke/70 bg-surface shadow-elev-sm">
+  <div className="overflow-hidden rounded-[24px] border border-border bg-surface shadow-elev-sm">
     <table className="min-w-full text-left text-sm">
       <thead className="bg-surface-alt/80 text-text-secondary">
         <tr>
@@ -28,8 +28,8 @@ export const ResultTable = ({ rows }: ResultTableProps) => (
           <tr
             key={row.id}
             className={cn(
-              "transition duration-swift ease-fluid hover:bg-brand-light/40",
-              index % 2 === 0 ? "bg-white" : "bg-[#FAFAFA]"
+              "transition duration-swift ease-fluid hover:bg-brand-light/30",
+              index % 2 === 0 ? "bg-surface" : "bg-surface-alt/60"
             )}
           >
             <td className="px-5 py-3 font-medium text-text-primary">{row.title}</td>

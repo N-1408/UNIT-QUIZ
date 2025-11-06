@@ -14,7 +14,7 @@ export const Header = ({ title, subtitle, actions, showBack = true, className }:
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 6);
+    const handleScroll = () => setIsScrolled(window.scrollY > 8);
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -23,17 +23,16 @@ export const Header = ({ title, subtitle, actions, showBack = true, className }:
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 px-4 pb-4 pt-[calc(env(safe-area-inset-top)+1rem)] transition duration-swift ease-fluid md:px-6 lg:px-12",
-        isScrolled && "backdrop-blur-md",
+        "sticky top-0 z-40 flex flex-col bg-surface transition duration-swift ease-fluid",
+        isScrolled ? "shadow-elev-sm" : "shadow-none",
         className
       )}
     >
+      <div className="h-[env(safe-area-inset-top)]" aria-hidden />
       <div
         className={cn(
-          "flex flex-col gap-4 rounded-[26px] px-4 py-4 transition duration-swift ease-fluid",
-          isScrolled
-            ? "border border-stroke/70 bg-surface/90 shadow-elev-sm"
-            : "border border-transparent"
+          "border-b border-border px-4 pb-4 pt-4 transition duration-swift ease-fluid sm:px-6 lg:px-12",
+          isScrolled ? "bg-surface" : "bg-surface"
         )}
       >
         <div className="flex items-center justify-between gap-3">

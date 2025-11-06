@@ -11,15 +11,15 @@ type ExamDetailHeaderProps = {
 };
 
 const STATUS_TEXT: Record<ExamDetailHeaderProps["status"], string> = {
-  open: "OPEN - Boshlash vaqti keldi, omad yor bo'lsin!",
-  upcoming: "UPCOMING - Tayyor turamiz, start tez orada.",
-  closed: "CLOSED - Yakunlandi, natijalarni Results bo'limida ko'rasiz."
+  open: "OPEN — Boshlash vaqti keldi, omad yor bo'lsin!",
+  upcoming: "UPCOMING — Tez orada start, tayyor turamiz.",
+  closed: "CLOSED — Yakunlandi, natijani Results bo'limidan topasiz."
 };
 
-const STATUS_ACCENTS: Record<ExamDetailHeaderProps["status"], string> = {
-  open: "border-brand/40 bg-brand-light text-brand",
-  upcoming: "border-info/40 bg-info/10 text-info",
-  closed: "border-accent-gray/60 bg-surface-alt text-text-secondary"
+const STATUS_STYLE: Record<ExamDetailHeaderProps["status"], string> = {
+  open: "border-brand/30 bg-brand-light text-brand",
+  upcoming: "border-accent-blue/30 bg-accent-blue/10 text-accent-blue",
+  closed: "border-border bg-surface-alt text-text-secondary"
 };
 
 export const ExamDetailHeader = ({
@@ -30,38 +30,29 @@ export const ExamDetailHeader = ({
   startsAt,
   status
 }: ExamDetailHeaderProps) => (
-  <section className="relative overflow-hidden rounded-[32px] border border-stroke/70 bg-surface p-6 shadow-elev-lg sm:p-8">
-    <div className="pointer-events-none absolute inset-x-[-40%] top-[-50%] h-72 rounded-full bg-mesh-orange opacity-40 blur-3xl" />
-    <div className="relative flex flex-col gap-6">
-      <div className="flex flex-col gap-3">
-        <span
-          className={cn(
-            "inline-flex w-fit items-center rounded-full border px-4 py-1 text-xs font-semibold tracking-wide",
-            STATUS_ACCENTS[status]
-          )}
-        >
-          {status.toUpperCase()}
+  <section className="rounded-[24px] border border-border bg-surface/95 p-5 shadow-elev-sm sm:p-6">
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-text-secondary">
+          Imtihon tafsilotlari
         </span>
-        <h1 className="text-3xl font-semibold leading-tight text-text-primary md:text-4xl">{title}</h1>
+        <h1 className="text-2xl font-semibold leading-tight text-text-primary sm:text-3xl">{title}</h1>
         <p className="text-sm text-text-secondary">
-          Davomiylik:{" "}
-          <span className="font-medium text-text-primary">{formatDuration(durationMinutes)}</span>
+          Davomiylik: <span className="font-medium text-text-primary">{formatDuration(durationMinutes)}</span>
         </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2 text-xs text-text-secondary">
         {typeof attemptsLeft === "number" ? (
-          <span className="rounded-full border border-stroke/60 bg-surface-alt px-3 py-1">
+          <span className="rounded-full border border-border bg-surface-alt px-3 py-1">
             Qolgan urinishlar: {attemptsLeft}
           </span>
         ) : null}
         {reviewPolicy ? (
-          <span className="rounded-full border border-stroke/60 bg-surface-alt px-3 py-1">
-            {reviewPolicy}
-          </span>
+          <span className="rounded-full border border-border bg-surface-alt px-3 py-1">{reviewPolicy}</span>
         ) : null}
         {startsAt ? (
-          <span className="rounded-full border border-stroke/60 bg-surface-alt px-3 py-1">
+          <span className="rounded-full border border-border bg-surface-alt px-3 py-1">
             Boshlanishi: {formatTime(startsAt)}
           </span>
         ) : null}
@@ -69,14 +60,14 @@ export const ExamDetailHeader = ({
 
       <div
         className={cn(
-          "rounded-[22px] border px-4 py-4 text-sm font-medium text-text-primary shadow-elev-sm",
-          STATUS_ACCENTS[status]
+          "rounded-[18px] border px-4 py-3 text-sm font-medium shadow-elev-sm",
+          STATUS_STYLE[status]
         )}
       >
         {status === "upcoming" && startsAt ? (
-          <span className="flex items-center gap-3 text-text-secondary">
+          <span className="flex items-center gap-2 text-current">
             <Countdown target={startsAt} />
-            <span>sabr qiling, sal qoldi :)</span>
+            <span>Sabr qiling, sal qoldi.</span>
           </span>
         ) : (
           STATUS_TEXT[status]

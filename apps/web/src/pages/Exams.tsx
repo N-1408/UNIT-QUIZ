@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ExamList } from "@/components/exams/ExamList";
 import type { ExamSummary } from "@/components/exams/ExamCard";
@@ -34,23 +34,20 @@ const FILTERS = [
 
 export const ExamsPage = () => {
   const { t } = useTranslation();
-  const [activeFilter, setActiveFilter] =
-    useState<(typeof FILTERS)[number]["id"]>("open");
+  const [activeFilter, setActiveFilter] = useState<(typeof FILTERS)[number]["id"]>("open");
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <h2 className="text-lg font-semibold text-text-primary">
-          {t("exams.title", { defaultValue: "Imtihonlar ro‘yxati" })}
+        <h2 className="text-base font-semibold text-text-primary">
+          {t("exams.title", { defaultValue: "Kayfiyatga qarab tanlang, hammasi tayyor." })}
         </h2>
         <p className="text-sm text-text-secondary">
-          {t("exams.subtitle", {
-            defaultValue: "Kayfiyatga mosini tanlang, start uchun hammasi tayyor."
-          })}
+          {t("exams.subtitle", { defaultValue: "Qaysi toifa sizni chaqiryapti? Filtrlab ko'ring." })}
         </p>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="inline-flex w-full items-center justify-between rounded-full border border-border bg-surface/95 p-1 shadow-elev-sm">
         {FILTERS.map((filter) => {
           const isActive = filter.id === activeFilter;
           return (
@@ -59,10 +56,10 @@ export const ExamsPage = () => {
               type="button"
               onClick={() => setActiveFilter(filter.id)}
               className={cn(
-                "whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition duration-swift ease-fluid",
+                "flex-1 rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wide transition duration-swift ease-fluid",
                 isActive
-                  ? "border-brand/50 bg-brand text-brand-ink shadow-elev-sm"
-                  : "border-stroke/60 bg-surface-alt text-text-secondary hover:border-brand/30 hover:text-text-primary"
+                  ? "bg-brand text-brand-ink shadow-elev-sm"
+                  : "text-text-secondary hover:text-text-primary"
               )}
             >
               {filter.label}

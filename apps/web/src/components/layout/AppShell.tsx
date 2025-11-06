@@ -33,10 +33,7 @@ export const AppShell = () => {
     } as const);
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-background text-text-primary transition-colors duration-soft ease-fluid dark:text-text-primary">
-      <div className="pointer-events-none absolute inset-x-0 top-[-140px] h-[360px] rounded-b-[48px] bg-mesh-soft opacity-95 blur-0 md:top-[-160px]" />
-      <div className="pointer-events-none absolute inset-x-8 top-[-120px] h-[320px] rounded-[48px] bg-mesh-brand blur-[120px] opacity-[0.45] sm:opacity-60" />
-
+    <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-gradient-to-b from-surface-soft via-background to-background text-text-primary transition-colors duration-soft ease-fluid dark:text-text-primary">
       <Header title={info.title} subtitle={info.subtitle} showBack={location.pathname !== "/"} />
 
       <AnimatePresence mode="wait" initial={false}>

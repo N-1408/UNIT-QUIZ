@@ -9,34 +9,44 @@ type ResultCardProps = {
   takenAt: Date;
 };
 
-const STATUS_COPY: Record<ResultStatus, string> = {
-  passed: "Ajoyib! Yutuq choyi sizdan.",
-  failed: "Xafa bo'lmang, bu faqat bir test xolos.",
-  neutral: "Bu sinov yakuniy natija emas, keyingi safar albatta!"
+const STATUS_META: Record<ResultStatus, { tone: string; message: string; emoji: string }> = {
+  passed: {
+    tone: "text-accent-green",
+    message: "Zo'r ishladingiz!",
+    emoji: "\uD83C\uDFC6"
+  },
+  failed: {
+    tone: "text-text-secondary",
+    message: "Bu safar omad keyingi safarga. \u2615\uFE0F",
+    emoji: "\uD83D\uDE14"
+  },
+  neutral: {
+    tone: "text-text-secondary",
+    message: "Natija tez orada yangilanadi.",
+    emoji: "\u23F3"
+  }
 };
 
-const STATUS_BADGE: Record<ResultStatus, string> = {
-  passed: "border-ok/40 bg-ok/10 text-ok",
-  failed: "border-danger/40 bg-danger/10 text-danger",
-  neutral: "border-stroke/60 bg-surface-alt text-text-secondary"
-};
+export const ResultCard = ({ title, score, status, takenAt }: ResultCardProps) => {
+  const meta = STATUS_META[status];
 
-export const ResultCard = ({ title, score, status, takenAt }: ResultCardProps) => (
-  <article className="flex flex-col gap-4 rounded-[28px] border border-stroke/70 bg-surface p-5 shadow-elev-sm">
-    <header className="flex items-center justify-between gap-3">
-      <div className="flex flex-col gap-1">
-        <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
-        <span className="text-sm text-text-secondary">{STATUS_COPY[status]}</span>
+  return (
+    <article className="flex items-center justify-between gap-4 rounded-[20px] border border-border bg-surface/95 px-4 py-3 shadow-elev-sm transition duration-swift ease-fluid hover:scale-[0.99] hover:shadow-elev-md active:scale-[0.98]">
+      <div className="flex flex-1 items-center gap-3">
+        <span className="text-lg" aria-hidden>
+          {meta.emoji}
+        </span>
+        <div className="flex flex-col gap-1">
+          <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
+          <span className={cn("text-xs font-medium", meta.tone)}>{meta.message}</span>
+          <span className="text-[11px] text-text-secondary">
+            {takenAt.toLocaleDateString()}
+          </span>
+        </div>
       </div>
-      <span
-        className={cn(
-          "rounded-full border px-3 py-1 text-xs font-semibold tracking-wide",
-          STATUS_BADGE[status]
-        )}
-      >
-        {takenAt.toLocaleDateString()}
-      </span>
-    </header>
-    <div className="text-4xl font-semibold text-text-primary">{score}%</div>
-  </article>
-);
+      <div className="flex items-center gap-2 rounded-full bg-brand-light px-3 py-1 text-sm font-semibold text-brand">
+        <span>{score}%</span>
+      </div>
+    </article>
+  );
+};

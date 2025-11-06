@@ -2,13 +2,17 @@
 import { cn } from "@/lib/utils";
 import { useLanguageStore, type LanguageCode } from "@/store/useLanguage";
 
-const LANGUAGES: Array<{ value: LanguageCode; label: string; accent: string }> = [
-  { value: "uz", label: "O'zbekcha", accent: "border-brand/40 bg-brand-light text-brand" },
-  { value: "ru", label: "Ruscha", accent: "border-info/40 bg-info/10 text-info" },
-  { value: "en", label: "English", accent: "border-accent-purple/40 bg-accent-purple/10 text-accent-purple" }
+const LANGUAGES: Array<{ value: LanguageCode; label: string }> = [
+  { value: "uz", label: "O'zbekcha" },
+  { value: "ru", label: "Ruscha" },
+  { value: "en", label: "English" }
 ];
 
-export const LanguageRadio = () => {
+type LanguageRadioProps = {
+  className?: string;
+};
+
+export const LanguageRadio = ({ className }: LanguageRadioProps) => {
   const { i18n } = useTranslation();
   const language = useLanguageStore((state) => state.language);
   const setLanguage = useLanguageStore((state) => state.setLanguage);
@@ -19,19 +23,19 @@ export const LanguageRadio = () => {
   };
 
   return (
-    <fieldset className="flex flex-col gap-3 rounded-[28px] border border-stroke/70 bg-surface p-5 shadow-elev-sm">
-      <legend className="text-sm font-semibold text-text-primary">Tilni tanlang</legend>
-      <div className="grid gap-2 sm:grid-cols-3">
+    <fieldset className={cn("flex flex-col gap-2", className)}>
+      <legend className="text-xs font-semibold uppercase tracking-wide text-text-muted">Til</legend>
+      <div className="grid grid-cols-3 gap-2">
         {LANGUAGES.map((item) => {
           const checked = language === item.value;
           return (
             <label
               key={item.value}
               className={cn(
-                "flex items-center justify-between gap-2 rounded-[22px] border px-4 py-3 text-sm font-medium transition duration-swift ease-fluid",
+                "flex items-center justify-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition duration-swift ease-fluid",
                 checked
-                  ? item.accent
-                  : "border-stroke/60 bg-surface-alt text-text-secondary hover:border-brand/30 hover:bg-surface"
+                  ? "border-brand bg-brand-light text-brand"
+                  : "border-border/70 bg-surface-alt text-text-secondary hover:border-brand/30 hover:text-text-primary"
               )}
             >
               <span>{item.label}</span>
@@ -41,7 +45,7 @@ export const LanguageRadio = () => {
                 value={item.value}
                 checked={checked}
                 onChange={() => handleChange(item.value)}
-                className="h-4 w-4 accent-brand"
+                className="sr-only"
               />
             </label>
           );

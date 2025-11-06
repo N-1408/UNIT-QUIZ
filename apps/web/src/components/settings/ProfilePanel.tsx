@@ -1,4 +1,6 @@
-import { useAuthStore } from "@/store/useAuth";
+﻿import { useAuthStore } from "@/store/useAuth";
+
+const placeholderCopy = "Telegram hisobingiz aniqlanmoqda. Bir ozdan so'ng qayta kirib ko'ring.";
 
 export const ProfilePanel = () => {
   const session = useAuthStore((state) => state.session);
@@ -6,30 +8,34 @@ export const ProfilePanel = () => {
 
   if (!session) {
     return (
-      <div className="rounded-[28px] border border-dashed border-stroke/70 bg-surface p-5 text-sm text-text-secondary shadow-elev-sm">
-        Telegram hisobingiz aniqlanmoqda. Bir ozdan so'ng qayta oching.
+      <div className="rounded-[20px] border border-border bg-surface/95 p-4 text-sm text-text-secondary shadow-elev-sm">
+        {placeholderCopy}
       </div>
     );
   }
 
+  const initials = session.fullName
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part[0]?.toUpperCase())
+    .slice(0, 2)
+    .join("");
+
   return (
-    <div className="rounded-[28px] border border-stroke/70 bg-surface p-5 shadow-elev-sm">
-      <header className="flex items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Profil</p>
-          <h3 className="text-lg font-semibold text-text-primary">{session.fullName}</h3>
-          <p className="text-xs text-text-secondary">tg_id: {session.tgId}</p>
-        </div>
-        <span className="rounded-full border border-brand/30 bg-brand-light px-3 py-1 text-xs font-semibold text-brand shadow-elev-sm">
-          {session.role}
-        </span>
-      </header>
+    <div className="flex items-center gap-3 rounded-[20px] border border-border bg-surface/95 p-4 shadow-elev-sm">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-light text-base font-semibold text-brand">
+        {initials || "TG"}
+      </div>
+      <div className="flex flex-1 flex-col gap-1">
+        <h3 className="text-sm font-semibold text-text-primary">{session.fullName}</h3>
+        <p className="text-xs text-text-secondary">tg_id: {session.tgId}</p>
+      </div>
       <button
         type="button"
         onClick={clearSession}
-        className="mt-4 text-sm font-medium text-danger underline-offset-4 transition duration-swift ease-fluid hover:underline"
+        className="text-xs font-semibold text-accent-red underline-offset-4 transition duration-swift ease-fluid hover:underline"
       >
-        Chiqib ketish
+        Chiqish
       </button>
     </div>
   );

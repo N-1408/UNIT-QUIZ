@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+﻿import { useTranslation } from "react-i18next";
 import { ResultCard } from "@/components/results/ResultCard";
 import { ResultTable } from "@/components/results/ResultTable";
 
@@ -11,19 +11,19 @@ export const ResultsPage = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-lg font-semibold text-text-primary">
-          {t("results.title", { defaultValue: "Natijalar varaqlari" })}
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-base font-semibold text-text-primary">
+          {t("results.title", { defaultValue: "Ko'rib chiqing, bu sizning yutuq tarixi. \uD83C\uDFC6" })}
         </h2>
         <p className="text-sm text-text-secondary">
           {t("results.subtitle", {
-            defaultValue: "Yutuqlarni ko‘rib mazza qiling, kerak bo‘lsa qayta urinib ham qo‘ying."
+            defaultValue: "Har bir natija kichik qadam, ularni qulay jadvalda ko'rib chiqing."
           })}
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="flex flex-col gap-3">
         <ResultCard title="Listening Sprint" score={87} status="passed" takenAt={new Date()} />
         <ResultCard title="Reading Marathon" score={54} status="failed" takenAt={new Date()} />
       </div>

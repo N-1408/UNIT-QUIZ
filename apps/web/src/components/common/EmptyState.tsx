@@ -14,7 +14,7 @@ export const EmptyState = ({ title, description, icon, className }: EmptyStatePr
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-stroke/70 bg-surface px-6 py-12 text-center text-sm text-text-secondary shadow-elev-sm",
+        "flex flex-col items-center justify-center gap-4 rounded-[24px] border border-dashed border-border bg-surface px-6 py-10 text-center text-sm text-text-secondary shadow-elev-sm",
         className
       )}
     >

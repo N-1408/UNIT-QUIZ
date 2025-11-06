@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+﻿import { NavLink } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { Home, ClipboardList, Trophy, Settings as SettingsIcon } from "lucide-react";
 import { triggerHaptic } from "@/lib/telegram";
 import { cn } from "@/lib/utils";
@@ -11,41 +12,51 @@ const NAV_ITEMS = [
 ] as const;
 
 export const BottomNav = () => (
-  <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-40 md:hidden">
-    <div className="pointer-events-auto mx-auto mb-4 w-full max-w-md px-4">
-      <div className="rounded-[28px] border border-stroke/60 bg-surface px-4 py-3 shadow-elev-lg">
-        <ul className="flex items-center justify-between gap-1">
-          {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
-            <li key={to} className="flex-1">
-              <NavLink
-                to={to}
-                onClick={() => triggerHaptic("light")}
-                className={({ isActive }: { isActive: boolean }) =>
-                  cn(
-                    "flex flex-col items-center gap-1 rounded-2xl p-3 text-xs font-medium text-text-secondary transition duration-swift ease-fluid",
-                    isActive && "text-brand"
-                  )
-                }
-              >
-                {({ isActive }: { isActive: boolean }) => (
-                  <>
-                    <span
-                      className={cn(
-                        "flex h-9 w-9 items-center justify-center rounded-2xl border border-stroke/40 bg-surface-alt text-text-secondary shadow-elev-sm",
-                        isActive && "border-brand/20 bg-brand-light text-brand shadow-elev-md"
-                      )}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </span>
-                    <span>{label}</span>
-                  </>
+  <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-50 md:hidden">
+    <div className="pointer-events-auto mx-auto w-full max-w-sm px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-2">
+      <div className="flex h-14 w-full items-center justify-between rounded-full border border-border bg-surface shadow-elev-md px-2">
+        {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            onClick={() => triggerHaptic("light")}
+            className="relative flex h-10 flex-1 items-center justify-center"
+          >
+            {({ isActive }: { isActive: boolean }) => (
+              <motion.div
+                layout
+                className={cn(
+                  "flex h-10 items-center justify-center gap-2 rounded-full px-3 text-xs font-medium transition duration-swift ease-fluid",
+                  isActive ? "bg-brand-light text-brand shadow-elev-sm" : "text-text-secondary"
                 )}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+                animate={{ scale: isActive ? 1 : 0.96 }}
+                transition={{ duration: 0.15, ease: "easeInOut" }}
+              >
+                <Icon
+                  className={cn(
+                    "h-5 w-5 transition duration-swift ease-fluid",
+                    isActive ? "text-brand" : "text-text-secondary"
+                  )}
+                />
+                <AnimatePresence initial={false}>
+                  {isActive ? (
+                    <motion.span
+                      key={label}
+                      layout
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 6 }}
+                      transition={{ duration: 0.15, ease: "easeInOut" }}
+                    >
+                      {label}
+                    </motion.span>
+                  ) : null}
+                </AnimatePresence>
+              </motion.div>
+            )}
+          </NavLink>
+        ))}
       </div>
-      <div className="h-[env(safe-area-inset-bottom)]" />
     </div>
   </nav>
 );
