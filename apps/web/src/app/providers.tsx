@@ -1,18 +1,27 @@
-import { Suspense, useCallback, useEffect } from "react";
+import { Suspense, useCallback, useEffect, useRef } from "react";
 import type { PropsWithChildren } from "react";
 import { I18nextProvider } from "react-i18next";
 import i18n from "@/lib/i18n";
 import { initTelegramWebApp, syncTelegramTheme, getTelegramUser, type TelegramThemePayload } from "@/lib/telegram";
 import { useThemeStore } from "@/store/useTheme";
-import { useLanguageStore } from "@/store/useLanguage";
-import { useAuthStore } from "@/store/useAuth";
+import { useLanguageStore, type LanguageCode } from "@/store/useLanguage";
+import { useAuthStore, type AuthPayload } from "@/store/useAuth";
 
 export const AppProviders = ({ children }: PropsWithChildren) => {
   const theme = useThemeStore((state) => state.theme);
   const setTelegramTheme = useThemeStore((state) => state.setTelegramTheme);
   const language = useLanguageStore((state) => state.language);
+  const setLanguage = useLanguageStore((state) => state.setLanguage);
   const setSession = useAuthStore((state) => state.setSession);
   const currentSession = useAuthStore((state) => state.session);
+  const setAuthStatus = useAuthStore((state) => state.setStatus);
+  const authStatus = useAuthStore((state) => state.status);
+  const hasBootstrappedRef = useRef(false);
+  useEffect(() => {
+    if (!currentSession && authStatus === "idle") {
+      hasBootstrappedRef.current = false;
+    }
+  }, [authStatus, currentSession]);
 
   const applyTelegramThemeParams = useCallback((payload?: TelegramThemePayload["themeParams"]) => {
     const root = document.documentElement;
@@ -46,21 +55,108 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     initTelegramWebApp();
-    if (!currentSession) {
-      const tgUser = getTelegramUser();
-      if (tgUser) {
-        const fullName = [tgUser.first_name, tgUser.last_name]
-          .filter(Boolean)
-          .join(" ")
-          .trim();
-        setSession({
-          tgId: tgUser.id,
-          fullName: fullName || tgUser.username || "do'stimiz",
-          role: "student"
-        });
-      }
-    }
   }, []);
+
+  useEffect(() => {
+    if (currentSession || hasBootstrappedRef.current || authStatus === "loading") {
+      return;
+    }
+
+    const tgUser = getTelegramUser();
+    if (!tgUser) {
+      return;
+    }
+
+    hasBootstrappedRef.current = true;
+    const controller = new AbortController();
+
+    const parseLanguage = (code: unknown): LanguageCode | null => {
+      if (code === "uz" || code === "ru" || code === "en") {
+        return code;
+      }
+      return null;
+    };
+    const parseRole = (role: unknown): AuthPayload["role"] => {
+      if (role === "teacher" || role === "admin") {
+        return role;
+      }
+      return "student";
+    };
+
+    const syncUser = async () => {
+      const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ").trim();
+
+      setAuthStatus("loading");
+
+      try {
+        const response = await fetch("/api/users/sync", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            telegramId: tgUser.id,
+            fullName: fullName || tgUser.username || "do'stimiz",
+            username: tgUser.username ?? null,
+            language
+          }),
+          signal: controller.signal
+        });
+
+        if (!response.ok) {
+          throw new Error(`Auth sync failed (${response.status})`);
+        }
+
+        const data: {
+          tgId: number;
+          fullName: string | null;
+          firstName: string | null;
+          lastName: string | null;
+          tgUsername: string | null;
+          phoneNumber: string | null;
+          lang: string | null;
+          role: string | null;
+          createdAt: string | null;
+        } = await response.json();
+
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        const normalizedLanguage = parseLanguage(data.lang) ?? language ?? "uz";
+        const normalizedRole = parseRole(data.role);
+        const payload: AuthPayload = {
+          tgId: data.tgId,
+          fullName: data.fullName || fullName || tgUser.username || "do'stimiz",
+          firstName: data.firstName ?? tgUser.first_name ?? null,
+          lastName: data.lastName ?? tgUser.last_name ?? null,
+          username: data.tgUsername ?? tgUser.username ?? null,
+          phoneNumber: data.phoneNumber ?? null,
+          role: normalizedRole,
+          language: normalizedLanguage,
+          createdAt: data.createdAt,
+          token: null
+        };
+
+        setSession(payload);
+        setAuthStatus("ready");
+        if (normalizedLanguage !== language) {
+          setLanguage(normalizedLanguage);
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error("[Auth] bootstrap failed:", error);
+          setSession(null);
+          setAuthStatus("error", error instanceof Error ? error.message : "Auth sync failed");
+        }
+      }
+    };
+
+    void syncUser();
+
+    return () => controller.abort();
+  }, [authStatus, currentSession, language, setAuthStatus, setLanguage, setSession]);
 
   useEffect(() => {
     const root = document.documentElement;

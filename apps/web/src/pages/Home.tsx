@@ -83,10 +83,8 @@ const widgetPalette = [
 ] as const;
 
 export const HomePage = () => {
-  const { session } = useAuthStore();
-  const rawName =
-    (session as { full_name?: string } | null)?.full_name ?? session?.fullName ?? "do'stimiz";
-  const displayName = rawName.trim() || "do'stimiz";
+  const session = useAuthStore((state) => state.session);
+  const displayName = session?.fullName?.trim() || "do'stimiz";
 
   const subtitleOptions = useMemo(
     () => [

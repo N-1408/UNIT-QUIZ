@@ -107,7 +107,9 @@ export async function getOrCreateStudent(
   tg_id: number,
   full_name: string | null,
   tg_username: string | null,
-  phone_number: string | null
+  phone_number: string | null,
+  lang?: string | null,
+  role?: string | null
 ): Promise<ServiceResult<StudentRecord>> {
   const existing = await getStudentByTgId(tg_id);
 
@@ -118,16 +120,24 @@ export async function getOrCreateStudent(
   if (existing.data) {
     const updates: Partial<StudentRecord> = {};
 
-    if (!existing.data.full_name && full_name) {
+    if (full_name && full_name !== existing.data.full_name) {
       updates.full_name = full_name;
     }
 
-    if (!existing.data.tg_username && tg_username) {
+    if (tg_username && tg_username !== existing.data.tg_username) {
       updates.tg_username = tg_username;
     }
 
-    if (!existing.data.phone_number && phone_number) {
+    if (phone_number && phone_number !== existing.data.phone_number) {
       updates.phone_number = phone_number;
+    }
+
+    if (lang && lang !== existing.data.lang) {
+      updates.lang = lang;
+    }
+
+    if (role && role !== existing.data.role) {
+      updates.role = role;
     }
 
     if (Object.keys(updates).length === 0) {
@@ -152,11 +162,14 @@ export async function getOrCreateStudent(
     return createSuccess(data as StudentRecord);
   }
 
+  const fallbackRole = role ?? "student";
   const insertPayload = {
     tg_id,
     full_name,
     tg_username,
-    phone_number
+    phone_number,
+    lang,
+    role: fallbackRole
   };
 
   const { data, error } = await supabase
