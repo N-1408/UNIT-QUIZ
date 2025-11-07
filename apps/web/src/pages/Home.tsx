@@ -84,6 +84,8 @@ const widgetPalette = [
 
 export const HomePage = () => {
   const session = useAuthStore((state) => state.session);
+  const status = useAuthStore((state) => state.status);
+  console.log("Auth status:", status);
   const displayName = session?.fullName?.trim() || "do'stimiz";
 
   const subtitleOptions = useMemo(

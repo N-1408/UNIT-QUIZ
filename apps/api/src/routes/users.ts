@@ -3,6 +3,19 @@ import { getStudentByTgId, getOrCreateStudent } from "../supabaseService.js";
 
 const router = Router();
 
+const toGuestProfile = () => ({
+  telegramId: "999",
+  tgId: 999,
+  fullName: "Guest User",
+  firstName: "Guest",
+  lastName: null,
+  tgUsername: "guest",
+  phoneNumber: null,
+  lang: "uz",
+  role: "student",
+  createdAt: new Date().toISOString()
+});
+
 const mapStudentRecord = (user: {
   tg_id: number;
   full_name: string | null;
@@ -30,36 +43,36 @@ const mapStudentRecord = (user: {
   };
 };
 
-router.get('/users/:telegramId', async (req, res) => {
+router.get("/users/:telegramId", async (req, res) => {
   const telegramId = req.params.telegramId?.trim();
 
   if (!telegramId) {
-    return res.status(400).json({ ok: false, error: 'missing_telegram_id' });
+    return res.status(200).json({ success: true, data: toGuestProfile(), error: null });
   }
 
   const numericId = Number(telegramId);
   if (!Number.isFinite(numericId)) {
-    return res.status(400).json({ ok: false, error: 'invalid_telegram_id' });
+    return res.status(400).json({ success: false, data: null, error: "invalid_telegram_id" });
   }
 
   try {
     const result = await getStudentByTgId(numericId);
 
     if (!result.success) {
-      console.error('get user error:', result.message ?? 'Unknown error');
-      return res.status(500).json({ ok: false, error: 'internal_error' });
+      console.error("get user error:", result.message ?? "Unknown error");
+      return res.status(500).json({ success: false, data: null, error: "internal_error" });
     }
 
     const user = result.data;
 
     if (!user) {
-      return res.status(404).json({ ok: false, error: 'user_not_found' });
+      return res.status(404).json({ success: false, data: null, error: "user_not_found" });
     }
 
-    return res.json(mapStudentRecord(user));
+    return res.json({ success: true, data: mapStudentRecord(user), error: null });
   } catch (error) {
-    console.error('get user error:', error);
-    return res.status(500).json({ ok: false, error: 'internal_error' });
+    console.error("get user error:", error);
+    return res.status(500).json({ success: false, data: null, error: "internal_error" });
   }
 });
 
@@ -67,12 +80,12 @@ router.post("/users/sync", async (req, res) => {
   const { telegramId, fullName, username, phoneNumber, language, role } = req.body ?? {};
 
   if (!telegramId) {
-    return res.status(400).json({ ok: false, error: "missing_telegram_id" });
+    return res.status(200).json({ success: true, data: toGuestProfile(), error: null });
   }
 
   const numericId = Number(String(telegramId).trim());
   if (!Number.isFinite(numericId)) {
-    return res.status(400).json({ ok: false, error: "invalid_telegram_id" });
+    return res.status(400).json({ success: false, data: null, error: "invalid_telegram_id" });
   }
 
   const safeString = (value: unknown) => {
@@ -104,14 +117,15 @@ router.post("/users/sync", async (req, res) => {
 
     if (!result.success || !result.data) {
       console.error("sync user error:", result.message ?? "Unknown error");
-      return res.status(500).json({ ok: false, error: "internal_error" });
+      return res.status(500).json({ success: false, data: null, error: "internal_error" });
     }
 
-    return res.json(mapStudentRecord(result.data));
+    return res.json({ success: true, data: mapStudentRecord(result.data), error: null });
   } catch (error) {
     console.error("sync user error:", error);
-    return res.status(500).json({ ok: false, error: "internal_error" });
+    return res.status(500).json({ success: false, data: null, error: "internal_error" });
   }
 });
 
 export default router;
+

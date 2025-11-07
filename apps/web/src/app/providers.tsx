@@ -2,10 +2,12 @@ import { Suspense, useCallback, useEffect, useRef } from "react";
 import type { PropsWithChildren } from "react";
 import { I18nextProvider } from "react-i18next";
 import i18n from "@/lib/i18n";
-import { initTelegramWebApp, syncTelegramTheme, getTelegramUser, type TelegramThemePayload } from "@/lib/telegram";
+import { initTelegramWebApp, syncTelegramTheme, getTelegramUser, type TelegramThemePayload, type TelegramUser } from "@/lib/telegram";
 import { useThemeStore } from "@/store/useTheme";
 import { useLanguageStore } from "@/store/useLanguage";
 import { useAuthStore } from "@/store/useAuth";
+
+const FALLBACK_USER: TelegramUser = { id: 999, first_name: "Guest", username: "guest" };
 
 export const AppProviders = ({ children }: PropsWithChildren) => {
   const theme = useThemeStore((state) => state.theme);
@@ -53,7 +55,12 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
   }, []);
 
   useEffect(() => {
-    initTelegramWebApp();
+    try {
+      initTelegramWebApp();
+      window.Telegram?.WebApp?.ready?.();
+    } catch (error) {
+      console.error("[Telegram] init failed:", error);
+    }
   }, []);
 
   useEffect(() => {
@@ -61,26 +68,27 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
       return;
     }
 
-    const tgUser = getTelegramUser();
-    if (!tgUser) {
-      return;
-    }
+    const bootstrap = async () => {
+      try {
+        const tgUser = getTelegramUser() ?? FALLBACK_USER;
+        hasBootstrappedRef.current = true;
+        const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ").trim();
+        const payload = await syncSession({
+          telegramId: tgUser.id,
+          fullName: fullName || tgUser.username || "do'stimiz",
+          username: tgUser.username ?? null,
+          language
+        });
 
-    hasBootstrappedRef.current = true;
-    const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ").trim();
-
-    void (async () => {
-      const payload = await syncSession({
-        telegramId: tgUser.id,
-        fullName: fullName || tgUser.username || "do'stimiz",
-        username: tgUser.username ?? null,
-        language
-      });
-
-      if (payload?.language && payload.language !== language) {
-        setLanguage(payload.language);
+        if (payload?.language && payload.language !== language) {
+          setLanguage(payload.language);
+        }
+      } catch (error) {
+        console.error("[Auth] bootstrap failed:", error);
       }
-    })();
+    };
+
+    void bootstrap();
   }, [authStatus, currentSession, language, setLanguage, syncSession]);
 
   useEffect(() => {
