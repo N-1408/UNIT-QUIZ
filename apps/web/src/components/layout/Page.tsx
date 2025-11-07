@@ -11,9 +11,9 @@ export const PageContainer = ({ className, children }: PageContainerProps) => {
 
   if (status === "idle" || status === "loading") {
     return (
-      <main className="flex min-h-screen w-full items-center justify-center bg-ui-background px-6 text-sm text-text-secondary">
+      <div className="flex min-h-screen w-full items-center justify-center bg-ui-background px-6 text-sm text-text-secondary">
         Yuklanmoqda...
-      </main>
+      </div>
     );
   }
 

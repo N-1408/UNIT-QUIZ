@@ -1,8 +1,8 @@
-import { Suspense, useCallback, useEffect, useRef } from "react";
+import { Suspense, useCallback, useEffect } from "react";
 import type { PropsWithChildren } from "react";
 import { I18nextProvider } from "react-i18next";
 import i18n from "@/lib/i18n";
-import { initTelegramWebApp, syncTelegramTheme, getTelegramUser, type TelegramThemePayload, type TelegramUser } from "@/lib/telegram";
+import { initTelegramWebApp, syncTelegramTheme, type TelegramThemePayload, type TelegramUser } from "@/lib/telegram";
 import { useThemeStore } from "@/store/useTheme";
 import { useLanguageStore } from "@/store/useLanguage";
 import { useAuthStore } from "@/store/useAuth";
@@ -14,15 +14,6 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
   const setTelegramTheme = useThemeStore((state) => state.setTelegramTheme);
   const language = useLanguageStore((state) => state.language);
   const setLanguage = useLanguageStore((state) => state.setLanguage);
-  const currentSession = useAuthStore((state) => state.session);
-  const authStatus = useAuthStore((state) => state.status);
-  const syncSession = useAuthStore((state) => state.syncSession);
-  const hasBootstrappedRef = useRef(false);
-  useEffect(() => {
-    if (!currentSession && authStatus !== "loading") {
-      hasBootstrappedRef.current = false;
-    }
-  }, [authStatus, currentSession]);
 
   const applyTelegramThemeParams = useCallback((payload?: TelegramThemePayload["themeParams"]) => {
     const root = document.documentElement;
@@ -55,41 +46,36 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
   }, []);
 
   useEffect(() => {
-    try {
-      initTelegramWebApp();
-      window.Telegram?.WebApp?.ready?.();
-    } catch (error) {
-      console.error("[Telegram] init failed:", error);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (currentSession || hasBootstrappedRef.current || authStatus === "loading") {
-      return;
-    }
-
-    const bootstrap = async () => {
+    (async () => {
       try {
-        const tgUser = getTelegramUser() ?? FALLBACK_USER;
-        hasBootstrappedRef.current = true;
-        const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ").trim();
-        const payload = await syncSession({
-          telegramId: tgUser.id,
-          fullName: fullName || tgUser.username || "do'stimiz",
-          username: tgUser.username ?? null,
-          language
-        });
+        console.log("[UNIT-QUIZ] Telegram init starting...");
+        initTelegramWebApp();
+        const tg = window.Telegram?.WebApp;
+        tg?.ready?.();
 
-        if (payload?.language && payload.language !== language) {
-          setLanguage(payload.language);
-        }
+        const tgUser = tg?.initDataUnsafe?.user ?? FALLBACK_USER;
+        console.log("[UNIT-QUIZ] Telegram user:", tgUser);
+
+        await useAuthStore
+          .getState()
+          .syncSession({
+            telegramId: tgUser.id,
+            fullName: [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ").trim() || tgUser.username || "do'stimiz",
+            username: tgUser.username ?? null,
+            language
+          })
+          .then((payload) => {
+            if (payload?.language && payload.language !== language) {
+              setLanguage(payload.language);
+            }
+            console.log("[UNIT-QUIZ] Auth store ready.");
+          });
       } catch (error) {
-        console.error("[Auth] bootstrap failed:", error);
+        console.error("[UNIT-QUIZ] Bootstrap error:", error);
+        useAuthStore.setState({ status: "ready", error: null });
       }
-    };
-
-    void bootstrap();
-  }, [authStatus, currentSession, language, setLanguage, syncSession]);
+    })();
+  }, [language, setLanguage]);
 
   useEffect(() => {
     const root = document.documentElement;

@@ -47,6 +47,7 @@ router.get("/users/:telegramId", async (req, res) => {
   const telegramId = req.params.telegramId?.trim();
 
   if (!telegramId) {
+    console.log("[UNIT-QUIZ API] Guest fallback used (GET).");
     return res.status(200).json({ success: true, data: toGuestProfile(), error: null });
   }
 
@@ -80,6 +81,7 @@ router.post("/users/sync", async (req, res) => {
   const { telegramId, fullName, username, phoneNumber, language, role } = req.body ?? {};
 
   if (!telegramId) {
+    console.log("[UNIT-QUIZ API] Guest fallback used (SYNC).");
     return res.status(200).json({ success: true, data: toGuestProfile(), error: null });
   }
 
@@ -128,4 +130,3 @@ router.post("/users/sync", async (req, res) => {
 });
 
 export default router;
-
