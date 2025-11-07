@@ -7,11 +7,13 @@ export type Role = "student" | "teacher" | "admin";
 
 export type AuthPayload = {
   tgId: number;
+  telegramId: string | null;
   fullName: string;
   firstName: string | null;
   lastName: string | null;
   username: string | null;
   phoneNumber: string | null;
+  photoUrl: string | null;
   role: Role;
   language: LanguageCode | null;
   createdAt: string | null;
@@ -27,6 +29,7 @@ type SyncSessionInput = {
   language?: LanguageCode;
   phoneNumber?: string | null;
   role?: string | null;
+  photoUrl?: string | null;
 };
 
 type AuthState = {
@@ -58,11 +61,13 @@ const toAuthPayload = (
   fallback: SyncSessionInput
 ): AuthPayload => ({
   tgId: profile.tgId,
+  telegramId: profile.telegramId ?? String(fallback.telegramId),
   fullName: profile.fullName || fallback.fullName,
   firstName: profile.firstName ?? null,
   lastName: profile.lastName ?? null,
   username: profile.tgUsername ?? fallback.username,
   phoneNumber: profile.phoneNumber ?? fallback.phoneNumber ?? null,
+  photoUrl: profile.photoUrl ?? fallback.photoUrl ?? null,
   role: parseRole(profile.role ?? fallback.role ?? null),
   language: parseLanguage(profile.lang) ?? fallback.language ?? "uz",
   createdAt: profile.createdAt,
@@ -89,7 +94,8 @@ export const useAuthStore = create<AuthState>((set, _get) => ({
       username: input.username,
       language: input.language,
       phoneNumber: input.phoneNumber,
-      role: input.role
+      role: input.role,
+      photoUrl: input.photoUrl
     });
 
     if (response.success && response.data) {

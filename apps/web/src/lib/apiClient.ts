@@ -16,6 +16,7 @@ type SyncUserInput = {
   language?: LanguageCode;
   phoneNumber?: string | null;
   role?: string | null;
+  photoUrl?: string | null;
 };
 
 const API_BASE = "/api";

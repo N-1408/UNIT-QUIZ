@@ -41,11 +41,16 @@ export const ProfilePanel = () => {
 
   return (
     <div className="flex items-center gap-3 rounded-[20px] border border-border bg-surface/95 p-4 shadow-elev-sm">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-light text-base font-semibold text-brand">
-        {initials || "TG"}
-      </div>
+      {session.photoUrl ? (
+        <img src={session.photoUrl} alt={session.fullName} className="h-12 w-12 rounded-full object-cover" />
+      ) : (
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-light text-base font-semibold text-brand">
+          {initials || "TG"}
+        </div>
+      )}
       <div className="flex flex-1 flex-col gap-1">
         <h3 className="text-sm font-semibold text-text-primary">{session.fullName}</h3>
+        <p className="text-xs text-text-secondary">Rol: {session.role}</p>
         <p className="text-xs text-text-secondary">tg_id: {session.tgId}</p>
         {metaLine ? <p className="text-xs text-text-secondary">{metaLine}</p> : null}
         {session.createdAt ? (

@@ -60,7 +60,8 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
           telegramId: tgUser.id,
           fullName: fullName || tgUser.username || "do'stimiz",
           username: tgUser.username ?? null,
-          language
+          language,
+          photoUrl: tgUser.photo_url ?? null
         });
 
         if (payload?.language && payload.language !== language) {
@@ -105,4 +106,3 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
     </I18nextProvider>
   );
 };
-

@@ -138,20 +138,27 @@ export const HomePage = () => {
           variants={itemVariants}
           className="rounded-[20px] bg-ui-surface/95 p-6 text-left shadow-[0_4px_12px_rgba(0,0,0,0.04)] backdrop-blur-sm"
         >
-          <div className="flex flex-col gap-3">
-            <h1 className="text-2xl font-semibold text-text-primary">
-              {`Salom, ${displayName}! ${emojis.wave}`}
-            </h1>
-            <p className="text-sm text-text-secondary">{subtitle}</p>
-            <Link
-              to="/exams"
-              onClick={() => triggerHaptic("light")}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-4 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(255,107,0,0.25)] transition duration-200 ease-out hover:brightness-105 active:scale-[0.97]"
-            >
-              <span className="text-[1.1em]">{emojis.rocket}</span>
-              Boshlaymiz!
-            </Link>
+          <div className="flex items-center gap-3">
+            {session?.photoUrl ? (
+              <img src={session.photoUrl} alt={displayName} className="h-9 w-9 rounded-full object-cover" />
+            ) : (
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-light text-sm font-semibold text-brand">
+                {displayName.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="flex flex-col gap-1">
+              <h1 className="text-2xl font-semibold text-text-primary">{`Salom, ${displayName}! ${emojis.wave}`}</h1>
+              <p className="text-sm text-text-secondary">{subtitle}</p>
+            </div>
           </div>
+          <Link
+            to="/exams"
+            onClick={() => triggerHaptic("light")}
+            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-4 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(255,107,0,0.25)] transition duration-200 ease-out hover:brightness-105 active:scale-[0.97]"
+          >
+            <span className="text-[1.1em]">{emojis.rocket}</span>
+            Boshlaymiz!
+          </Link>
         </motion.section>
 
         <motion.section variants={itemVariants} className="flex flex-col gap-4">

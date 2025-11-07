@@ -57,11 +57,13 @@ export type AttemptSummaryDto = {
 
 export type UserProfileResponse = {
   tgId: number;
+  telegramId: string | null;
   fullName: string | null;
   firstName: string | null;
   lastName: string | null;
   tgUsername: string | null;
   phoneNumber: string | null;
+  photoUrl: string | null;
   lang: string | null;
   role: string | null;
   createdAt: string | null;

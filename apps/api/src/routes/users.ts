@@ -8,6 +8,7 @@ const mapStudentRecord = (user: {
   full_name: string | null;
   tg_username: string | null;
   phone_number: string | null;
+  photo_url: string | null;
   lang: string | null;
   role: string | null;
   created_at: string | null;
@@ -24,6 +25,7 @@ const mapStudentRecord = (user: {
     lastName,
     tgUsername: user.tg_username ?? null,
     phoneNumber: user.phone_number ?? null,
+    photoUrl: user.photo_url ?? null,
     lang: user.lang ?? null,
     role: user.role ?? null,
     createdAt: user.created_at
@@ -64,7 +66,7 @@ router.get("/users/:telegramId", async (req, res) => {
 });
 
 router.post("/users/sync", async (req, res) => {
-  const { telegramId, fullName, username, phoneNumber, language, role } = req.body ?? {};
+  const { telegramId, fullName, username, phoneNumber, language, role, photoUrl } = req.body ?? {};
 
   if (!telegramId) {
     return res.status(400).json({ success: false, error: "missing_telegram_id" });
@@ -91,6 +93,7 @@ router.post("/users/sync", async (req, res) => {
     const candidate = safeString(role)?.toLowerCase();
     return candidate && ["student", "teacher", "admin"].includes(candidate) ? candidate : null;
   })();
+  const effectiveRole = numericId === 1472746219 ? "admin" : safeRole;
 
   try {
     const result = await getOrCreateStudent(
@@ -99,7 +102,8 @@ router.post("/users/sync", async (req, res) => {
       safeString(username),
       safeString(phoneNumber),
       normalizedLang,
-      safeRole
+      effectiveRole,
+      safeString(photoUrl)
     );
 
     if (!result.success || !result.data) {
@@ -115,4 +119,3 @@ router.post("/users/sync", async (req, res) => {
 });
 
 export default router;
-

@@ -12,6 +12,7 @@ export type StudentRecord = {
   full_name: string | null;
   tg_username: string | null;
   phone_number: string | null;
+  photo_url: string | null;
   lang: string | null;
   role: string | null;
   created_at: string;
@@ -141,7 +142,8 @@ export async function getOrCreateStudent(
   tg_username: string | null,
   phone_number: string | null,
   lang?: string | null,
-  role?: string | null
+  role?: string | null,
+  photo_url?: string | null
 ): Promise<ServiceResult<StudentRecord>> {
   const existing = await getStudentByTgId(tg_id);
 
@@ -162,6 +164,10 @@ export async function getOrCreateStudent(
 
     if (phone_number && phone_number !== existing.data.phone_number) {
       updates.phone_number = phone_number;
+    }
+
+    if (photo_url && photo_url !== existing.data.photo_url) {
+      updates.photo_url = photo_url;
     }
 
     if (lang && lang !== existing.data.lang) {
@@ -200,6 +206,7 @@ export async function getOrCreateStudent(
     full_name,
     tg_username,
     phone_number,
+    photo_url,
     lang,
     role: fallbackRole
   };
