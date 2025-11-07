@@ -66,7 +66,17 @@ router.get("/users/:telegramId", async (req, res) => {
 });
 
 router.post("/users/sync", async (req, res) => {
-  const { telegramId, fullName, username, phoneNumber, language, role, photoUrl } = req.body ?? {};
+  const body = req.body ?? {};
+  const queryTelegramId = req.query?.telegramId;
+  const telegramId =
+    body.telegramId ?? body?.from?.id ?? body?.message?.from?.id ?? queryTelegramId ?? null;
+
+  console.log("[UNIT-QUIZ] Sync payload received", {
+    telegramId,
+    update_id: body?.update_id
+  });
+
+  const { fullName, username, phoneNumber, language, role, photoUrl } = body;
 
   if (!telegramId) {
     return res.status(400).json({ success: false, error: "missing_telegram_id" });

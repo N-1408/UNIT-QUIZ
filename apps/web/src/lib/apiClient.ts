@@ -19,16 +19,25 @@ type SyncUserInput = {
   photoUrl?: string | null;
 };
 
-const API_BASE = "/api";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "";
 
 const buildHeaders = (headers?: HeadersInit): HeadersInit => ({
   "Content-Type": "application/json",
   ...headers
 });
 
+const buildUrl = (endpoint: string) => {
+  if (API_BASE) {
+    return `${API_BASE.replace(/\/$/, "")}${endpoint}`;
+  }
+  return endpoint;
+};
+
 async function request<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
   try {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
+    const url = buildUrl(endpoint);
+    console.log("[UNIT-QUIZ] API request →", url);
+    const response = await fetch(url, {
       credentials: "include",
       ...options,
       headers: buildHeaders(options?.headers)
