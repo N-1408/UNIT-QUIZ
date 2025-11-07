@@ -30,10 +30,10 @@ export type AttemptRecord = {
 };
 
 export type AttemptWithExamRecord = AttemptRecord & {
-  exams?: {
+  exams?: Array<{
     title: string | null;
     duration_min: number | null;
-  };
+  }> | null;
 };
 
 export type AttemptAnswerRecord = {

@@ -3,25 +3,38 @@ import { getStudentAttempts, submitAttempt } from "../supabaseService.js";
 
 const router = Router();
 
-const mapAttempt = (attempt: {
+type SupabaseAttemptRow = {
   id: number;
   exam_id: number;
-  exams?: { title: string | null };
+  exams?: Array<{ title: string | null }> | { title: string | null } | null;
   score: number | null;
   state: string;
   started_at: string | null;
   submitted_at: string | null;
   duration_spent_sec: number | null;
-}) => ({
-  id: attempt.id,
-  examId: attempt.exam_id,
-  examTitle: attempt.exams?.title ?? null,
-  score: attempt.score,
-  state: attempt.state,
-  startedAt: attempt.started_at,
-  submittedAt: attempt.submitted_at,
-  durationSpentSec: attempt.duration_spent_sec
-});
+};
+
+const pickExamMeta = (attempt: SupabaseAttemptRow) => {
+  if (!attempt.exams) return null;
+  if (Array.isArray(attempt.exams)) {
+    return attempt.exams[0] ?? null;
+  }
+  return attempt.exams;
+};
+
+const mapAttempt = (attempt: SupabaseAttemptRow) => {
+  const examMeta = pickExamMeta(attempt);
+  return {
+    id: attempt.id,
+    examId: attempt.exam_id,
+    examTitle: examMeta?.title ?? null,
+    score: attempt.score,
+    state: attempt.state,
+    startedAt: attempt.started_at,
+    submittedAt: attempt.submitted_at,
+    durationSpentSec: attempt.duration_spent_sec
+  };
+};
 
 router.get("/attempts", async (req, res) => {
   const tgIdParam = req.query.tgId;
@@ -64,4 +77,3 @@ router.post("/attempts/:attemptId/submit", async (req, res) => {
 });
 
 export default router;
-

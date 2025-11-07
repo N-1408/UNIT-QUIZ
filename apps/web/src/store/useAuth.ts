@@ -69,7 +69,7 @@ const toAuthPayload = (
   token: null
 });
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set, _get) => ({
   session: null,
   status: "idle",
   error: null,

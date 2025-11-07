@@ -8,7 +8,7 @@ export type ExamStatus = "upcoming" | "open" | "closed";
 
 export type ExamSummaryDto = {
   id: number;
-  title: string;
+  title: string | null;
   description: string | null;
   durationMin: number | null;
   attemptsLimit: number | null;
@@ -30,7 +30,7 @@ export type ExamQuestionDto = {
     text: string | null;
     isCorrect: boolean | null;
     ord: number | null;
-  }>;
+  }> | null;
 };
 
 export type ExamDetailDto = ExamSummaryDto & {
@@ -39,7 +39,7 @@ export type ExamDetailDto = ExamSummaryDto & {
   shuffleQuestions: boolean | null;
   shuffleAnswers: boolean | null;
   backNavLock: boolean | null;
-  questions: ExamQuestionDto[];
+  questions: ExamQuestionDto[] | null;
 };
 
 export type AttemptState = "active" | "submitted" | "graded" | "auto_submitted";

@@ -30,7 +30,7 @@ export const ExamDetailPage = () => {
       return null;
     }
     return {
-      title: detail.title,
+      title: detail.title ?? `Imtihon #${detail.id}`,
       durationMinutes: detail.durationMin ?? 0,
       attemptsLeft: detail.attemptsLimit ?? 0,
       reviewPolicy: detail.reviewPolicy ?? "Natija yakunlangach ochiladi",

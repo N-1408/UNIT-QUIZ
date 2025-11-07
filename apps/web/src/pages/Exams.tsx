@@ -15,7 +15,7 @@ const FILTERS: Array<{ id: ExamStatus; label: string }> = [
 
 const mapExamToCard = (exam: ExamSummaryDto): ExamCardSummary => ({
   id: exam.id,
-  title: exam.title,
+  title: exam.title ?? "Imtihon",
   startsAt: exam.startsAt ? new Date(exam.startsAt) : null,
   durationMinutes: exam.durationMin ?? 0,
   status: exam.status
@@ -109,4 +109,3 @@ export const ExamsPage = () => {
     </PageContainer>
   );
 };
-

@@ -4,7 +4,7 @@ import { I18nextProvider } from "react-i18next";
 import i18n from "@/lib/i18n";
 import { initTelegramWebApp, syncTelegramTheme, getTelegramUser, type TelegramThemePayload } from "@/lib/telegram";
 import { useThemeStore } from "@/store/useTheme";
-import { useLanguageStore, type LanguageCode } from "@/store/useLanguage";
+import { useLanguageStore } from "@/store/useLanguage";
 import { useAuthStore } from "@/store/useAuth";
 
 export const AppProviders = ({ children }: PropsWithChildren) => {

@@ -18,7 +18,7 @@ type ExamState = {
   currentIndex: number;
   drafts: Record<number, AnswerDraft>;
   detail: ExamDetailDto | null;
-  detailCache: Record<number, ExamDetailDto>;
+  detailCache: Record<number, ExamDetailDto | null>;
   status: "idle" | "loading" | "ready" | "error";
   error: string | null;
   setExamContext: (payload: {
