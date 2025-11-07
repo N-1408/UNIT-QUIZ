@@ -20,6 +20,7 @@ type SyncUserInput = {
 };
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "";
+const API_PREFIX = "/api";
 
 const buildHeaders = (headers?: HeadersInit): HeadersInit => ({
   "Content-Type": "application/json",
@@ -27,10 +28,9 @@ const buildHeaders = (headers?: HeadersInit): HeadersInit => ({
 });
 
 const buildUrl = (endpoint: string) => {
-  if (API_BASE) {
-    return `${API_BASE.replace(/\/$/, "")}${endpoint}`;
-  }
-  return endpoint;
+  const base = API_BASE.replace(/\/$/, "");
+  const path = `${API_PREFIX}${endpoint}`;
+  return base ? `${base}${path}` : path;
 };
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
@@ -49,7 +49,7 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<ApiR
       throw new Error(payload.error ?? `Request failed (${response.status})`);
     }
 
-    console.info(`[api] ${endpoint} ✓`, payload.data);
+    console.info(`[api] ${endpoint} →`, payload.data);
     return {
       success: true,
       data: payload.data,
@@ -57,8 +57,7 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<ApiR
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected API error";
-    console.error(`[api] ${endpoint} ✗`, message);
-    // TODO: Surface toast notification once global feedback system is ready.
+    console.error(`[api] ${endpoint} ×`, message);
     return {
       success: false,
       data: null,
@@ -90,7 +89,6 @@ export const apiClient = {
       body: JSON.stringify(payload)
     }),
 
-  // Example Supabase-direct helper (used when realtime or client-side queries are required).
   getAttemptAnswersDirect: async (attemptId: number) => {
     const { data, error } = await supabase
       .from("attempt_answers")
@@ -98,11 +96,11 @@ export const apiClient = {
       .eq("attempt_id", attemptId);
 
     if (error) {
-      console.error("[api] attempt_answers ✗", error);
+      console.error("[api] attempt_answers ×", error);
       return { success: false as const, data: null, error: error.message };
     }
 
-    console.info("[api] attempt_answers ✓", data);
+    console.info("[api] attempt_answers →", data);
     return { success: true as const, data, error: null };
   }
 };
