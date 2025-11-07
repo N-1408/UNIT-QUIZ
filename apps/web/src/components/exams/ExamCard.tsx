@@ -1,8 +1,8 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Clock, Star } from "lucide-react";
 import { cn, formatDuration, formatTime } from "@/lib/utils";
-
-export type ExamStatus = "upcoming" | "open" | "closed";
+import type { ExamStatus } from "@/types/api";
+export type { ExamStatus } from "@/types/api";
 
 export type ExamSummary = {
   id: number;
@@ -76,3 +76,4 @@ export const ExamCard = ({ exam, className }: ExamCardProps) => {
     </Link>
   );
 };
+

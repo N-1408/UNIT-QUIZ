@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { apiClient } from "@/lib/apiClient";
+import type { ExamDetailDto } from "@/types/api";
 
 type AnswerDraft = {
   questionId: number;
@@ -15,6 +17,10 @@ type ExamState = {
   questionCount: number;
   currentIndex: number;
   drafts: Record<number, AnswerDraft>;
+  detail: ExamDetailDto | null;
+  detailCache: Record<number, ExamDetailDto>;
+  status: "idle" | "loading" | "ready" | "error";
+  error: string | null;
   setExamContext: (payload: {
     examId: number;
     attemptId: number | null;
@@ -23,10 +29,11 @@ type ExamState = {
   }) => void;
   setCurrentIndex: (index: number) => void;
   upsertDraft: (draft: Omit<AnswerDraft, "updatedAt">) => void;
+  fetchExamDetail: (examId: number) => Promise<ExamDetailDto | null>;
   clear: () => void;
 };
 
-export const useExamState = create<ExamState>((set) => ({
+export const useExamState = create<ExamState>((set, get) => ({
   currentExamId: null,
   attemptId: null,
   startedAt: null,
@@ -34,6 +41,10 @@ export const useExamState = create<ExamState>((set) => ({
   questionCount: 0,
   currentIndex: 0,
   drafts: {},
+  detail: null,
+  detailCache: {},
+  status: "idle",
+  error: null,
   setExamContext: ({ examId, attemptId, durationSec, questionCount }) =>
     set({
       currentExamId: examId,
@@ -57,6 +68,32 @@ export const useExamState = create<ExamState>((set) => ({
         }
       }
     })),
+  fetchExamDetail: async (examId) => {
+    const cached = get().detailCache[examId];
+    if (cached) {
+      set({ detail: cached, status: "ready", error: null });
+      return cached;
+    }
+
+    set({ status: "loading", error: null });
+    const response = await apiClient.getExamById(examId);
+
+    if (response.success && response.data) {
+      set((state) => ({
+        detail: response.data,
+        detailCache: {
+          ...state.detailCache,
+          [examId]: response.data
+        },
+        status: "ready",
+        error: null
+      }));
+      return response.data;
+    }
+
+    set({ status: "error", error: response.error ?? "Failed to load exam" });
+    return null;
+  },
   clear: () =>
     set({
       currentExamId: null,
@@ -65,6 +102,9 @@ export const useExamState = create<ExamState>((set) => ({
       durationSec: 0,
       questionCount: 0,
       currentIndex: 0,
-      drafts: {}
+      drafts: {},
+      detail: null,
+      status: "idle",
+      error: null
     })
 }));

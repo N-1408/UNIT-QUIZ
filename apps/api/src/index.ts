@@ -3,6 +3,8 @@ import cors from 'cors';
 import { env } from './env.js';
 import testsRouter from './routes/tests.js';
 import usersRouter from './routes/users.js';
+import examsRouter from './routes/exams.js';
+import attemptsRouter from './routes/attempts.js';
 import { bot } from './bot.js';
 
 console.log('Server starting...');
@@ -49,6 +51,8 @@ app.post('/telegram/webhook', async (req, res) => {
 
 app.use('/api', testsRouter);
 app.use('/api', usersRouter);
+app.use('/api', examsRouter);
+app.use('/api', attemptsRouter);
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Global error:', err);

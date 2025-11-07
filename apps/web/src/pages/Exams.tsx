@@ -1,41 +1,61 @@
-﻿import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ExamList } from "@/components/exams/ExamList";
-import type { ExamSummary } from "@/components/exams/ExamCard";
+import type { ExamSummary as ExamCardSummary, ExamStatus } from "@/components/exams/ExamCard";
 import { PageContainer } from "@/components/layout/Page";
+import { apiClient } from "@/lib/apiClient";
+import type { ExamSummaryDto } from "@/types/api";
 import { cn } from "@/lib/utils";
 
-const MOCK_DATA: Record<"upcoming" | "open" | "closed", ExamSummary[]> = {
-  upcoming: [
-    {
-      id: 3,
-      title: "Speaking Jam Session",
-      startsAt: new Date(Date.now() + 1000 * 60 * 120),
-      durationMinutes: 25,
-      status: "upcoming"
-    }
-  ],
-  open: [
-    {
-      id: 4,
-      title: "Grammar Clinic",
-      startsAt: null,
-      durationMinutes: 35,
-      status: "open"
-    }
-  ],
-  closed: []
-};
-
-const FILTERS = [
+const FILTERS: Array<{ id: ExamStatus; label: string }> = [
   { id: "upcoming", label: "UPCOMING" },
   { id: "open", label: "OPEN" },
   { id: "closed", label: "CLOSED" }
-] as const;
+];
+
+const mapExamToCard = (exam: ExamSummaryDto): ExamCardSummary => ({
+  id: exam.id,
+  title: exam.title,
+  startsAt: exam.startsAt ? new Date(exam.startsAt) : null,
+  durationMinutes: exam.durationMin ?? 0,
+  status: exam.status
+});
 
 export const ExamsPage = () => {
   const { t } = useTranslation();
-  const [activeFilter, setActiveFilter] = useState<(typeof FILTERS)[number]["id"]>("open");
+  const [activeFilter, setActiveFilter] = useState<ExamStatus>("open");
+  const [items, setItems] = useState<ExamSummaryDto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setError(null);
+
+    void (async () => {
+      const response = await apiClient.getExams();
+      if (!mounted) {
+        return;
+      }
+      if (response.success && response.data) {
+        setItems(response.data);
+      } else {
+        setError(response.error ?? "Imtihonlar ro'yxatini yuklab bo'lmadi.");
+      }
+      setLoading(false);
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => item.status === activeFilter).map(mapExamToCard);
+  }, [activeFilter, items]);
+
+  const hasData = filteredItems.length > 0;
 
   return (
     <PageContainer className="gap-5">
@@ -69,7 +89,24 @@ export const ExamsPage = () => {
         })}
       </div>
 
-      <ExamList items={MOCK_DATA[activeFilter]} />
+      {loading ? (
+        <div className="space-y-3">
+          {[0, 1].map((key) => (
+            <div key={key} className="h-24 animate-pulse rounded-[20px] bg-surface-alt/80" />
+          ))}
+        </div>
+      ) : error ? (
+        <div className="rounded-[20px] border border-border bg-surface/95 p-4 text-sm text-text-secondary shadow-elev-sm">
+          {error}
+        </div>
+      ) : hasData ? (
+        <ExamList items={filteredItems} />
+      ) : (
+        <div className="rounded-[20px] border border-dashed border-border bg-surface/80 p-4 text-sm text-text-secondary shadow-elev-sm">
+          {t("exams.empty", { defaultValue: "Bu toifada hozircha imtihon yo'q." })}
+        </div>
+      )}
     </PageContainer>
   );
 };
+

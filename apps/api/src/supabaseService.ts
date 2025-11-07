@@ -29,6 +29,13 @@ export type AttemptRecord = {
   meta: unknown;
 };
 
+export type AttemptWithExamRecord = AttemptRecord & {
+  exams?: {
+    title: string | null;
+    duration_min: number | null;
+  };
+};
+
 export type AttemptAnswerRecord = {
   id: number;
   attempt_id: number;
@@ -66,7 +73,19 @@ export type ExamWithQuestions = {
       is_correct: boolean | null;
       ord: number | null;
     }>;
-  }>;
+  }>; 
+};
+
+export type ExamSummaryRecord = {
+  id: number;
+  title: string;
+  description: string | null;
+  duration_min: number | null;
+  attempts_limit: number | null;
+  review_policy: string | null;
+  pass_min_correct: number | null;
+  is_published: boolean | null;
+  created_at: string | null;
 };
 
 const createError = <T>(scope: string, error: unknown): ServiceResult<T> => {
@@ -88,6 +107,19 @@ const createSuccess = <T>(data: T, message = "OK"): ServiceResult<T> => ({
   data,
   message
 });
+
+export async function listExams(): Promise<ServiceResult<ExamSummaryRecord[]>> {
+  const { data, error } = await supabase
+    .from("exams")
+    .select("id,title,description,duration_min,attempts_limit,review_policy,pass_min_correct,is_published,created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return createError("listExams", error);
+  }
+
+  return createSuccess((data as ExamSummaryRecord[]) ?? []);
+}
 
 export async function getStudentByTgId(tg_id: number): Promise<ServiceResult<StudentRecord | null>> {
   const { data, error } = await supabase
@@ -214,7 +246,7 @@ export async function submitAttempt(
   attempt_id: number,
   score: number | null,
   duration_spent_sec: number | null
-): Promise<ServiceResult<AttemptRecord>> {
+): Promise<ServiceResult<AttemptWithExamRecord>> {
   const payload = {
     state: "submitted" as AttemptRecord["state"],
     score,
@@ -222,7 +254,28 @@ export async function submitAttempt(
     submitted_at: new Date().toISOString()
   };
 
-  const { data, error } = await supabase.from("attempts").update(payload).eq("id", attempt_id).select("*").maybeSingle();
+  const { data, error } = await supabase
+    .from("attempts")
+    .update(payload)
+    .eq("id", attempt_id)
+    .select(
+      `
+      id,
+      exam_id,
+      student_tg_id,
+      state,
+      started_at,
+      submitted_at,
+      score,
+      duration_spent_sec,
+      meta,
+      exams:exam_id (
+        title,
+        duration_min
+      )
+    `
+    )
+    .maybeSingle();
 
   if (error) {
     return createError("submitAttempt", error);
@@ -232,7 +285,7 @@ export async function submitAttempt(
     return { success: false, message: "Attempt not found" };
   }
 
-  return createSuccess(data as AttemptRecord);
+  return createSuccess(data as AttemptWithExamRecord);
 }
 
 export async function saveAnswer(
@@ -310,14 +363,64 @@ export async function getExamWithQuestions(exam_id: number): Promise<ServiceResu
   return createSuccess((data as ExamWithQuestions) ?? null);
 }
 
-export async function getStudentAttempts(student_tg_id: number): Promise<ServiceResult<AttemptRecord[]>> {
-  const { data, error } = await supabase.from("attempts").select("*").eq("student_tg_id", student_tg_id).order("id", {
-    ascending: false
-  });
+export async function getStudentAttempts(student_tg_id: number): Promise<ServiceResult<AttemptWithExamRecord[]>> {
+  const { data, error } = await supabase
+    .from("attempts")
+    .select(
+      `
+      id,
+      exam_id,
+      student_tg_id,
+      state,
+      started_at,
+      submitted_at,
+      score,
+      duration_spent_sec,
+      meta,
+      exams:exam_id (
+        title,
+        duration_min
+      )
+    `
+    )
+    .eq("student_tg_id", student_tg_id)
+    .order("id", {
+      ascending: false
+    });
 
   if (error) {
     return createError("getStudentAttempts", error);
   }
 
-  return createSuccess((data as AttemptRecord[]) ?? []);
+  return createSuccess((data as AttemptWithExamRecord[]) ?? []);
+}
+
+export async function getAttemptById(attempt_id: number): Promise<ServiceResult<AttemptWithExamRecord | null>> {
+  const { data, error } = await supabase
+    .from("attempts")
+    .select(
+      `
+      id,
+      exam_id,
+      student_tg_id,
+      state,
+      started_at,
+      submitted_at,
+      score,
+      duration_spent_sec,
+      meta,
+      exams:exam_id (
+        title,
+        duration_min
+      )
+    `
+    )
+    .eq("id", attempt_id)
+    .maybeSingle();
+
+  if (error) {
+    return createError("getAttemptById", error);
+  }
+
+  return createSuccess((data as AttemptWithExamRecord) ?? null);
 }

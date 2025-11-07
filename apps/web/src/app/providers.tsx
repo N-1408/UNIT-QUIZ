@@ -5,20 +5,19 @@ import i18n from "@/lib/i18n";
 import { initTelegramWebApp, syncTelegramTheme, getTelegramUser, type TelegramThemePayload } from "@/lib/telegram";
 import { useThemeStore } from "@/store/useTheme";
 import { useLanguageStore, type LanguageCode } from "@/store/useLanguage";
-import { useAuthStore, type AuthPayload } from "@/store/useAuth";
+import { useAuthStore } from "@/store/useAuth";
 
 export const AppProviders = ({ children }: PropsWithChildren) => {
   const theme = useThemeStore((state) => state.theme);
   const setTelegramTheme = useThemeStore((state) => state.setTelegramTheme);
   const language = useLanguageStore((state) => state.language);
   const setLanguage = useLanguageStore((state) => state.setLanguage);
-  const setSession = useAuthStore((state) => state.setSession);
   const currentSession = useAuthStore((state) => state.session);
-  const setAuthStatus = useAuthStore((state) => state.setStatus);
   const authStatus = useAuthStore((state) => state.status);
+  const syncSession = useAuthStore((state) => state.syncSession);
   const hasBootstrappedRef = useRef(false);
   useEffect(() => {
-    if (!currentSession && authStatus === "idle") {
+    if (!currentSession && authStatus !== "loading") {
       hasBootstrappedRef.current = false;
     }
   }, [authStatus, currentSession]);
@@ -68,95 +67,21 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
     }
 
     hasBootstrappedRef.current = true;
-    const controller = new AbortController();
+    const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ").trim();
 
-    const parseLanguage = (code: unknown): LanguageCode | null => {
-      if (code === "uz" || code === "ru" || code === "en") {
-        return code;
+    void (async () => {
+      const payload = await syncSession({
+        telegramId: tgUser.id,
+        fullName: fullName || tgUser.username || "do'stimiz",
+        username: tgUser.username ?? null,
+        language
+      });
+
+      if (payload?.language && payload.language !== language) {
+        setLanguage(payload.language);
       }
-      return null;
-    };
-    const parseRole = (role: unknown): AuthPayload["role"] => {
-      if (role === "teacher" || role === "admin") {
-        return role;
-      }
-      return "student";
-    };
-
-    const syncUser = async () => {
-      const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ").trim();
-
-      setAuthStatus("loading");
-
-      try {
-        const response = await fetch("/api/users/sync", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            telegramId: tgUser.id,
-            fullName: fullName || tgUser.username || "do'stimiz",
-            username: tgUser.username ?? null,
-            language
-          }),
-          signal: controller.signal
-        });
-
-        if (!response.ok) {
-          throw new Error(`Auth sync failed (${response.status})`);
-        }
-
-        const data: {
-          tgId: number;
-          fullName: string | null;
-          firstName: string | null;
-          lastName: string | null;
-          tgUsername: string | null;
-          phoneNumber: string | null;
-          lang: string | null;
-          role: string | null;
-          createdAt: string | null;
-        } = await response.json();
-
-        if (controller.signal.aborted) {
-          return;
-        }
-
-        const normalizedLanguage = parseLanguage(data.lang) ?? language ?? "uz";
-        const normalizedRole = parseRole(data.role);
-        const payload: AuthPayload = {
-          tgId: data.tgId,
-          fullName: data.fullName || fullName || tgUser.username || "do'stimiz",
-          firstName: data.firstName ?? tgUser.first_name ?? null,
-          lastName: data.lastName ?? tgUser.last_name ?? null,
-          username: data.tgUsername ?? tgUser.username ?? null,
-          phoneNumber: data.phoneNumber ?? null,
-          role: normalizedRole,
-          language: normalizedLanguage,
-          createdAt: data.createdAt,
-          token: null
-        };
-
-        setSession(payload);
-        setAuthStatus("ready");
-        if (normalizedLanguage !== language) {
-          setLanguage(normalizedLanguage);
-        }
-      } catch (error) {
-        if (!controller.signal.aborted) {
-          console.error("[Auth] bootstrap failed:", error);
-          setSession(null);
-          setAuthStatus("error", error instanceof Error ? error.message : "Auth sync failed");
-        }
-      }
-    };
-
-    void syncUser();
-
-    return () => controller.abort();
-  }, [authStatus, currentSession, language, setAuthStatus, setLanguage, setSession]);
+    })();
+  }, [authStatus, currentSession, language, setLanguage, syncSession]);
 
   useEffect(() => {
     const root = document.documentElement;
