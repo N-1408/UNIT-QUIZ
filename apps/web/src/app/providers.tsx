@@ -52,27 +52,24 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
         initTelegramWebApp();
         const tg = window.Telegram?.WebApp;
         tg?.ready?.();
-
         const tgUser = tg?.initDataUnsafe?.user ?? FALLBACK_USER;
         console.log("[UNIT-QUIZ] Telegram user:", tgUser);
 
-        await useAuthStore
-          .getState()
-          .syncSession({
-            telegramId: tgUser.id,
-            fullName: [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ").trim() || tgUser.username || "do'stimiz",
-            username: tgUser.username ?? null,
-            language
-          })
-          .then((payload) => {
-            if (payload?.language && payload.language !== language) {
-              setLanguage(payload.language);
-            }
-            console.log("[UNIT-QUIZ] Auth store ready.");
-          });
+        const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ").trim();
+        const payload = await useAuthStore.getState().syncSession({
+          telegramId: tgUser.id,
+          fullName: fullName || tgUser.username || "do'stimiz",
+          username: tgUser.username ?? null,
+          language
+        });
+
+        if (payload?.language && payload.language !== language) {
+          setLanguage(payload.language);
+        }
+        console.log("[UNIT-QUIZ] Auth store ready.");
       } catch (error) {
         console.error("[UNIT-QUIZ] Bootstrap error:", error);
-        useAuthStore.setState({ status: "ready", error: null });
+        useAuthStore.setState((state) => ({ ...state, status: "ready", error: null }));
       }
     })();
   }, [language, setLanguage]);
@@ -108,3 +105,4 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
     </I18nextProvider>
   );
 };
+
