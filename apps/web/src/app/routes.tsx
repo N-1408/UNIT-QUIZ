@@ -1,11 +1,13 @@
 import { createBrowserRouter } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { HomePage } from "@/pages/Home";
 import { ExamsPage } from "@/pages/Exams";
 import { ExamDetailPage } from "@/pages/ExamDetail";
 import { AttemptPage } from "@/pages/Attempt";
 import { ResultsPage } from "@/pages/Results";
 import { SettingsPage } from "@/pages/Settings";
+import { AdminPage } from "@/pages/Admin";
 
 export const appRouter = createBrowserRouter([
   {
@@ -14,10 +16,39 @@ export const appRouter = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "exams", element: <ExamsPage /> },
-      { path: "exams/:examId", element: <ExamDetailPage /> },
-      { path: "attempts/:attemptId", element: <AttemptPage /> },
-      { path: "results", element: <ResultsPage /> },
-      { path: "settings", element: <SettingsPage /> }
+      {
+        path: "exams/:examId",
+        element: (
+          <ProtectedRoute>
+            <ExamDetailPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "attempts/:attemptId",
+        element: (
+          <ProtectedRoute>
+            <AttemptPage />
+          </ProtectedRoute>
+        )
+      },
+      {
+        path: "results",
+        element: (
+          <ProtectedRoute>
+            <ResultsPage />
+          </ProtectedRoute>
+        )
+      },
+      { path: "settings", element: <SettingsPage /> },
+      {
+        path: "admin",
+        element: (
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminPage />
+          </ProtectedRoute>
+        )
+      }
     ]
   }
 ]);
