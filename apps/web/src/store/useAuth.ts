@@ -100,6 +100,7 @@ export const useAuthStore = create<AuthState>((set, _get) => ({
 
     if (response.success && response.data) {
       const payload = toAuthPayload(response.data, input);
+      console.log("[UNIT-QUIZ] Auth hydrated →", payload);
       set({ session: payload, status: "ready", error: null });
       return payload;
     }

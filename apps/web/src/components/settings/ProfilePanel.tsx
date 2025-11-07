@@ -50,6 +50,9 @@ export const ProfilePanel = () => {
       )}
       <div className="flex flex-1 flex-col gap-1">
         <h3 className="text-sm font-semibold text-text-primary">{session.fullName}</h3>
+        {session.username ? (
+          <p className="text-xs text-text-secondary">@{session.username}</p>
+        ) : null}
         <p className="text-xs text-text-secondary">Rol: {session.role}</p>
         <p className="text-xs text-text-secondary">tg_id: {session.tgId}</p>
         {metaLine ? <p className="text-xs text-text-secondary">{metaLine}</p> : null}
