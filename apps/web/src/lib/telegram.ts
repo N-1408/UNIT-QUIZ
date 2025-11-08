@@ -26,7 +26,7 @@ type TelegramThemeParams = {
   button_text_color?: string;
 };
 
-type TelegramWebApp = {
+type TelegramWebAppInstance = {
   ready: () => void;
   expand: () => void;
   colorScheme: "light" | "dark";
@@ -40,19 +40,11 @@ type TelegramWebApp = {
   };
 };
 
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: TelegramWebApp;
-    };
-  }
-}
-
-let webApp: TelegramWebApp | undefined;
+let webApp: TelegramWebAppInstance | undefined;
 
 export const initTelegramWebApp = () => {
   if (typeof window === "undefined") return;
-  const tg = window.Telegram?.WebApp;
+  const tg = window.Telegram?.WebApp as TelegramWebAppInstance | undefined;
   if (!tg) return;
   webApp = tg;
   try {

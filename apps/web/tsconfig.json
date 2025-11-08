@@ -1,4 +1,7 @@
 {
+  "compilerOptions": {
+    "types": ["vite/client", "./src/types/telegram"]
+  },
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
