@@ -68,32 +68,29 @@ router.get("/users/:telegramId", async (req, res) => {
 router.post("/users/sync", async (req, res) => {
   const body = req.body ?? {};
 
-  const parseId = (value: unknown): number | null => {
-    if (value === undefined || value === null) return null;
-    const numeric = Number(String(value).trim());
-    return Number.isFinite(numeric) ? numeric : null;
-  };
-
-  const candidates = [
-    req.query?.telegramId,
-    body.telegramId,
-    body?.user?.id,
-    body?.from?.id,
-    body?.message?.from?.id
-  ];
-
-  const numericId = candidates.reduce<number | null>(
-    (acc, current) => (acc !== null ? acc : parseId(current)),
-    null
-  );
-
-  console.log("[UNIT-QUIZ] Sync payload received:", {
-    raw: candidates,
-    update_id: body?.update_id
+  console.log("[UNIT-QUIZ] Raw request dump:", {
+    method: req.method,
+    query: req.query,
+    bodyKeys: Object.keys(req.body || {}),
+    body: req.body
   });
 
-  if (numericId === null) {
-    console.warn("[UNIT-QUIZ] Invalid telegramId:", candidates);
+  const telegramIdSources = [
+    req.query?.telegramId,
+    body?.telegramId,
+    body?.user?.id,
+    body?.from?.id,
+    body?.message?.from?.id,
+    body?.chat?.id
+  ];
+
+  console.log("[UNIT-QUIZ] ID candidates:", telegramIdSources);
+
+  const validIds = telegramIdSources.filter((value) => value && !Number.isNaN(Number(value)));
+  const telegramId = validIds.length ? Number(validIds[0]) : null;
+
+  if (!telegramId) {
+    console.error("[UNIT-QUIZ] Invalid telegramId from all sources:", telegramIdSources);
     return res.status(400).json({ success: false, error: "invalid_telegram_id" });
   }
 
@@ -118,7 +115,7 @@ router.post("/users/sync", async (req, res) => {
 
   try {
     const result = await getOrCreateStudent(
-      numericId,
+      telegramId,
       safeString(fullName),
       safeString(username),
       safeString(phoneNumber),
@@ -133,7 +130,14 @@ router.post("/users/sync", async (req, res) => {
     }
 
     const mapped = mapStudentRecord(result.data);
-    console.log("[UNIT-QUIZ] Sync response:", mapped);
+    console.log("[UNIT-QUIZ] Sync response:", {
+      telegramId: mapped.tgId,
+      role: mapped.role,
+      fullName: mapped.fullName,
+      username: mapped.tgUsername,
+      phoneNumber: mapped.phoneNumber,
+      photoUrl: mapped.photoUrl
+    });
     return res.json({ success: true, data: mapped, error: null });
   } catch (error) {
     console.error("sync user error:", error);
