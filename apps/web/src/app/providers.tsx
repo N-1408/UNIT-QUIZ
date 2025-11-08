@@ -62,6 +62,23 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
   }, []);
 
   useEffect(() => {
+    const tg = window.Telegram?.WebApp;
+    if (!tg) {
+      void remoteLog("telegram_sdk_missing", null);
+      return;
+    }
+
+    tg.ready?.();
+    const dataUnsafe = tg.initDataUnsafe ?? null;
+    const user = dataUnsafe?.user ?? null;
+    void remoteLog("telegram_detected", { exists: Boolean(user), user });
+
+    if (!user) {
+      void remoteLog("telegram_user_missing_initial", dataUnsafe);
+    }
+  }, []);
+
+  useEffect(() => {
     let attempts = 0;
     let timeoutId: number | null = null;
     let cancelled = false;
