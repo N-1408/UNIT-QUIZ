@@ -7,6 +7,11 @@ import { useThemeStore } from "@/store/useTheme";
 import { useLanguageStore } from "@/store/useLanguage";
 import { useAuthStore } from "@/store/useAuth";
 
+type TelegramUserExtended = TelegramUser & {
+  language_code?: string;
+  photo_url?: string;
+};
+
 async function remoteLog(tag: string, data: unknown) {
   try {
     await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ""}/api/log`, {
@@ -18,12 +23,6 @@ async function remoteLog(tag: string, data: unknown) {
     // Ignore logging errors so Mini App flow continues.
   }
 }
-
-export const AppProviders = ({ children }: PropsWithChildren) => {
-type TelegramUserExtended = TelegramUser & {
-  language_code?: string;
-  photo_url?: string;
-};
 
 export const AppProviders = ({ children }: PropsWithChildren) => {
   const theme = useThemeStore((state) => state.theme);
