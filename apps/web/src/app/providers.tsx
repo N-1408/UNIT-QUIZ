@@ -6,6 +6,7 @@ import { initTelegramWebApp, syncTelegramTheme, type TelegramThemePayload, type 
 import { useThemeStore } from "@/store/useTheme";
 import { useLanguageStore } from "@/store/useLanguage";
 import { useAuthStore } from "@/store/useAuth";
+import type { LanguageCode } from "@/store/useLanguage";
 
 type TelegramUserExtended = TelegramUser & {
   language_code?: string;
@@ -101,7 +102,7 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
           telegramId: tgUser.id,
           fullName: fullName || tgUser.username || "do'stimiz",
           username: tgUser.username ?? null,
-          language: tgUser.language_code ?? language ?? "en",
+          language: ((tgUser.language_code ?? language ?? "en") as unknown) as LanguageCode,
           photoUrl: tgUser.photo_url ?? null
         };
 
