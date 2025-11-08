@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { LanguageRadio } from "@/components/settings/LanguageRadio";
 import { ThemeToggle } from "@/components/settings/ThemeToggle";
@@ -24,35 +24,48 @@ export const SettingsPage = () => {
   const { t } = useTranslation();
   const session = useAuthStore((state) => state.session);
   const syncSession = useAuthStore((state) => state.syncSession);
-  const retryRef = useRef(false);
 
   useEffect(() => {
-    if (session || retryRef.current) {
-      return;
-    }
+    let isMounted = true;
 
-    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user as TelegramUserExtended | undefined;
+    const runSync = async () => {
+      if (useAuthStore.getState().session) {
+        return;
+      }
 
-    if (!tgUser?.id) {
-      retryRef.current = true;
-      console.warn("[UNIT-QUIZ] Telegram user not available for Settings resync.");
-      return;
-    }
+      const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user as TelegramUserExtended | undefined;
 
-    retryRef.current = true;
-    console.log("[UNIT-QUIZ] No session found — attempting Telegram sync from Settings.");
+      if (!tgUser?.id) {
+        console.warn("[UNIT-QUIZ] Telegram user not available for Settings resync.");
+        return;
+      }
 
-    const fullName = `${tgUser.first_name ?? ""} ${tgUser.last_name ?? ""}`.trim();
-    const language = normalizeLanguage(tgUser.language_code ?? null);
+      console.log("[UNIT-QUIZ] No session found — attempting Telegram sync from Settings.");
 
-    void syncSession({
-      telegramId: tgUser.id,
-      fullName: fullName || tgUser.username || "do'stimiz",
-      username: tgUser.username ?? null,
-      language,
-      photoUrl: tgUser.photo_url ?? null
-    });
-  }, [session, syncSession]);
+      const fullName = `${tgUser.first_name ?? ""} ${tgUser.last_name ?? ""}`.trim();
+      const language = normalizeLanguage(tgUser.language_code ?? null);
+
+      try {
+        await syncSession({
+          telegramId: tgUser.id,
+          fullName: fullName || tgUser.username || "do'stimiz",
+          username: tgUser.username ?? null,
+          language,
+          photoUrl: tgUser.photo_url ?? null
+        });
+      } catch (error) {
+        if (isMounted) {
+          console.error("[UNIT-QUIZ] Settings sync error:", error);
+        }
+      }
+    };
+
+    void runSync();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [syncSession]);
 
   if (!session) {
     return (
