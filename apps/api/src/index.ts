@@ -5,6 +5,7 @@ import testsRouter from './routes/tests.js';
 import usersRouter from './routes/users.js';
 import examsRouter from './routes/exams.js';
 import attemptsRouter from './routes/attempts.js';
+import logRouter from './routes/log.js';
 import { bot } from './bot.js';
 
 console.log('Server starting...');
@@ -49,6 +50,7 @@ app.post('/telegram/webhook', async (req, res) => {
   }
 });
 
+app.use('/api/log', logRouter);
 app.use('/api', testsRouter);
 app.use('/api', usersRouter);
 app.use('/api', examsRouter);

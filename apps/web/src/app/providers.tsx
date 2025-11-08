@@ -7,6 +7,18 @@ import { useThemeStore } from "@/store/useTheme";
 import { useLanguageStore } from "@/store/useLanguage";
 import { useAuthStore } from "@/store/useAuth";
 
+async function remoteLog(tag: string, data: unknown) {
+  try {
+    await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ""}/api/log`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tag, data })
+    });
+  } catch {
+    // Ignore logging errors so Mini App flow continues.
+  }
+}
+
 export const AppProviders = ({ children }: PropsWithChildren) => {
   const theme = useThemeStore((state) => state.theme);
   const setTelegramTheme = useThemeStore((state) => state.setTelegramTheme);
@@ -50,6 +62,11 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
         initTelegramWebApp();
         const tg = window.Telegram?.WebApp;
         tg?.ready?.();
+
+        await remoteLog("telegram_object", Boolean(window.Telegram?.WebApp));
+        await remoteLog("telegram_dataUnsafe", window.Telegram?.WebApp?.initDataUnsafe);
+        await remoteLog("telegram_user", window.Telegram?.WebApp?.initDataUnsafe?.user);
+
         const tgUser = tg?.initDataUnsafe?.user as TelegramUser | undefined;
         console.log("[UNIT-QUIZ] Telegram raw user ->", tgUser);
 
@@ -69,6 +86,7 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
         };
 
         console.log("[UNIT-QUIZ] Sync payload being sent ->", syncPayload);
+        await remoteLog("sync_payload", syncPayload);
 
         const payload = await useAuthStore.getState().syncSession(syncPayload);
 
