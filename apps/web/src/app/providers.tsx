@@ -20,6 +20,12 @@ async function remoteLog(tag: string, data: unknown) {
 }
 
 export const AppProviders = ({ children }: PropsWithChildren) => {
+type TelegramUserExtended = TelegramUser & {
+  language_code?: string;
+  photo_url?: string;
+};
+
+export const AppProviders = ({ children }: PropsWithChildren) => {
   const theme = useThemeStore((state) => state.theme);
   const setTelegramTheme = useThemeStore((state) => state.setTelegramTheme);
   const language = useLanguageStore((state) => state.language);
@@ -68,7 +74,7 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
         if (cancelled) return;
 
         const tg = window.Telegram?.WebApp;
-        const tgUser = tg?.initDataUnsafe?.user as TelegramUser | undefined;
+        const tgUser = (tg?.initDataUnsafe?.user ?? {}) as TelegramUserExtended;
 
         await remoteLog("telegram_attempt", {
           attempt: attempts,
@@ -96,7 +102,7 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
           telegramId: tgUser.id,
           fullName: fullName || tgUser.username || "do'stimiz",
           username: tgUser.username ?? null,
-          language: tgUser.language_code ?? language,
+          language: tgUser.language_code ?? language ?? "en",
           photoUrl: tgUser.photo_url ?? null
         };
 
