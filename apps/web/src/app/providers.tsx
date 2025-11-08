@@ -56,32 +56,47 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
   }, []);
 
   useEffect(() => {
-    (async () => {
+    let attempts = 0;
+    let timeoutId: number | null = null;
+    let cancelled = false;
+
+    console.log("[UNIT-QUIZ] Telegram init starting with retry...");
+    initTelegramWebApp();
+
+    const checkTelegram = async () => {
       try {
-        console.log("[UNIT-QUIZ] Telegram init starting...");
-        initTelegramWebApp();
+        if (cancelled) return;
+
         const tg = window.Telegram?.WebApp;
-        tg?.ready?.();
-
-        await remoteLog("telegram_object", Boolean(window.Telegram?.WebApp));
-        await remoteLog("telegram_dataUnsafe", window.Telegram?.WebApp?.initDataUnsafe);
-        await remoteLog("telegram_user", window.Telegram?.WebApp?.initDataUnsafe?.user);
-
         const tgUser = tg?.initDataUnsafe?.user as TelegramUser | undefined;
-        console.log("[UNIT-QUIZ] Telegram raw user ->", tgUser);
 
-        if (!tgUser?.id) {
-          console.error("[UNIT-QUIZ] Telegram did not provide a valid user payload.");
-          useAuthStore.setState((state) => ({ ...state, status: "ready", error: "telegram_user_missing" }));
+        await remoteLog("telegram_attempt", {
+          attempt: attempts,
+          tgExists: Boolean(tg),
+          tgUser: tgUser ?? null
+        });
+
+        if (!tg || !tgUser) {
+          if (attempts < 10) {
+            attempts += 1;
+            timeoutId = window.setTimeout(checkTelegram, 1000);
+          } else {
+            await remoteLog("telegram_final_fail", { reason: "No Telegram context after 10s" });
+            console.error("[UNIT-QUIZ] Telegram context still missing after retries.");
+            useAuthStore.setState((state) => ({ ...state, status: "ready", error: "telegram_user_missing" }));
+          }
           return;
         }
 
-        const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ").trim();
+        await remoteLog("telegram_ready", { id: tgUser.id, username: tgUser.username });
+        tg.ready?.();
+
+        const fullName = `${tgUser.first_name ?? ""} ${tgUser.last_name ?? ""}`.trim();
         const syncPayload = {
           telegramId: tgUser.id,
           fullName: fullName || tgUser.username || "do'stimiz",
           username: tgUser.username ?? null,
-          language,
+          language: tgUser.language_code ?? language,
           photoUrl: tgUser.photo_url ?? null
         };
 
@@ -98,7 +113,16 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
         console.error("[UNIT-QUIZ] Bootstrap error:", error);
         useAuthStore.setState((state) => ({ ...state, status: "ready", error: null }));
       }
-    })();
+    };
+
+    checkTelegram();
+
+    return () => {
+      cancelled = true;
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
   }, [language, setLanguage]);
 
   useEffect(() => {
