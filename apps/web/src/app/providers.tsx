@@ -7,8 +7,6 @@ import { useThemeStore } from "@/store/useTheme";
 import { useLanguageStore } from "@/store/useLanguage";
 import { useAuthStore } from "@/store/useAuth";
 
-const FALLBACK_USER: TelegramUser = { id: 999, first_name: "Guest", username: "guest" };
-
 export const AppProviders = ({ children }: PropsWithChildren) => {
   const theme = useThemeStore((state) => state.theme);
   const setTelegramTheme = useThemeStore((state) => state.setTelegramTheme);
@@ -52,17 +50,27 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
         initTelegramWebApp();
         const tg = window.Telegram?.WebApp;
         tg?.ready?.();
-        const tgUser = tg?.initDataUnsafe?.user ?? FALLBACK_USER;
-        console.log("[UNIT-QUIZ] Telegram user:", tgUser);
+        const tgUser = tg?.initDataUnsafe?.user as TelegramUser | undefined;
+        console.log("[UNIT-QUIZ] Telegram raw user ->", tgUser);
+
+        if (!tgUser?.id) {
+          console.error("[UNIT-QUIZ] Telegram did not provide a valid user payload.");
+          useAuthStore.setState((state) => ({ ...state, status: "ready", error: "telegram_user_missing" }));
+          return;
+        }
 
         const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ").trim();
-        const payload = await useAuthStore.getState().syncSession({
+        const syncPayload = {
           telegramId: tgUser.id,
           fullName: fullName || tgUser.username || "do'stimiz",
           username: tgUser.username ?? null,
           language,
           photoUrl: tgUser.photo_url ?? null
-        });
+        };
+
+        console.log("[UNIT-QUIZ] Sync payload being sent ->", syncPayload);
+
+        const payload = await useAuthStore.getState().syncSession(syncPayload);
 
         if (payload?.language && payload.language !== language) {
           setLanguage(payload.language);

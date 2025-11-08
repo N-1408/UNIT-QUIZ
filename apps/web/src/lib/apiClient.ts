@@ -72,6 +72,9 @@ export const apiClient = {
   syncUser: (input: SyncUserInput) =>
     request<UserProfileResponse>("/users/sync", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify(input)
     }),
 
