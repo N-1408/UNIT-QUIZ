@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Variants } from "framer-motion";
@@ -8,6 +8,7 @@ import { triggerHaptic } from "@/lib/telegram";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuth";
 import { useRoleStore } from "@/store/roleStore";
+import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 
 const emojis = {
   wave: "\u{1F44B}",
@@ -90,6 +91,8 @@ export const HomePage = () => {
   const displayName = session?.fullName?.trim() || "do'stimiz";
   const role = useRoleStore((state) => state.role);
   const setRole = useRoleStore((state) => state.setRole);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<{ streak: number; bestScore: number } | null>(null);
 
   const subtitleOptions = useMemo(
     () => [
@@ -131,6 +134,23 @@ export const HomePage = () => {
     setCardIndex((prev) => prev + 1);
   };
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setStats({ streak: 4, bestScore: 92 });
+      setLoading(false);
+    }, 1500);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <PageContainer className="pb-[calc(env(safe-area-inset-bottom)+120px)]">
+        <LoadingSkeleton variant="stats" />
+        <LoadingSkeleton variant="card" />
+      </PageContainer>
+    );
+  }
+
   return (
     <PageContainer className="pb-[calc(env(safe-area-inset-bottom)+120px)]">
       <motion.div
@@ -139,16 +159,6 @@ export const HomePage = () => {
         animate="show"
         className="flex flex-col gap-6"
       >
-        <div className="flex justify-end">
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => setRole(role === "teacher" ? "student" : "teacher")}
-          >
-            {role === "teacher" ? "Switch to Student" : "Switch to Teacher"}
-          </Button>
-        </div>
         <motion.section
           variants={itemVariants}
           className="rounded-[20px] bg-ui-surface/95 p-6 text-left shadow-[0_4px_12px_rgba(0,0,0,0.04)] backdrop-blur-sm"
@@ -166,15 +176,51 @@ export const HomePage = () => {
               <p className="text-sm text-text-secondary">{subtitle}</p>
             </div>
           </div>
-          <Link
+          <Button
+            component={Link}
             to="/exams"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 4, py: 2, fontSize: 18, fontWeight: 600, borderRadius: 3 }}
             onClick={() => triggerHaptic("light")}
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-primary px-4 py-3 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(255,107,0,0.25)] transition duration-200 ease-out hover:brightness-105 active:scale-[0.97]"
           >
-            <span className="text-[1.1em]">{emojis.rocket}</span>
             Boshlaymiz!
-          </Link>
+          </Button>
+          <Button
+            variant="outlined"
+            fullWidth
+            sx={{ mt: 2, color: "#FF5F00", borderColor: "#FF5F00" }}
+            onClick={() => {
+              const newRole = role === "student" ? "teacher" : "student";
+              setRole(newRole);
+              localStorage.setItem("role", newRole);
+              window.location.reload();
+            }}
+          >
+            Switch to {role === "student" ? "Teacher" : "Student"} (Dev)
+          </Button>
         </motion.section>
+
+        {stats ? (
+          <motion.section
+            variants={itemVariants}
+            className="grid grid-cols-2 gap-3 rounded-[20px] bg-ui-surface/95 p-4 text-center shadow-[0_4px_12px_rgba(0,0,0,0.04)] sm:grid-cols-3"
+          >
+            <div>
+              <p className="text-xs text-text-secondary">Faol streak</p>
+              <p className="text-xl font-semibold text-text-primary">{stats.streak} kun</p>
+            </div>
+            <div>
+              <p className="text-xs text-text-secondary">Eng yaxshi ball</p>
+              <p className="text-xl font-semibold text-text-primary">{stats.bestScore}%</p>
+            </div>
+            <div>
+              <p className="text-xs text-text-secondary">Motivatsiya</p>
+              <p className="text-xl font-semibold text-text-primary">{emojis.rocket}</p>
+            </div>
+          </motion.section>
+        ) : null}
 
         <motion.section variants={itemVariants} className="flex flex-col gap-4">
           {widgetPalette.map((widget, index) => (

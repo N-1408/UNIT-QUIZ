@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { ExamList } from "@/components/exams/ExamList";
 import type { ExamSummary as ExamCardSummary, ExamStatus } from "@/components/exams/ExamCard";
 import { PageContainer } from "@/components/layout/Page";
@@ -9,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { useRoleStore } from "@/store/roleStore";
 import { Fab } from "@mui/material";
 import { Add } from "@mui/icons-material";
+import { LoadingSkeleton } from "@/components/LoadingSkeleton";
+import { EmptyExams } from "@/components/EmptyState";
 
 const FILTERS: Array<{ id: ExamStatus; label: string }> = [
   { id: "upcoming", label: "UPCOMING" },
@@ -26,6 +29,7 @@ const mapExamToCard = (exam: ExamSummaryDto): ExamCardSummary => ({
 
 export const ExamsPage = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<ExamStatus>("open");
   const [items, setItems] = useState<ExamSummaryDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,56 +65,60 @@ export const ExamsPage = () => {
 
   const hasData = filteredItems.length > 0;
 
-  return (
-    <>
-      <PageContainer className="gap-5 pb-28">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-base font-semibold text-text-primary">
-          {t("exams.title", { defaultValue: "Kayfiyatga qarab tanlang, hammasi tayyor." })}
-        </h2>
-        <p className="text-sm text-text-secondary">
-          {t("exams.subtitle", { defaultValue: "Qaysi toifa sizni chaqiryapti? Filtrlab ko'ring." })}
-        </p>
-      </div>
+  const renderContent = () => {
+    if (loading) {
+      return <LoadingSkeleton variant="list" />;
+    }
 
-      <div className="inline-flex w-full items-center justify-between rounded-full border border-border bg-surface/95 p-1 shadow-elev-sm">
-        {FILTERS.map((filter) => {
-          const isActive = filter.id === activeFilter;
-          return (
-            <button
-              key={filter.id}
-              type="button"
-              onClick={() => setActiveFilter(filter.id)}
-              className={cn(
-                "flex-1 rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wide transition duration-swift ease-fluid",
-                isActive
-                  ? "bg-brand text-brand-ink shadow-elev-sm"
-                  : "text-text-secondary hover:text-text-primary"
-              )}
-            >
-              {filter.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {loading ? (
-        <div className="space-y-3">
-          {[0, 1].map((key) => (
-            <div key={key} className="h-24 animate-pulse rounded-[20px] bg-surface-alt/80" />
-          ))}
-        </div>
-      ) : error ? (
+    if (error) {
+      return (
         <div className="rounded-[20px] border border-border bg-surface/95 p-4 text-sm text-text-secondary shadow-elev-sm">
           {error}
         </div>
-      ) : hasData ? (
-        <ExamList items={filteredItems} />
-      ) : (
-        <div className="rounded-[20px] border border-dashed border-border bg-surface/80 p-4 text-sm text-text-secondary shadow-elev-sm">
-          {t("exams.empty", { defaultValue: "Bu toifada hozircha imtihon yo'q." })}
+      );
+    }
+
+    if (!hasData) {
+      return <EmptyExams onAction={() => navigate("/results")} />;
+    }
+
+    return <ExamList items={filteredItems} />;
+  };
+
+  return (
+    <>
+      <PageContainer className="gap-5 pb-28">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-base font-semibold text-text-primary">
+            {t("exams.title", { defaultValue: "Kayfiyatga qarab tanlang, hammasi tayyor." })}
+          </h2>
+          <p className="text-sm text-text-secondary">
+            {t("exams.subtitle", { defaultValue: "Qaysi toifa sizni chaqiryapti? Filtrlab ko'ring." })}
+          </p>
         </div>
-      )}
+
+        <div className="inline-flex w-full items-center justify-between rounded-full border border-border bg-surface/95 p-1 shadow-elev-sm">
+          {FILTERS.map((filter) => {
+            const isActive = filter.id === activeFilter;
+            return (
+              <button
+                key={filter.id}
+                type="button"
+                onClick={() => setActiveFilter(filter.id)}
+                className={cn(
+                  "flex-1 rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wide transition duration-swift ease-fluid",
+                  isActive
+                    ? "bg-brand text-brand-ink shadow-elev-sm"
+                    : "text-text-secondary hover:text-text-primary"
+                )}
+              >
+                {filter.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {renderContent()}
       </PageContainer>
       {role !== "student" ? (
         <Fab
