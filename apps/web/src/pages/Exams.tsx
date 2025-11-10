@@ -6,6 +6,9 @@ import { PageContainer } from "@/components/layout/Page";
 import { apiClient } from "@/lib/apiClient";
 import type { ExamSummaryDto } from "@/types/api";
 import { cn } from "@/lib/utils";
+import { useRoleStore } from "@/store/roleStore";
+import { Fab } from "@mui/material";
+import { Add } from "@mui/icons-material";
 
 const FILTERS: Array<{ id: ExamStatus; label: string }> = [
   { id: "upcoming", label: "UPCOMING" },
@@ -27,6 +30,7 @@ export const ExamsPage = () => {
   const [items, setItems] = useState<ExamSummaryDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const role = useRoleStore((state) => state.role);
 
   useEffect(() => {
     let mounted = true;
@@ -58,7 +62,8 @@ export const ExamsPage = () => {
   const hasData = filteredItems.length > 0;
 
   return (
-    <PageContainer className="gap-5">
+    <>
+      <PageContainer className="gap-5 pb-28">
       <div className="flex flex-col gap-2">
         <h2 className="text-base font-semibold text-text-primary">
           {t("exams.title", { defaultValue: "Kayfiyatga qarab tanlang, hammasi tayyor." })}
@@ -106,6 +111,22 @@ export const ExamsPage = () => {
           {t("exams.empty", { defaultValue: "Bu toifada hozircha imtihon yo'q." })}
         </div>
       )}
-    </PageContainer>
+      </PageContainer>
+      {role !== "student" ? (
+        <Fab
+          color="primary"
+          sx={{
+            position: "fixed",
+            bottom: 80,
+            right: 16,
+            bgcolor: "#FF5F00",
+            "&:hover": { bgcolor: "#E05500" }
+          }}
+          onClick={() => console.log("Open create exam modal")}
+        >
+          <Add />
+        </Fab>
+      ) : null}
+    </>
   );
 };

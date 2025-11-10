@@ -1,10 +1,13 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import type { Variants } from "framer-motion";
+import { Button } from "@mui/material";
 import { PageContainer } from "@/components/layout/Page";
 import { triggerHaptic } from "@/lib/telegram";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuth";
+import { useRoleStore } from "@/store/roleStore";
 
 const emojis = {
   wave: "\u{1F44B}",
@@ -16,21 +19,21 @@ const emojis = {
   sparkle: "\u{2728}"
 } as const;
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0, y: 10 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.3, ease: "easeOut", staggerChildren: 0.12 }
+    transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1], staggerChildren: 0.12 }
   }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.24, ease: "easeOut" }
+    transition: { duration: 0.24, ease: [0.22, 1, 0.36, 1] }
   }
 };
 
@@ -85,6 +88,8 @@ const widgetPalette = [
 export const HomePage = () => {
   const session = useAuthStore((state) => state.session);
   const displayName = session?.fullName?.trim() || "do'stimiz";
+  const role = useRoleStore((state) => state.role);
+  const setRole = useRoleStore((state) => state.setRole);
 
   const subtitleOptions = useMemo(
     () => [
@@ -134,6 +139,16 @@ export const HomePage = () => {
         animate="show"
         className="flex flex-col gap-6"
       >
+        <div className="flex justify-end">
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => setRole(role === "teacher" ? "student" : "teacher")}
+          >
+            {role === "teacher" ? "Switch to Student" : "Switch to Teacher"}
+          </Button>
+        </div>
         <motion.section
           variants={itemVariants}
           className="rounded-[20px] bg-ui-surface/95 p-6 text-left shadow-[0_4px_12px_rgba(0,0,0,0.04)] backdrop-blur-sm"

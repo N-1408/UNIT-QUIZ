@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
 import { PageContainer } from "@/components/layout/Page";
 
 const stats = [
@@ -19,12 +20,12 @@ const quickActions = [
   { label: "View Logs", description: "Audit log va tizim monitoringi", href: "#" }
 ];
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
-  show: (i: number) => ({
+  show: (i: number = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { duration: 0.25, delay: i * 0.05, ease: "easeOut" }
+    transition: { duration: 0.25, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }
   })
 };
 
@@ -121,4 +122,3 @@ export const AdminPage = () => (
     </motion.section>
   </PageContainer>
 );
-
