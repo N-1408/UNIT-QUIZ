@@ -8,6 +8,14 @@ type Answer = {
   selectedAnswer: number;
 };
 
+type BreakdownItem = {
+  questionId: string;
+  isCorrect: boolean;
+  isSkipped: boolean;
+  userAnswer: number | null;
+  correctAnswer: number;
+};
+
 export const calculateScore = (questions: Question[], answers: Answer[]) => {
   if (!questions.length) {
     return {
@@ -20,7 +28,7 @@ export const calculateScore = (questions: Question[], answers: Answer[]) => {
 
   let correctCount = 0;
 
-  const breakdown = questions.map((question, index) => {
+  const breakdown: BreakdownItem[] = questions.map((question, index) => {
     const answer = answers[index];
     const isSkipped = !answer;
     const isCorrect = Boolean(answer && answer.selectedAnswer === question.correctAnswer);
@@ -33,7 +41,7 @@ export const calculateScore = (questions: Question[], answers: Answer[]) => {
       questionId: question.id,
       isCorrect,
       isSkipped,
-      userAnswer: answer?.selectedAnswer,
+      userAnswer: answer ? answer.selectedAnswer : null,
       correctAnswer: question.correctAnswer
     };
   });

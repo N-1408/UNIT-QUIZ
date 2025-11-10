@@ -8,10 +8,11 @@ import { apiClient } from "@/lib/apiClient";
 import type { ExamSummaryDto } from "@/types/api";
 import { cn } from "@/lib/utils";
 import { useRoleStore } from "@/store/roleStore";
-import { Button, Fab } from "@mui/material";
+import { Fab } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { EmptyExams } from "@/components/EmptyState";
+import { BulkImportModal } from "@/components/BulkImportModal";
 
 const FILTERS: Array<{ id: ExamStatus; label: string }> = [
   { id: "upcoming", label: "UPCOMING" },
@@ -35,6 +36,7 @@ export const ExamsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const role = useRoleStore((state) => state.role);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -97,15 +99,7 @@ export const ExamsPage = () => {
         </p>
       </div>
 
-      <Button
-        variant="contained"
-        sx={{ bgcolor: "#FF5F00", "&:hover": { bgcolor: "#E05500" }, alignSelf: "flex-start", ml: 0.5 }}
-        onClick={() => navigate("/exam/exam-001")}
-      >
-        Testni boshlash (Mock)
-      </Button>
-
-        <div className="inline-flex w-full items-center justify-between rounded-full border border-border bg-surface/95 p-1 shadow-elev-sm">
+      <div className="inline-flex w-full items-center justify-between rounded-full border border-border bg-surface/95 p-1 shadow-elev-sm">
           {FILTERS.map((filter) => {
             const isActive = filter.id === activeFilter;
             return (
@@ -129,20 +123,31 @@ export const ExamsPage = () => {
         {renderContent()}
       </PageContainer>
       {role !== "student" ? (
-        <Fab
-          color="primary"
-          sx={{
-            position: "fixed",
-            bottom: 80,
-            right: 16,
-            bgcolor: "#FF5F00",
-            "&:hover": { bgcolor: "#E05500" }
-          }}
-          onClick={() => console.log("Open create exam modal")}
-        >
-          <Add />
-        </Fab>
+        <>
+          <Fab
+            color="primary"
+            sx={{
+              position: "fixed",
+              bottom: 80,
+              right: 16,
+              bgcolor: "#FF5F00",
+              "&:hover": { bgcolor: "#E05500" }
+            }}
+            onClick={() => setImportModalOpen(true)}
+          >
+            <Add />
+          </Fab>
+          <BulkImportModal
+            open={importModalOpen}
+            onClose={() => setImportModalOpen(false)}
+            onImport={handleImport}
+          />
+        </>
       ) : null}
     </>
   );
 };
+  const handleImport = (questions: unknown[]) => {
+    localStorage.setItem("importedQuestions", JSON.stringify(questions));
+    alert(`${questions.length} ta savol import qilindi!`);
+  };
