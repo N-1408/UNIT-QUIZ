@@ -1,20 +1,17 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import React from "react";
+import ReactDOM from "react-dom/client";
 import { ThemeProvider } from "@mui/material/styles";
-import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
-import "@/types/telegram";
 import { theme } from "./theme";
-import { BottomNav } from "./components/BottomNav";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
-createRoot(document.getElementById("root") as HTMLElement).render(
-  <StrictMode>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
     <ThemeProvider theme={theme}>
-      <BrowserRouter>
+      <ErrorBoundary>
         <App />
-        <BottomNav />
-      </BrowserRouter>
+      </ErrorBoundary>
     </ThemeProvider>
-  </StrictMode>
+  </React.StrictMode>
 );
