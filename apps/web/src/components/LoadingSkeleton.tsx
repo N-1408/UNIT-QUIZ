@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { Box, Skeleton } from "@mui/material";
 
 type LoadingSkeletonProps = {
   variant: "card" | "stats" | "list";
+  showMinimum?: boolean;
 };
 
 const orangeShimmer = {
@@ -10,7 +12,22 @@ const orangeShimmer = {
   }
 } as const;
 
-export const LoadingSkeleton = ({ variant }: LoadingSkeletonProps) => {
+export const LoadingSkeleton = ({ variant, showMinimum = true }: LoadingSkeletonProps) => {
+  const [show, setShow] = useState(!showMinimum);
+
+  useEffect(() => {
+    if (!showMinimum) {
+      setShow(true);
+      return;
+    }
+    const timer = window.setTimeout(() => setShow(true), 200);
+    return () => window.clearTimeout(timer);
+  }, [showMinimum]);
+
+  if (!show) {
+    return null;
+  }
+
   if (variant === "card") {
     return (
       <Box sx={{ p: 2 }}>

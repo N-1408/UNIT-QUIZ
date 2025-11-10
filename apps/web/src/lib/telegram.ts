@@ -42,6 +42,81 @@ type TelegramWebAppInstance = {
 
 let webApp: TelegramWebAppInstance | undefined;
 
+const createMockWebApp = (): TelegramWebAppInstance => ({
+  ready: () => undefined,
+  expand: () => undefined,
+  colorScheme: "light",
+  themeParams: undefined,
+  initDataUnsafe: { user: { id: 7409467049, first_name: "Demo", username: "demo" } },
+  onEvent: () => undefined,
+  offEvent: () => undefined,
+  BackButton: {
+    show: () => undefined,
+    hide: () => undefined,
+    onClick: () => undefined,
+    offClick: () => undefined
+  },
+  HapticFeedback: {
+    impactOccurred: () => undefined
+  }
+});
+
+export const initializeTelegram = (): Promise<TelegramWebAppInstance> =>
+  new Promise((resolve) => {
+    if (typeof window === "undefined") {
+      resolve(createMockWebApp());
+      return;
+    }
+
+    const finish = (instance: TelegramWebAppInstance) => {
+      resolve(instance);
+    };
+
+    const resolveIfAvailable = () => {
+      const instance = window.Telegram?.WebApp as TelegramWebAppInstance | undefined;
+      if (instance) {
+        finish(instance);
+        return true;
+      }
+      return false;
+    };
+
+    if (resolveIfAvailable()) {
+      return;
+    }
+
+    let timeoutId: number;
+    let pollId: number;
+
+    const cleanup = () => {
+      window.removeEventListener("telegram-loaded", onLoad);
+      window.clearTimeout(timeoutId);
+      if (pollId) {
+        window.clearInterval(pollId);
+      }
+    };
+
+    timeoutId = window.setTimeout(() => {
+      console.warn("Telegram SDK timeout, using mock");
+      cleanup();
+      finish(createMockWebApp());
+    }, 500);
+
+    const onLoad = () => {
+      if (resolveIfAvailable()) {
+        cleanup();
+      }
+    };
+
+    window.addEventListener("telegram-loaded", onLoad);
+
+    pollId = window.setInterval(() => {
+      if (resolveIfAvailable()) {
+        cleanup();
+      }
+    }, 50);
+  });
+
 export const initTelegramWebApp = () => {
   if (typeof window === "undefined") return;
   const tg = window.Telegram?.WebApp as TelegramWebAppInstance | undefined;

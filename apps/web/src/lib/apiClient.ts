@@ -21,6 +21,7 @@ type SyncUserInput = {
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "";
 const API_PREFIX = "/api";
+const CACHE_DURATION_MS = 5 * 60 * 1000;
 
 const buildHeaders = (headers?: HeadersInit): HeadersInit => ({
   "Content-Type": "application/json",
@@ -33,10 +34,54 @@ const buildUrl = (endpoint: string) => {
   return base ? `${base}${path}` : path;
 };
 
+const isBrowser = () => typeof window !== "undefined";
+const cacheKey = (endpoint: string) => `cache:${endpoint}`;
+
+const readCache = <T>(endpoint: string): ApiResponse<T> | null => {
+  if (!isBrowser()) return null;
+  const raw = localStorage.getItem(cacheKey(endpoint));
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as ApiResponse<T>;
+  } catch {
+    localStorage.removeItem(cacheKey(endpoint));
+    return null;
+  }
+};
+
+const writeCache = <T>(endpoint: string, payload: ApiResponse<T>) => {
+  if (!isBrowser()) return;
+  const key = cacheKey(endpoint);
+  localStorage.setItem(key, JSON.stringify(payload));
+  window.setTimeout(() => {
+    if (isBrowser()) {
+      localStorage.removeItem(key);
+    }
+  }, CACHE_DURATION_MS);
+};
+
+const clearCache = () => {
+  if (!isBrowser()) return;
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith("cache:")) {
+      localStorage.removeItem(key);
+    }
+  });
+};
+
 async function request<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
+  const method = options?.method?.toUpperCase() ?? "GET";
+
+  if (method === "GET") {
+    const cached = readCache<T>(endpoint);
+    if (cached) {
+      return cached;
+    }
+  }
+
   try {
     const url = buildUrl(endpoint);
-    console.log("[UNIT-QUIZ] API request →", url);
+    console.log("[UNIT-QUIZ] API request ��'", url);
     const response = await fetch(url, {
       credentials: "include",
       ...options,
@@ -49,15 +94,24 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<ApiR
       throw new Error(payload.error ?? `Request failed (${response.status})`);
     }
 
-    console.info(`[api] ${endpoint} →`, payload.data);
-    return {
+    console.info(`[api] ${endpoint} ��'`, payload.data);
+
+    const normalized: ApiResponse<T> = {
       success: true,
       data: payload.data,
       error: null
     };
+
+    if (method === "GET") {
+      writeCache(endpoint, normalized);
+    } else {
+      clearCache();
+    }
+
+    return normalized;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected API error";
-    console.error(`[api] ${endpoint} ×`, message);
+    console.error(`[api] ${endpoint} �-`, message);
     return {
       success: false,
       data: null,
@@ -99,11 +153,11 @@ export const apiClient = {
       .eq("attempt_id", attemptId);
 
     if (error) {
-      console.error("[api] attempt_answers ×", error);
+      console.error("[api] attempt_answers �-", error);
       return { success: false as const, data: null, error: error.message };
     }
 
-    console.info("[api] attempt_answers →", data);
+    console.info("[api] attempt_answers ��'", data);
     return { success: true as const, data, error: null };
   }
 };

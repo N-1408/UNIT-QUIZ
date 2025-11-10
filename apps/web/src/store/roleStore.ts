@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 export type Role = "student" | "teacher" | "admin";
 
@@ -7,19 +8,28 @@ type RoleStore = {
   setRole: (role: Role) => void;
 };
 
-const getInitialRole = (): Role => {
-  if (typeof window === "undefined") return "student";
-  const stored = localStorage.getItem("role");
-  if (stored === "teacher" || stored === "admin") {
-    return stored;
-  }
-  return "student";
-};
-
-export const useRoleStore = create<RoleStore>((set) => ({
-  role: getInitialRole(),
-  setRole: (role) => {
-    localStorage.setItem("role", role);
-    set({ role });
-  }
-}));
+export const useRoleStore = create<RoleStore>()(
+  persist(
+    (set) => ({
+      role: "student",
+      setRole: (role) => set({ role })
+    }),
+    {
+      name: "role-storage",
+      storage: createJSONStorage(() => ({
+        getItem: (name: string) => {
+          if (typeof window === "undefined") return null;
+          return localStorage.getItem(name);
+        },
+        setItem: (name: string, value: string) => {
+          if (typeof window === "undefined") return;
+          localStorage.setItem(name, value);
+        },
+        removeItem: (name: string) => {
+          if (typeof window === "undefined") return;
+          localStorage.removeItem(name);
+        }
+      }))
+    }
+  )
+);

@@ -1,7 +1,10 @@
 import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BottomNavigation, BottomNavigationAction } from "@mui/material";
-import { Home, Assignment, BarChart, Person } from "@mui/icons-material";
+import HomeIcon from "@mui/icons-material/Home";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import PersonIcon from "@mui/icons-material/Person";
 import { useRoleStore } from "@/store/roleStore";
 
 const BOTTOM_NAV_LABELS = {
@@ -54,10 +57,10 @@ export const BottomNav = () => {
       }}
       showLabels
     >
-      <BottomNavigationAction label={labels[0]} icon={<Home />} />
-      <BottomNavigationAction label={labels[1]} icon={<Assignment />} />
-      <BottomNavigationAction label={labels[2]} icon={<BarChart />} />
-      <BottomNavigationAction label={labels[3]} icon={<Person />} />
+      <BottomNavigationAction label={labels[0]} icon={<HomeIcon />} />
+      <BottomNavigationAction label={labels[1]} icon={<AssignmentIcon />} />
+      <BottomNavigationAction label={labels[2]} icon={<BarChartIcon />} />
+      <BottomNavigationAction label={labels[3]} icon={<PersonIcon />} />
     </BottomNavigation>
   );
 };

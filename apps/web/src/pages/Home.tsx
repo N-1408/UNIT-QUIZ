@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { Button } from "@mui/material";
 import { PageContainer } from "@/components/layout/Page";
-import { triggerHaptic } from "@/lib/telegram";
+import { initializeTelegram, triggerHaptic } from "@/lib/telegram";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuth";
 import { useRoleStore } from "@/store/roleStore";
@@ -88,11 +88,13 @@ const widgetPalette = [
 
 export const HomePage = () => {
   const session = useAuthStore((state) => state.session);
-  const displayName = session?.fullName?.trim() || "do'stimiz";
   const role = useRoleStore((state) => state.role);
   const setRole = useRoleStore((state) => state.setRole);
-  const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [stats, setStats] = useState<{ streak: number; bestScore: number } | null>(null);
+  const [userName, setUserName] = useState("Loading...");
+  const [hasCachedUser, setHasCachedUser] = useState(false);
+  const [userLoading, setUserLoading] = useState(true);
 
   const subtitleOptions = useMemo(
     () => [
@@ -103,7 +105,9 @@ export const HomePage = () => {
     []
   );
 
-  const subtitle = subtitleOptions[displayName.length % subtitleOptions.length] ?? subtitleOptions[0];
+  const resolvedName = session?.fullName?.trim() || userName || "do'stimiz";
+  const greetingName = resolvedName || "do'stimiz";
+  const subtitle = subtitleOptions[greetingName.length % subtitleOptions.length] ?? subtitleOptions[0];
 
   const [cardIndex, setCardIndex] = useState(0);
   const [selection, setSelection] = useState<string | null>(null);
@@ -135,18 +139,52 @@ export const HomePage = () => {
   };
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const cached = localStorage.getItem("telegram-user");
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached) as { first_name?: string };
+        if (parsed?.first_name) {
+          setUserName(parsed.first_name);
+          setHasCachedUser(true);
+        }
+      } catch {
+        localStorage.removeItem("telegram-user");
+      } finally {
+        setUserLoading(false);
+      }
+    }
+
+    void initializeTelegram()
+      .then((tg) => {
+        const userData = tg.initDataUnsafe?.user ?? { first_name: "Guest" };
+        setUserName(userData.first_name ?? "Guest");
+        setHasCachedUser(true);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("telegram-user", JSON.stringify(userData));
+        }
+      })
+      .catch(() => {
+        setUserName("Guest");
+      })
+      .finally(() => setUserLoading(false));
+  }, []);
+
+  useEffect(() => {
     const timer = window.setTimeout(() => {
       setStats({ streak: 4, bestScore: 92 });
-      setLoading(false);
+      setStatsLoading(false);
     }, 1500);
     return () => window.clearTimeout(timer);
   }, []);
 
-  if (loading) {
+  if (statsLoading && !hasCachedUser && userLoading) {
     return (
       <PageContainer className="pb-[calc(env(safe-area-inset-bottom)+120px)]">
-        <LoadingSkeleton variant="stats" />
-        <LoadingSkeleton variant="card" />
+        <LoadingSkeleton variant="stats" showMinimum={false} />
       </PageContainer>
     );
   }
@@ -165,14 +203,14 @@ export const HomePage = () => {
         >
           <div className="flex items-center gap-3">
             {session?.photoUrl ? (
-              <img src={session.photoUrl} alt={displayName} className="h-9 w-9 rounded-full object-cover" />
+              <img src={session.photoUrl} alt={greetingName} className="h-9 w-9 rounded-full object-cover" />
             ) : (
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-light text-sm font-semibold text-brand">
-                {displayName.charAt(0).toUpperCase()}
+                {greetingName.charAt(0).toUpperCase()}
               </div>
             )}
             <div className="flex flex-col gap-1">
-              <h1 className="text-2xl font-semibold text-text-primary">{`Salom, ${displayName}! ${emojis.wave}`}</h1>
+              <h1 className="text-2xl font-semibold text-text-primary">{`Salom, ${greetingName}! ${emojis.wave}`}</h1>
               <p className="text-sm text-text-secondary">{subtitle}</p>
             </div>
           </div>
@@ -194,8 +232,6 @@ export const HomePage = () => {
             onClick={() => {
               const newRole = role === "student" ? "teacher" : "student";
               setRole(newRole);
-              localStorage.setItem("role", newRole);
-              window.location.reload();
             }}
           >
             Switch to {role === "student" ? "Teacher" : "Student"} (Dev)
