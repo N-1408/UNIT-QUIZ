@@ -8,7 +8,7 @@ import { apiClient } from "@/lib/apiClient";
 import type { ExamSummaryDto } from "@/types/api";
 import { cn } from "@/lib/utils";
 import { useRoleStore } from "@/store/roleStore";
-import { Fab } from "@mui/material";
+import { Button, Fab } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { EmptyExams } from "@/components/EmptyState";
@@ -88,14 +88,22 @@ export const ExamsPage = () => {
   return (
     <>
       <PageContainer className="gap-5 pb-28">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-base font-semibold text-text-primary">
-            {t("exams.title", { defaultValue: "Kayfiyatga qarab tanlang, hammasi tayyor." })}
-          </h2>
-          <p className="text-sm text-text-secondary">
-            {t("exams.subtitle", { defaultValue: "Qaysi toifa sizni chaqiryapti? Filtrlab ko'ring." })}
-          </p>
-        </div>
+      <div className="flex flex-col gap-2">
+        <h2 className="text-base font-semibold text-text-primary">
+          {t("exams.title", { defaultValue: "Kayfiyatga qarab tanlang, hammasi tayyor." })}
+        </h2>
+        <p className="text-sm text-text-secondary">
+          {t("exams.subtitle", { defaultValue: "Qaysi toifa sizni chaqiryapti? Filtrlab ko'ring." })}
+        </p>
+      </div>
+
+      <Button
+        variant="contained"
+        sx={{ bgcolor: "#FF5F00", "&:hover": { bgcolor: "#E05500" }, alignSelf: "flex-start", ml: 0.5 }}
+        onClick={() => navigate("/exam/exam-001")}
+      >
+        Testni boshlash (Mock)
+      </Button>
 
         <div className="inline-flex w-full items-center justify-between rounded-full border border-border bg-surface/95 p-1 shadow-elev-sm">
           {FILTERS.map((filter) => {

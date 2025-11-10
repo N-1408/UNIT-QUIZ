@@ -194,6 +194,7 @@ export const ExamTaking = () => {
     const existingAttempts = JSON.parse(localStorage.getItem("attempts") ?? "[]") as Attempt[];
     existingAttempts.push(attempt);
     localStorage.setItem("attempts", JSON.stringify(existingAttempts));
+    localStorage.setItem("lastExam", JSON.stringify(exam));
     localStorage.removeItem("currentExam");
 
     navigate("/results", { state: { attempt } });
