@@ -6,7 +6,8 @@ import type {
   ExamSummaryDto,
   AttemptSummaryDto,
   SubmitAttemptPayload,
-  UserProfileResponse
+  UserProfileResponse,
+  UploadQuestionsResponse
 } from "@/types/api";
 
 type SyncUserInput = {
@@ -189,7 +190,7 @@ export const apiClient = {
     return handleResponse(res);
   },
 
-  uploadQuestions: async (examId: number, file: File) => {
+  uploadQuestions: async (examId: number, file: File): Promise<ApiResponse<UploadQuestionsResponse>> => {
     const formData = new FormData();
     formData.append("file", file);
 
@@ -204,7 +205,7 @@ export const apiClient = {
       },
       body: formData,
     });
-    return handleResponse(res);
+    return handleResponse<UploadQuestionsResponse>(res);
   },
 
   submitAttempt: (attemptId: number, payload: SubmitAttemptPayload) =>
