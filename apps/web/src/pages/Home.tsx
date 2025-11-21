@@ -21,39 +21,55 @@ export const HomePage = () => {
     const init = async () => {
       // 1. Init Telegram User
       try {
-        const tg = await initializeTelegram();
-        const user = tg.initDataUnsafe?.user;
-        if (user?.first_name) {
-          setUserName(user.first_name);
+        await initializeTelegram();
+        // Sync user with backend
+        const webApp = (window as any).Telegram?.WebApp;
+        if (webApp) {
+          webApp.ready();
+          // We don't strictly need to call syncUser manually if every request does it via middleware,
+          // but syncUser endpoint might return profile data we need.
+          // For now, let's assume the backend middleware handles creation on first request.
+          // But we need to fetch user stats.
         }
-      } catch (e) {
-        console.error("Telegram init failed", e);
+
+        // Fetch user profile/stats
+        // Since we don't have a dedicated "me" endpoint yet that returns stats, 
+        // we might need to rely on what we have or add one.
+        // For now, let's fetch attempts to calculate stats.
+
+        // We need the user's TG ID for some legacy calls if they still require it in query params,
+        // but ideally we should switch to using the token.
+        // The backend attempts endpoint now uses the token to identify the user.
+
+        const attemptsRes = await apiClient.getAttempts(0); // 0 or any ID is ignored by backend if not admin
+        if (attemptsRes.success && attemptsRes.data) {
+          const submitted = attemptsRes.data.filter((a) => a.state === "submitted" || a.state === "graded");
+          const total = submitted.length;
+          const avg = total > 0
+            ? Math.round(submitted.reduce((acc, a) => acc + (a.score || 0), 0) / total)
+            : 0;
+          const last = submitted.length > 0 ? submitted[submitted.length - 1] : null;
+
+          setStats({
+            totalExams: total,
+            averageScore: avg,
+            lastExamTitle: last?.examTitle || "N/A",
+            lastExamScore: last?.score || 0,
+          });
+        }
+
+        // Get user info from WebApp
+        const user = webApp?.initDataUnsafe?.user;
+        if (user) {
+          setUserName(user.first_name);
+        } else {
+          setUserName("Mehmon");
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error("Failed to initialize Telegram or fetch data:", error);
+        setLoading(false); // Ensure loading state is cleared even on error
       }
-
-      // 2. Fetch Stats (Attempts)
-      // Hardcoded ID for prototype
-      const STUDENT_ID = 7409467049;
-      const res = await apiClient.getAttempts(STUDENT_ID);
-
-      if (res.success && res.data) {
-        const attempts = res.data;
-        const submitted = attempts.filter((a) => a.state === "submitted" || a.state === "graded");
-
-        const total = submitted.length;
-        const avg = total > 0
-          ? Math.round(submitted.reduce((acc, curr) => acc + (curr.score || 0), 0) / total)
-          : 0;
-
-        const last = submitted.length > 0 ? submitted[submitted.length - 1] : null;
-
-        setStats({
-          totalExams: total,
-          averageScore: avg,
-          lastExamTitle: last?.examTitle || "N/A",
-          lastExamScore: last?.score || 0,
-        });
-      }
-      setLoading(false);
     };
 
     init();

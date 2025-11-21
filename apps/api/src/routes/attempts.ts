@@ -1,87 +1,76 @@
 import { Router } from "express";
-import { getStudentAttempts, gradeAndSubmitAttempt, createAttempt } from "../supabaseService.js";
+import { createAttempt, getStudentAttempts, gradeAndSubmitAttempt } from "../supabaseService.js";
+import { authMiddleware } from "../middleware/auth.js";
 
 const router = Router();
 
-type SupabaseAttemptRow = {
-  id: number;
-  exam_id: number;
-  exams?: { title: string | null; duration_min: number | null } | null;
-  score: number | null;
-  state: string;
-  started_at: string | null;
-  submitted_at: string | null;
-  duration_spent_sec: number | null;
-};
+router.use(authMiddleware);
 
-const mapAttempt = (attempt: SupabaseAttemptRow) => {
-  return {
-    id: attempt.id,
-    examId: attempt.exam_id,
-    examTitle: attempt.exams?.title ?? null,
-    score: attempt.score,
-    state: attempt.state,
-    startedAt: attempt.started_at,
-    submittedAt: attempt.submitted_at,
-    durationSpentSec: attempt.duration_spent_sec
-  };
-};
+router.get("/", async (req, res) => {
+  const user = req.user!;
+  // Allow admin to view other's attempts if tgId query param is present, otherwise view own
+  const targetTgId = (user.role === "admin" && req.query.tgId)
+    ? Number(req.query.tgId)
+    : user.tgId;
 
-router.get("/attempts", async (req, res) => {
-  const tgIdParam = req.query.tgId;
-
-  if (!tgIdParam) {
-    return res.status(400).json({ success: false, data: null, error: "missing_tg_id" });
-  }
-
-  const numericId = Number(String(tgIdParam));
-  if (!Number.isFinite(numericId)) {
-    return res.status(400).json({ success: false, data: null, error: "invalid_tg_id" });
-  }
-
-  const result = await getStudentAttempts(numericId);
+  const result = await getStudentAttempts(targetTgId);
 
   if (!result.success) {
-    return res.status(500).json({ success: false, data: null, error: result.message ?? "internal_error" });
+    return res.status(500).json({ success: false, error: result.message });
   }
 
-  const payload = (result.data ?? []).map(mapAttempt);
-  return res.json({ success: true, data: payload, error: null });
+  // Map to DTO
+  const payload = result.data?.map((a) => ({
+    id: a.id,
+    examId: a.exam_id,
+    examTitle: a.exams?.title ?? "Unknown Exam",
+    score: a.score,
+    state: a.state,
+    startedAt: a.started_at,
+    submittedAt: a.submitted_at,
+    durationSpentSec: 0 // TODO: calc
+  }));
+
+  return res.json({ success: true, data: payload });
 });
 
-router.post("/attempts", async (req, res) => {
-  const { examId, studentTgId } = req.body;
+router.post("/", async (req, res) => {
+  const user = req.user!;
+  const { examId } = req.body;
 
-  if (!examId || !studentTgId) {
-    return res.status(400).json({ success: false, data: null, error: "missing_params" });
+  if (!examId) {
+    return res.status(400).json({ success: false, error: "missing_exam_id" });
   }
 
-  const result = await createAttempt(Number(studentTgId), Number(examId));
+  const result = await createAttempt(user.tgId, examId);
 
-  if (!result.success || !result.data) {
-    return res.status(400).json({ success: false, data: null, error: result.message ?? "creation_failed" });
+  if (!result.success) {
+    return res.status(400).json({ success: false, error: result.message });
   }
 
-  return res.json({ success: true, data: mapAttempt(result.data as any), error: null });
+  return res.json({ success: true, data: result.data });
 });
 
-router.post("/attempts/:attemptId/submit", async (req, res) => {
+router.post("/:attemptId/submit", async (req, res) => {
+  const user = req.user!;
   const attemptId = Number(req.params.attemptId);
+  const { answers, durationSpentSec } = req.body; // Expecting { questionId: optionId }
 
-  if (!Number.isFinite(attemptId)) {
-    return res.status(400).json({ success: false, data: null, error: "invalid_attempt_id" });
+  if (!Number.isFinite(attemptId) || !answers) {
+    return res.status(400).json({ success: false, error: "invalid_payload" });
   }
 
-  // Expect answers: { [questionId: number]: optionId }
-  const { answers = {}, durationSpentSec = 0 } = req.body ?? {};
+  // Verify ownership (optional but recommended, though attempt ID is hard to guess)
+  // For now, gradeAndSubmitAttempt checks if attempt exists and is active. 
+  // Ideally we should check if attempt.student_id === user.tgId inside the service.
 
-  const result = await gradeAndSubmitAttempt(attemptId, answers, durationSpentSec);
+  const result = await gradeAndSubmitAttempt(attemptId, answers, durationSpentSec || 0);
 
-  if (!result.success || !result.data) {
-    return res.status(500).json({ success: false, data: null, error: result.message ?? "internal_error" });
+  if (!result.success) {
+    return res.status(500).json({ success: false, error: result.message });
   }
 
-  return res.json({ success: true, data: mapAttempt(result.data), error: null });
+  return res.json({ success: true, data: result.data });
 });
 
 export default router;

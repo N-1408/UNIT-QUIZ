@@ -23,10 +23,19 @@ const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? ""
 const API_PREFIX = "/api";
 const CACHE_DURATION_MS = 5 * 60 * 1000;
 
-const buildHeaders = (headers?: HeadersInit): HeadersInit => ({
-  "Content-Type": "application/json",
-  ...headers
-});
+const buildHeaders = (headers?: HeadersInit): HeadersInit => {
+  const webApp = (window as any).Telegram?.WebApp;
+  const initData = webApp?.initData || "";
+
+  // In dev mode, if no initData, we might want to use a dummy token if backend allows
+  // For now, we send what we have.
+
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `twa ${initData}`,
+    ...headers
+  };
+};
 
 const buildUrl = (endpoint: string) => {
   const base = API_BASE.replace(/\/$/, "");
