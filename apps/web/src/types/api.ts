@@ -58,12 +58,17 @@ export type AttemptSummaryDto = {
 };
 
 export type UserProfileResponse = {
-  id: number;
-  telegram_id: number;
-  full_name: string;
-  username: string | null;
-  role: string;
-  created_at: string;
+  tgId: number;
+  telegramId: string | null;
+  fullName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  tgUsername: string | null;
+  phoneNumber: string | null;
+  photoUrl: string | null;
+  lang: string | null;
+  role: string | null;
+  createdAt: string | null;
 };
 
 export type UploadQuestionsResponse = {
