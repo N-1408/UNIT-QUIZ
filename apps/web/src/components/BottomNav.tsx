@@ -1,66 +1,59 @@
 import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { BottomNavigation, BottomNavigationAction } from "@mui/material";
-import HomeIcon from "@mui/icons-material/Home";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import PersonIcon from "@mui/icons-material/Person";
+import { Home, FileText, BarChart2, User, Shield } from "lucide-react";
 import { useRoleStore } from "@/store/roleStore";
-
-const BOTTOM_NAV_LABELS = {
-  student: ["Bosh sahifa", "Imtihonlar", "Natijalar", "Profil"],
-  teacher: ["Bosh sahifa", "Imtihonlar", "Natijalar", "Profil"],
-  admin: ["Bosh sahifa", "Imtihonlar", "Natijalar", "Admin"]
-};
+import { cn } from "@/lib/utils";
 
 export const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const role = useRoleStore((state) => state.role);
-  const labels = BOTTOM_NAV_LABELS[role] ?? BOTTOM_NAV_LABELS.student;
 
-  const routes = useMemo(
-    () => (role === "admin" ? ["/", "/exams", "/results", "/admin"] : ["/", "/exams", "/results", "/settings"]),
-    [role]
-  );
+  // Hide on exam taking pages
+  if (location.pathname.startsWith("/exam/")) {
+    return null;
+  }
 
-  const value = useMemo(() => {
-    const current = location.pathname;
-    const index = routes.findIndex((route) => current.startsWith(route));
-    return index >= 0 ? index : 0;
-  }, [location.pathname, routes]);
+  const navItems = useMemo(() => {
+    const items = [
+      { label: "Bosh sahifa", icon: Home, path: "/" },
+      { label: "Imtihonlar", icon: FileText, path: "/exams" },
+      { label: "Natijalar", icon: BarChart2, path: "/results" },
+    ];
 
-  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
-    navigate(routes[newValue] ?? "/");
-  };
+    if (role === "admin") {
+      items.push({ label: "Admin", icon: Shield, path: "/admin" });
+    } else {
+      items.push({ label: "Profil", icon: User, path: "/settings" });
+    }
+
+    return items;
+  }, [role]);
 
   return (
-    <BottomNavigation
-      value={value}
-      onChange={handleChange}
-      sx={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1000,
-        height: 56,
-        bgcolor: "#FFFFFF",
-        borderTop: "1px solid #E5E7EB",
-        "& .MuiBottomNavigationAction-root": {
-          color: "#6B7280",
-          "&.Mui-selected": {
-            color: "#FF5F00",
-            bgcolor: "rgba(255, 95, 0, 0.08)"
-          }
-        }
-      }}
-      showLabels
-    >
-      <BottomNavigationAction label={labels[0]} icon={<HomeIcon />} />
-      <BottomNavigationAction label={labels[1]} icon={<AssignmentIcon />} />
-      <BottomNavigationAction label={labels[2]} icon={<BarChartIcon />} />
-      <BottomNavigationAction label={labels[3]} icon={<PersonIcon />} />
-    </BottomNavigation>
+    <div className="fixed bottom-6 left-4 right-4 z-50">
+      <div className="mx-auto max-w-md rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 p-2 flex items-center justify-between">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          const Icon = item.icon;
+
+          return (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={cn(
+                "flex flex-col items-center justify-center w-full py-2 rounded-xl transition-all duration-200",
+                isActive
+                  ? "bg-orange-500 text-white shadow-lg shadow-orange-500/25"
+                  : "text-slate-400 hover:text-white hover:bg-white/5"
+              )}
+            >
+              <Icon className={cn("w-5 h-5 mb-1", isActive && "fill-current")} />
+              <span className="text-[10px] font-medium">{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 };

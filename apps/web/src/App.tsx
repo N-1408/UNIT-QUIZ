@@ -4,7 +4,7 @@ import { ExamsPage } from "./pages/Exams";
 import { ResultsPage } from "./pages/Results";
 import { SettingsPage } from "./pages/Settings";
 import { ExamTaking } from "./pages/ExamTaking";
-import { AdminDashboard } from "./pages/AdminDashboard";
+import { TeacherDashboard } from "./pages/TeacherDashboard";
 import { BottomNav } from "./components/BottomNav";
 
 function App() {
@@ -16,7 +16,7 @@ function App() {
         <Route path="/results" element={<ResultsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/exam/:examId" element={<ExamTaking />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin" element={<TeacherDashboard />} />
       </Routes>
       <BottomNav />
     </BrowserRouter>

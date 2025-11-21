@@ -1,416 +1,162 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
-import type { Variants } from "framer-motion";
-import { Button } from "@mui/material";
-import { PageContainer } from "@/components/layout/Page";
-import { initializeTelegram, triggerHaptic } from "@/lib/telegram";
-import { cn } from "@/lib/utils";
-import { useAuthStore } from "@/store/useAuth";
-import { useRoleStore } from "@/store/roleStore";
-import { LoadingSkeleton } from "@/components/LoadingSkeleton";
-
-const emojis = {
-  wave: "\u{1F44B}",
-  coffee: "\u{2615}\u{FE0F}",
-  rocket: "\u{1F680}",
-  flame: "\u{1F525}",
-  medal: "\u{1F3C5}",
-  bulb: "\u{1F4A1}",
-  sparkle: "\u{2728}"
-} as const;
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1], staggerChildren: 0.12 }
-  }
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 12 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.24, ease: [0.22, 1, 0.36, 1] }
-  }
-};
-
-const wordGameDeck = [
-  {
-    word: "Serene",
-    prompt: "Choose the closest meaning.",
-    options: [
-      { label: "Tinch, osoyishta", correct: true },
-      { label: "Qiziqarli", correct: false },
-      { label: "Shoshilinch", correct: false }
-    ],
-    tip: "Think of a calm lake at sunset."
-  },
-  {
-    word: "Spark",
-    prompt: "Pick the matching translation.",
-    options: [
-      { label: "Charm", correct: false },
-      { label: "Yonqin uchquni", correct: true },
-      { label: "Uyquchanlik", correct: false }
-    ],
-    tip: "It starts the fire."
-  },
-  {
-    word: "Glow",
-    prompt: "What does it mean?",
-    options: [
-      { label: "Yal-yorug' porlash", correct: true },
-      { label: "Qorong'ilik", correct: false },
-      { label: "Shovqin", correct: false }
-    ],
-    tip: "Soft light, like a candle."
-  }
-] as const;
-
-const widgetPalette = [
-  {
-    title: "Faol kunlaringiz",
-    highlight: `${emojis.flame} 4 kun`,
-    description: "Ketma-ket harakat motivatsiyani yuqorida ushlab turadi.",
-    accent: "from-ui-accent2 via-[#FFE5CC] to-ui-accent2"
-  },
-  {
-    title: "Eng yuqori ball",
-    highlight: `${emojis.medal} 92%`,
-    description: "Listening Sprint natijangiz rekordni yangilashga tayyor.",
-    accent: "from-ui-accent1 via-[#E7F0FF] to-ui-accent1"
-  }
-] as const;
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { apiClient } from "@/lib/apiClient";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { initializeTelegram } from "@/lib/telegram";
+import { Play, Trophy, Clock, TrendingUp, BookOpen } from "lucide-react";
 
 export const HomePage = () => {
-  const session = useAuthStore((state) => state.session);
-  const role = useRoleStore((state) => state.role);
-  const setRole = useRoleStore((state) => state.setRole);
-  const [statsLoading, setStatsLoading] = useState(true);
-  const [stats, setStats] = useState<{ streak: number; bestScore: number } | null>(null);
-  const [userName, setUserName] = useState("Loading...");
-  const [hasCachedUser, setHasCachedUser] = useState(false);
-  const [userLoading, setUserLoading] = useState(true);
-
-  const subtitleOptions = useMemo(
-    () => [
-      `Bugun sinovlarmi yoki choy ichamizmi? ${emojis.coffee}`,
-      `Yangi natijalarga tayyormisiz? ${emojis.rocket}`,
-      "Imtihonlar sizni sog'indi."
-    ],
-    []
-  );
-
-  const resolvedName = session?.fullName?.trim() || userName || "do'stimiz";
-  const greetingName = resolvedName || "do'stimiz";
-  const subtitle = subtitleOptions[greetingName.length % subtitleOptions.length] ?? subtitleOptions[0];
-
-  const [cardIndex, setCardIndex] = useState(0);
-  const [selection, setSelection] = useState<string | null>(null);
-  const [showFeedback, setShowFeedback] = useState(false);
-
-  const currentCard = wordGameDeck[cardIndex % wordGameDeck.length];
-  const selectedOption = selection
-    ? currentCard.options.find((option) => option.label === selection)
-    : undefined;
-  const isCorrectSelection = Boolean(showFeedback && selectedOption?.correct);
-  const isWrongSelection = Boolean(showFeedback && selection && !selectedOption?.correct);
-
-  const feedbackCopy = isCorrectSelection
-    ? "Zo'r! Shunday ritm bilan tez orada yangi rekordlar sizniki bo'ladi."
-    : isWrongSelection
-      ? "Bu safar biroz chalkashdi. Yangi so'z yana imkoniyat beradi."
-      : "Tanlang va aniqligini tekshirib ko'ring.";
-
-  const handleOptionClick = (label: string, correct: boolean) => {
-    triggerHaptic(correct ? "light" : "medium");
-    setSelection(label);
-    setShowFeedback(true);
-  };
-
-  const handleNextCard = () => {
-    setSelection(null);
-    setShowFeedback(false);
-    setCardIndex((prev) => prev + 1);
-  };
+  const navigate = useNavigate();
+  const [userName, setUserName] = useState("Student");
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalExams: 0,
+    averageScore: 0,
+    lastExamTitle: "",
+    lastExamScore: 0,
+  });
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const cached = localStorage.getItem("telegram-user");
-    if (cached) {
+    const init = async () => {
+      // 1. Init Telegram User
       try {
-        const parsed = JSON.parse(cached) as { first_name?: string };
-        if (parsed?.first_name) {
-          setUserName(parsed.first_name);
-          setHasCachedUser(true);
+        const tg = await initializeTelegram();
+        const user = tg.initDataUnsafe?.user;
+        if (user?.first_name) {
+          setUserName(user.first_name);
         }
-      } catch {
-        localStorage.removeItem("telegram-user");
-      } finally {
-        setUserLoading(false);
+      } catch (e) {
+        console.error("Telegram init failed", e);
       }
-    }
 
-    void initializeTelegram()
-      .then((tg) => {
-        const userData = tg.initDataUnsafe?.user ?? { first_name: "Guest" };
-        setUserName(userData.first_name ?? "Guest");
-        setHasCachedUser(true);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("telegram-user", JSON.stringify(userData));
-        }
-      })
-      .catch(() => {
-        setUserName("Guest");
-      })
-      .finally(() => setUserLoading(false));
+      // 2. Fetch Stats (Attempts)
+      // Hardcoded ID for prototype
+      const STUDENT_ID = 7409467049;
+      const res = await apiClient.getAttempts(STUDENT_ID);
+
+      if (res.success && res.data) {
+        const attempts = res.data;
+        const submitted = attempts.filter((a) => a.state === "submitted" || a.state === "graded");
+
+        const total = submitted.length;
+        const avg = total > 0
+          ? Math.round(submitted.reduce((acc, curr) => acc + (curr.score || 0), 0) / total)
+          : 0;
+
+        const last = submitted.length > 0 ? submitted[submitted.length - 1] : null;
+
+        setStats({
+          totalExams: total,
+          averageScore: avg,
+          lastExamTitle: last?.examTitle || "N/A",
+          lastExamScore: last?.score || 0,
+        });
+      }
+      setLoading(false);
+    };
+
+    init();
   }, []);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setStats({ streak: 4, bestScore: 92 });
-      setStatsLoading(false);
-    }, 1500);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  if (statsLoading && !hasCachedUser && userLoading) {
-    return (
-      <PageContainer className="pb-[calc(env(safe-area-inset-bottom)+120px)]">
-        <LoadingSkeleton variant="stats" showMinimum={false} />
-      </PageContainer>
-    );
+  if (loading) {
+    return <div className="flex h-screen items-center justify-center text-white">Yuklanmoqda...</div>;
   }
 
   return (
-    <PageContainer className="pb-[calc(env(safe-area-inset-bottom)+120px)]">
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="show"
-        className="flex flex-col gap-6"
-      >
-        <motion.section
-          variants={itemVariants}
-          className="rounded-[20px] bg-ui-surface/95 p-6 text-left shadow-[0_4px_12px_rgba(0,0,0,0.04)] backdrop-blur-sm"
-        >
-          <div className="flex items-center gap-3">
-            {session?.photoUrl ? (
-              <img src={session.photoUrl} alt={greetingName} className="h-9 w-9 rounded-full object-cover" />
-            ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-light text-sm font-semibold text-brand">
-                {greetingName.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div className="flex flex-col gap-1">
-              <h1 className="text-2xl font-semibold text-text-primary">{`Salom, ${greetingName}! ${emojis.wave}`}</h1>
-              <p className="text-sm text-text-secondary">{subtitle}</p>
-            </div>
+    <div className="min-h-screen bg-slate-950 text-slate-50 pb-24 font-sans">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden rounded-b-[3rem] bg-gradient-to-br from-orange-600 to-orange-800 px-6 pt-12 pb-16 shadow-2xl shadow-orange-900/50">
+        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+
+        <div className="relative z-10 flex items-center justify-between mb-6">
+          <div>
+            <p className="text-orange-200 text-sm font-medium mb-1">Xush kelibsiz 👋</p>
+            <h1 className="text-3xl font-bold text-white">{userName}</h1>
           </div>
-          <Button
-            component={Link}
-            to="/exams"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 4, py: 2, fontSize: 18, fontWeight: 600, borderRadius: 3 }}
-            onClick={() => triggerHaptic("light")}
-          >
-            Boshlaymiz!
-          </Button>
-          <Button
-            variant="outlined"
-            fullWidth
-            sx={{ mt: 2, color: "#FF5F00", borderColor: "#FF5F00" }}
-            onClick={() => {
-              const newRole = role === "student" ? "teacher" : "student";
-              setRole(newRole);
-            }}
-          >
-            Switch to {role === "student" ? "Teacher" : "Student"} (Dev)
-          </Button>
-        </motion.section>
+          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-xl">
+            👨‍🎓
+          </div>
+        </div>
 
-        {stats ? (
-          <motion.section
-            variants={itemVariants}
-            className="grid grid-cols-2 gap-3 rounded-[20px] bg-ui-surface/95 p-4 text-center shadow-[0_4px_12px_rgba(0,0,0,0.04)] sm:grid-cols-3"
-          >
-            <div>
-              <p className="text-xs text-text-secondary">Faol streak</p>
-              <p className="text-xl font-semibold text-text-primary">{stats.streak} kun</p>
+        {/* Main Stats Card */}
+        <div className="relative z-10 grid grid-cols-2 gap-4">
+          <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <div className="flex items-center gap-2 text-orange-200 mb-2">
+              <Trophy className="w-4 h-4" />
+              <span className="text-xs font-medium">O'rtacha Ball</span>
             </div>
-            <div>
-              <p className="text-xs text-text-secondary">Eng yaxshi ball</p>
-              <p className="text-xl font-semibold text-text-primary">{stats.bestScore}%</p>
+            <p className="text-2xl font-bold text-white">{stats.averageScore}%</p>
+          </div>
+          <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <div className="flex items-center gap-2 text-orange-200 mb-2">
+              <BookOpen className="w-4 h-4" />
+              <span className="text-xs font-medium">Topshirildi</span>
             </div>
-            <div>
-              <p className="text-xs text-text-secondary">Motivatsiya</p>
-              <p className="text-xl font-semibold text-text-primary">{emojis.rocket}</p>
-            </div>
-          </motion.section>
-        ) : null}
+            <p className="text-2xl font-bold text-white">{stats.totalExams} ta</p>
+          </div>
+        </div>
+      </div>
 
-        <motion.section variants={itemVariants} className="flex flex-col gap-4">
-          {widgetPalette.map((widget, index) => (
-            <motion.div
-              key={widget.title}
-              variants={itemVariants}
-              transition={{ delay: index * 0.06 }}
-              className={cn(
-                "rounded-[20px] border border-ui-border/70 bg-gradient-to-br p-5 shadow-[0_4px_12px_rgba(0,0,0,0.04)]",
-                widget.accent
-              )}
-            >
-              <div className="flex flex-col gap-2">
-                <h3 className="text-sm font-medium text-text-primary/90">{widget.title}</h3>
-                <span className="text-lg font-semibold text-text-primary">{widget.highlight}</span>
-                <p className="text-xs text-text-secondary/90">{widget.description}</p>
-              </div>
-            </motion.div>
-          ))}
-        </motion.section>
-
-        <motion.section
-          variants={itemVariants}
-          className="flex items-start gap-3 rounded-[20px] bg-ui-surface/95 p-5 shadow-[0_4px_12px_rgba(0,0,0,0.04)] backdrop-blur-sm"
+      <div className="px-6 -mt-8 relative z-20 space-y-6">
+        {/* Quick Action */}
+        <Button
+          className="w-full h-16 text-lg shadow-xl shadow-orange-500/30 rounded-2xl flex items-center justify-between px-6"
+          onClick={() => navigate("/exams")}
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-light text-lg text-brand-primary shadow-[0_4px_12px_rgba(255,107,0,0.22)]">
-            {emojis.bulb}
+          <span className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+              <Play className="w-4 h-4 fill-current" />
+            </div>
+            Imtihon Topshirish
           </span>
-          <div className="flex flex-col gap-1.5">
-            <h3 className="text-sm font-semibold text-text-primary">Bugungi ilhom</h3>
-            <p className="text-sm text-text-secondary">
-              Qadam tashlang, qolganini biz birgalikda o'rganamiz.
-            </p>
-          </div>
-        </motion.section>
+          <span className="opacity-60">→</span>
+        </Button>
 
-        <motion.section
-          variants={itemVariants}
-          className="flex flex-col gap-4 rounded-[20px] bg-ui-surface/95 p-5 shadow-[0_4px_12px_rgba(0,0,0,0.04)] backdrop-blur-sm"
-        >
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <h3 className="text-base font-semibold text-text-primary">
-                <span className="mr-1 text-[1.1em]">{emojis.sparkle}</span>
-                Word Spark
-              </h3>
-              <p className="text-xs text-text-secondary">
-                Mini o'yin: yangi so'zlarni sokin ritmda yodda saqlang.
-              </p>
+        {/* Recent Activity */}
+        <div>
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-orange-500" />
+            So'nggi Faoliyat
+          </h3>
+
+          {stats.totalExams > 0 ? (
+            <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+              <CardContent className="p-5 flex items-center justify-between">
+                <div>
+                  <h4 className="font-medium text-white mb-1">{stats.lastExamTitle}</h4>
+                  <p className="text-sm text-slate-400">Natija: {stats.lastExamScore}%</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => navigate("/results")}>
+                  Ko'rish
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="text-center p-8 rounded-2xl border border-dashed border-white/10 bg-white/5">
+              <p className="text-slate-400 text-sm">Hali hech qanday imtihon topshirmadingiz.</p>
             </div>
+          )}
+        </div>
+
+        {/* Weekly Progress (Mock for visual) */}
+        <div>
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-green-500" />
+            Haftalik O'sish
+          </h3>
+          <div className="grid grid-cols-7 gap-2 h-24 items-end p-4 rounded-2xl bg-white/5 border border-white/10">
+            {[40, 65, 30, 85, 50, 90, 75].map((h, i) => (
+              <div key={i} className="w-full bg-white/10 rounded-t-lg relative group">
+                <div
+                  className="absolute bottom-0 w-full bg-orange-500/50 rounded-t-lg transition-all group-hover:bg-orange-500"
+                  style={{ height: `${h}%` }}
+                ></div>
+              </div>
+            ))}
           </div>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentCard.word}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
-              className="flex flex-col gap-3 rounded-[16px] bg-gradient-to-br from-ui-accent2/60 via-[#F6F8FF] to-ui-accent1/70 p-4"
-            >
-              <div className="flex items-center justify-between text-sm font-semibold text-text-primary">
-                <span>{currentCard.word}</span>
-                <span className="text-xs text-text-secondary">{currentCard.prompt}</span>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                {currentCard.options.map(({ label, correct }) => {
-                  const isSelected = selection === label;
-                  const isCorrect = showFeedback && correct;
-                  const isWrong = showFeedback && isSelected && !correct;
-
-                  return (
-                    <motion.button
-                      key={label}
-                      type="button"
-                      onClick={() => handleOptionClick(label, correct)}
-                      className={cn(
-                        "flex items-center justify-between rounded-[14px] border border-transparent bg-ui-surface px-4 py-2 text-sm transition duration-150 ease-in-out",
-                        isSelected && !showFeedback && "border-brand-primary/60 bg-brand-light/70 text-brand-primary",
-                        isCorrect &&
-                          "border-ui-success/70 bg-ui-success/10 text-ui-success shadow-[0_8px_18px_rgba(52,199,89,0.18)]",
-                        isWrong &&
-                          "border-ui-danger/60 bg-ui-danger/10 text-ui-danger shadow-[0_8px_18px_rgba(255,59,48,0.16)]"
-                      )}
-                      whileHover={{ scale: 1.04 }}
-                      whileTap={{ scale: 0.97 }}
-                      transition={{ type: "spring", stiffness: 420, damping: 30 }}
-                    >
-                      <span>{label}</span>
-                      <AnimatePresence mode="wait">
-                        {isCorrect ? (
-                          <motion.span
-                            key="correct"
-                            initial={{ scale: 0.6, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.6, opacity: 0 }}
-                            transition={{ type: "spring", stiffness: 500, damping: 24 }}
-                            className="ml-2"
-                          >
-                            ✅
-                          </motion.span>
-                        ) : null}
-                        {isWrong ? (
-                          <motion.span
-                            key="wrong"
-                            initial={{ scale: 0.6, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.6, opacity: 0 }}
-                            transition={{ type: "spring", stiffness: 500, damping: 24 }}
-                            className="ml-2"
-                          >
-                            ❌
-                          </motion.span>
-                        ) : null}
-                      </AnimatePresence>
-                    </motion.button>
-                  );
-                })}
-              </div>
-
-              <div className="rounded-[14px] bg-ui-surface/70 px-3 py-2 text-xs text-text-secondary">
-                {showFeedback ? currentCard.tip : "Tanlang va aniqligini tekshirib ko'ring."}
-              </div>
-
-              <motion.span
-                key={feedbackCopy}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className={cn(
-                  "text-xs font-medium",
-                  isCorrectSelection ? "text-ui-success" : isWrongSelection ? "text-ui-danger" : "text-text-secondary"
-                )}
-              >
-                {feedbackCopy}
-              </motion.span>
-
-              <button
-                type="button"
-                disabled={!showFeedback}
-                onClick={handleNextCard}
-                className={cn(
-                  "self-end rounded-full bg-gradient-to-r from-brand-gradient1 to-brand-gradient2 px-4 py-2 text-xs font-semibold text-brand-ink shadow-[0_4px_12px_rgba(255,138,0,0.28)] transition duration-150 ease-in-out",
-                  "enabled:hover:brightness-110 enabled:active:scale-[0.98] disabled:opacity-40"
-                )}
-              >
-                Keyingi so'z \u279C
-              </button>
-            </motion.div>
-          </AnimatePresence>
-        </motion.section>
-      </motion.div>
-    </PageContainer>
+        </div>
+      </div>
+    </div>
   );
 };
