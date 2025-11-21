@@ -1,6 +1,5 @@
 import { Router } from "express";
 import multer from "multer";
-import pdf from "pdf-parse";
 import * as XLSX from "xlsx";
 import fs from "fs";
 import { authMiddleware } from "../middleware/auth.js";
@@ -33,8 +32,10 @@ router.post("/:examId/import", upload.single("file"), async (req, res) => {
         let questions: any[] = [];
 
         if (mimeType === "application/pdf") {
+            // Dynamic import for pdf-parse to handle ESM compatibility
+            const pdfParse = (await import("pdf-parse")).default;
             const dataBuffer = fs.readFileSync(filePath);
-            const data = await pdf(dataBuffer);
+            const data = await pdfParse(dataBuffer);
             questions = parsePdfContent(data.text);
         } else if (
             mimeType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
