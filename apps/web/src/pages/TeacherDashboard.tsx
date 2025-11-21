@@ -1,14 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRoleStore } from "@/store/roleStore";
-import { Plus, FileText, Users, Settings, LogOut } from "lucide-react";
+import { Plus, FileText, Users, Settings, LogOut, Edit, Clock } from "lucide-react";
+import { CreateExamForm } from "@/components/teacher/CreateExamForm";
+import { QuestionEditor } from "@/components/teacher/QuestionEditor";
+import { apiClient } from "@/lib/apiClient";
+import type { ExamSummaryDto } from "@/types/api";
 
 export const TeacherDashboard = () => {
     const navigate = useNavigate();
     const role = useRoleStore((state) => state.role);
     const [activeTab, setActiveTab] = useState("exams");
+    const [isCreatingExam, setIsCreatingExam] = useState(false);
+    const [selectedExamId, setSelectedExamId] = useState<number | null>(null);
+    const [exams, setExams] = useState<ExamSummaryDto[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (activeTab === "exams") {
+            loadExams();
+        }
+    }, [activeTab]);
+
+    const loadExams = async () => {
+        setLoading(true);
+        const res = await apiClient.getExams();
+        if (res.success && res.data) {
+            setExams(res.data);
+        }
+        setLoading(false);
+    };
 
     if (role === "student") {
         return (
@@ -72,63 +95,116 @@ export const TeacherDashboard = () => {
                         <h1 className="text-3xl font-bold text-white mb-1">O'qituvchi Paneli</h1>
                         <p className="text-slate-400">Xush kelibsiz, Ustoz!</p>
                     </div>
-                    <Button className="bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Yangi Imtihon
-                    </Button>
+                    {!isCreatingExam && !selectedExamId && (
+                        <Button
+                            className="bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20"
+                            onClick={() => setIsCreatingExam(true)}
+                        >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Yangi Imtihon
+                        </Button>
+                    )}
                 </header>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-slate-400">Faol Imtihonlar</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-bold text-white">3</div>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-slate-400">Jami O'quvchilar</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-bold text-white">128</div>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-slate-400">O'rtacha Natija</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-3xl font-bold text-white">76%</div>
-                        </CardContent>
-                    </Card>
-                </div>
+                {/* Stats Grid - Only show on main view */}
+                {!isCreatingExam && !selectedExamId && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-slate-400">Faol Imtihonlar</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-3xl font-bold text-white">{exams.filter(e => e.status === 'open').length}</div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-slate-400">Jami Imtihonlar</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-3xl font-bold text-white">{exams.length}</div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-slate-400">O'rtacha Natija</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-3xl font-bold text-white">--%</div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
 
                 {/* Content Area */}
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-6 min-h-[400px]">
-                    {activeTab === "exams" && (
-                        <div className="text-center py-20">
-                            <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold text-white mb-2">Imtihonlar ro'yxati</h3>
-                            <p className="text-slate-400 mb-6">Hozircha imtihonlar yaratilmagan.</p>
-                            <Button variant="outline">Yaratishni boshlash</Button>
-                        </div>
-                    )}
-                    {activeTab === "students" && (
-                        <div className="text-center py-20">
-                            <Users className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold text-white mb-2">O'quvchilar ro'yxati</h3>
-                            <p className="text-slate-400">Tez orada...</p>
-                        </div>
-                    )}
-                    {activeTab === "settings" && (
-                        <div className="text-center py-20">
-                            <Settings className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold text-white mb-2">Sozlamalar</h3>
-                            <p className="text-slate-400">Tez orada...</p>
-                        </div>
+                    {isCreatingExam ? (
+                        <CreateExamForm
+                            onSuccess={() => {
+                                setIsCreatingExam(false);
+                                loadExams();
+                            }}
+                            onCancel={() => setIsCreatingExam(false)}
+                        />
+                    ) : selectedExamId ? (
+                        <QuestionEditor
+                            examId={selectedExamId}
+                            onBack={() => setSelectedExamId(null)}
+                        />
+                    ) : (
+                        <>
+                            {activeTab === "exams" && (
+                                <div>
+                                    {loading ? (
+                                        <div className="text-center py-20 text-slate-400">Yuklanmoqda...</div>
+                                    ) : exams.length === 0 ? (
+                                        <div className="text-center py-20">
+                                            <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+                                            <h3 className="text-xl font-semibold text-white mb-2">Imtihonlar ro'yxati</h3>
+                                            <p className="text-slate-400 mb-6">Hozircha imtihonlar yaratilmagan.</p>
+                                            <Button variant="outline" onClick={() => setIsCreatingExam(true)}>Yaratishni boshlash</Button>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 gap-4">
+                                            {exams.map((exam) => (
+                                                <div key={exam.id} className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                                                    <div>
+                                                        <h3 className="font-semibold text-white text-lg">{exam.title}</h3>
+                                                        <div className="flex items-center gap-4 text-sm text-slate-400 mt-1">
+                                                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {exam.durationMin} daqiqa</span>
+                                                            <span className={`px-2 py-0.5 rounded-full text-xs ${exam.status === 'open' ? 'bg-green-500/20 text-green-400' :
+                                                                    exam.status === 'upcoming' ? 'bg-blue-500/20 text-blue-400' :
+                                                                        'bg-slate-500/20 text-slate-400'
+                                                                }`}>
+                                                                {exam.status.toUpperCase()}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <Button variant="secondary" onClick={() => setSelectedExamId(exam.id)}>
+                                                        <Edit className="w-4 h-4 mr-2" />
+                                                        Boshqarish
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            {activeTab === "students" && (
+                                <div className="text-center py-20">
+                                    <Users className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+                                    <h3 className="text-xl font-semibold text-white mb-2">O'quvchilar ro'yxati</h3>
+                                    <p className="text-slate-400">Tez orada...</p>
+                                </div>
+                            )}
+                            {activeTab === "settings" && (
+                                <div className="text-center py-20">
+                                    <Settings className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+                                    <h3 className="text-xl font-semibold text-white mb-2">Sozlamalar</h3>
+                                    <p className="text-slate-400">Tez orada...</p>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

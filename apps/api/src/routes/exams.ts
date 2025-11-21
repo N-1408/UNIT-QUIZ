@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getExamWithQuestions, listExams, type ExamRecord } from "../supabaseService.js";
+import { getExamWithQuestions, listExams, createExam, createQuestion, type ExamRecord } from "../supabaseService.js";
 
 const router = Router();
 
@@ -82,6 +82,43 @@ router.get("/exams/:examId", async (req, res) => {
   };
 
   return res.json({ success: true, data: payload, error: null });
+});
+
+router.post("/exams", async (req, res) => {
+  // TODO: Real auth check
+  const { title, description, durationMin, startTime, endTime } = req.body;
+  const ownerId = 1472746219; // Hardcoded admin for now
+
+  if (!title || !durationMin) {
+    return res.status(400).json({ success: false, error: "missing_fields" });
+  }
+
+  const result = await createExam(ownerId, title, description, durationMin, startTime, endTime);
+
+  if (!result.success) {
+    return res.status(500).json({ success: false, error: result.message });
+  }
+
+  return res.json({ success: true, data: result.data });
+});
+
+router.post("/exams/:examId/questions", async (req, res) => {
+  const examId = Number(req.params.examId);
+  const { text, type, points, options } = req.body;
+
+  if (!Number.isFinite(examId) || !text || !options || !Array.isArray(options)) {
+    return res.status(400).json({ success: false, error: "invalid_payload" });
+  }
+
+  // TODO: Check ownership
+
+  const result = await createQuestion(examId, text, type ?? "single_choice", points ?? 1, options);
+
+  if (!result.success) {
+    return res.status(500).json({ success: false, error: result.message });
+  }
+
+  return res.json({ success: true, data: result.data });
 });
 
 export default router;

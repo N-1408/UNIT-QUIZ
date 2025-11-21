@@ -146,6 +146,24 @@ export const apiClient = {
       body: JSON.stringify({ examId, studentTgId })
     }),
 
+  createExam: (payload: {
+    title: string;
+    description: string;
+    durationMin: number;
+    startTime: string;
+    endTime: string;
+  }) =>
+    request<ExamSummaryDto>("/exams", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    }),
+
+  createQuestion: (examId: number, payload: any) =>
+    request<any>(`/exams/${examId}/questions`, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    }),
+
   submitAttempt: (attemptId: number, payload: SubmitAttemptPayload) =>
     request<AttemptSummaryDto>(`/attempts/${attemptId}/submit`, {
       method: "POST",
@@ -159,11 +177,11 @@ export const apiClient = {
       .eq("attempt_id", attemptId);
 
     if (error) {
-      console.error("[api] attempt_answers �-", error);
+      console.error("[api] attempt_answers -", error);
       return { success: false as const, data: null, error: error.message };
     }
 
-    console.info("[api] attempt_answers ��'", data);
+    console.info("[api] attempt_answers '", data);
     return { success: true as const, data, error: null };
   }
 };

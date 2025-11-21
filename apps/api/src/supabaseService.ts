@@ -145,7 +145,7 @@ export async function getOrCreateStudent(
     if (tg_username && tg_username !== existing.data.tg_username) updates.tg_username = tg_username;
     if (phone_number && phone_number !== existing.data.phone_number) updates.phone_number = phone_number;
     if (photo_url && photo_url !== existing.data.photo_url) updates.photo_url = photo_url;
-    
+
     if (Object.keys(updates).length === 0) return createSuccess(existing.data);
 
     const { data, error } = await supabase
@@ -302,13 +302,65 @@ export async function getStudentAttempts(student_tg_id: number): Promise<Service
   return createSuccess((data as AttemptWithExamRecord[]) ?? []);
 }
 
-export async function getAttemptById(attempt_id: number): Promise<ServiceResult<AttemptWithExamRecord | null>> {
+export async function createExam(
+  owner_tg_id: number,
+  title: string,
+  description: string | null,
+  duration_min: number,
+  start_time: string | null,
+  end_time: string | null
+): Promise<ServiceResult<ExamRecord>> {
   const { data, error } = await supabase
-    .from("attempts")
-    .select("*, exams(title, duration_min)")
-    .eq("id", attempt_id)
-    .maybeSingle();
+    .from("exams")
+    .insert({
+      owner_tg_id,
+      title,
+      description,
+      duration_min,
+      start_time,
+      end_time,
+      is_published: false // Default to draft
+    })
+    .select("*")
+    .single();
 
-  if (error) return createError("getAttemptById", error);
-  return createSuccess((data as AttemptWithExamRecord) ?? null);
+  if (error) return createError("createExam", error);
+  return createSuccess(data as ExamRecord);
 }
+
+export async function createQuestion(
+  exam_id: number,
+  text: string,
+  type: string,
+  points: number,
+  options: { text: string; is_correct: boolean }[]
+): Promise<ServiceResult<QuestionRecord>> {
+  // 1. Create Question
+  const { data: question, error: qError } = await supabase
+    .from("questions")
+    .insert({
+      exam_id,
+      text,
+      type,
+      points
+    })
+    .select("*")
+    .single();
+
+  if (qError || !question) return createError("createQuestion:insert", qError);
+
+  // 2. Create Options
+  const optionRecords = options.map((opt, idx) => ({
+    question_id: question.id,
+    text: opt.text,
+    is_correct: opt.is_correct,
+    ord: idx
+  }));
+
+  const { error: oError } = await supabase.from("question_options").insert(optionRecords);
+
+  if (oError) return createError("createQuestion:options", oError);
+
+  return createSuccess({ ...question, options: [] } as QuestionRecord); // Return basic record
+}
+
