@@ -1,195 +1,131 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Box, Button, Card, CardContent, CircularProgress, Typography } from "@mui/material";
-import { calculateScore } from "@/lib/calculateScore";
-import { ResultsBreakdown } from "@/components/ResultsBreakdown";
-import { useRoleStore } from "@/store/roleStore";
-
-type AttemptRecord = {
-  examId: string;
-  studentId: number;
-  answers: Array<{ questionId: string; selectedAnswer: number }>;
-  score: number;
-  submittedAt: string;
-  timeSpent: number;
-};
-
-type ExamRecord = {
-  id: string;
-  title: string;
-  questions: Array<{ id: string; text: string; options: string[]; correctAnswer: number }>;
-};
+import { apiClient } from "@/lib/apiClient";
+import type { AttemptSummaryDto } from "@/types/api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { CheckCircle, XCircle, Clock, Trophy } from "lucide-react";
 
 export const ResultsPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const role = useRoleStore((state) => state.role);
 
-  const [attempt, setAttempt] = useState<AttemptRecord | null>(null);
-  const [exam, setExam] = useState<ExamRecord | null>(null);
+  const [attempt, setAttempt] = useState<AttemptSummaryDto | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stateAttempt = location.state?.attempt as AttemptRecord | undefined;
-    const attempts = JSON.parse(localStorage.getItem("attempts") ?? "[]") as AttemptRecord[];
-    const storedExam =
-      localStorage.getItem("lastExam") ?? localStorage.getItem("currentExam");
-
-    if (stateAttempt) {
-      setAttempt(stateAttempt);
-    } else if (attempts.length > 0) {
-      setAttempt(attempts[attempts.length - 1]);
-    }
-
-    if (storedExam) {
-      try {
-        setExam(JSON.parse(storedExam) as ExamRecord);
-      } catch {
-        localStorage.removeItem("lastExam");
+    const init = async () => {
+      // 1. Try to get attempt from navigation state
+      if (location.state?.attempt) {
+        setAttempt(location.state.attempt);
+        setLoading(false);
+        return;
       }
-    }
 
-    setLoading(false);
+      // 2. Fallback: Fetch last attempt from API
+      // Hardcoded student ID for prototype
+      const STUDENT_ID = 7409467049;
+      const res = await apiClient.getAttempts(STUDENT_ID);
+
+      if (res.success && res.data && res.data.length > 0) {
+        // Get the most recent submitted attempt
+        const lastSubmitted = res.data.find(a => a.state === "submitted" || a.state === "graded");
+        if (lastSubmitted) {
+          setAttempt(lastSubmitted);
+        }
+      }
+      setLoading(false);
+    };
+
+    init();
   }, [location.state]);
 
   if (loading) {
+    return <div className="flex h-screen items-center justify-center text-white">Natijalar yuklanmoqda...</div>;
+  }
+
+  if (!attempt) {
     return (
-      <Box sx={{ p: 4 }}>
-        <Typography variant="h6">Natijalar yuklanmoqda...</Typography>
-      </Box>
+      <div className="flex flex-col h-screen items-center justify-center text-white p-4 text-center">
+        <h2 className="text-2xl font-bold mb-2">Hali natijalar yo'q</h2>
+        <p className="text-slate-400 mb-6">Imtihon topshirganingizdan so'ng natijalar shu yerda ko'rinadi.</p>
+        <Button onClick={() => navigate("/exams")}>Imtihonlarga o'tish</Button>
+      </div>
     );
   }
 
-  if (!attempt || !exam) {
-    return (
-      <Box sx={{ p: 4 }}>
-        <Typography variant="h6" sx={{ mb: 1 }}>
-          Hali natijalar yo'q
-        </Typography>
-        <Typography variant="body2" sx={{ color: "#6B7280" }}>
-          Iltimos, birinchi bo'lib imtihon topshiring yoki mavjud natijalarni qayta yuklang.
-        </Typography>
-      </Box>
-    );
-  }
-
-  const scoreData = calculateScore(exam.questions, attempt.answers);
-
-  const handleReviewMistakes = () => {
-    const mistakes = scoreData.breakdown.filter((entry) => !entry.isCorrect && !entry.isSkipped).length;
-    alert(`${mistakes} ta xatolikni qayta ko'rib chiqing!`);
-  };
+  const score = attempt.score ?? 0;
+  const isPass = score >= 60; // TODO: Get pass mark from exam details
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#FFFFFF", pb: 8 }}>
-      <Card
-        sx={{
-          m: 2,
-          borderRadius: 3,
-          color: "#FFFFFF",
-          background: "linear-gradient(135deg, #FF5F00 0%, #E05500 100%)",
-          boxShadow: "0 8px 24px rgba(255, 95, 0, 0.3)",
-          position: "relative",
-          overflow: "hidden"
-        }}
-      >
-        <CardContent sx={{ textAlign: "center", py: 4 }}>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
-            {exam.title}
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 2, opacity: 0.8 }}>
-            Jo'natilgan: {new Date(attempt.submittedAt).toLocaleString()}
-          </Typography>
+    <div className="min-h-screen bg-slate-950 text-slate-50 p-4 pb-24 font-sans">
+      <div className="max-w-md mx-auto space-y-6">
 
-          <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
-            <Box sx={{ position: "relative", display: "inline-flex" }}>
-              <CircularProgress
-                variant="determinate"
-                value={scoreData.score}
-                size={110}
-                thickness={4.5}
-                sx={{
-                  color: "#FFFFFF",
-                  "& .MuiCircularProgress-circle": { strokeLinecap: "round" }
-                }}
-              />
-              <Box
-                sx={{
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                  position: "absolute",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }}
-              >
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                    {scoreData.score}%
-                  </Typography>
-                  <Typography variant="caption">
-                    {scoreData.correctCount}/{scoreData.total}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
+        {/* Score Card */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 to-orange-700 p-8 text-center shadow-2xl shadow-orange-500/20">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
 
-          {(role === "teacher" || role === "admin") && (
-            <Card
-              sx={{
-                mt: 3,
-                borderRadius: 2,
-                bgcolor: "rgba(255,255,255,0.2)",
-                border: "1px solid rgba(255,255,255,0.3)"
-              }}
-            >
-              <CardContent sx={{ p: 2 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  Class Average: 78.5%
-                </Typography>
-                <Typography variant="caption">24/30 students completed</Typography>
-              </CardContent>
-            </Card>
-          )}
-        </CardContent>
-      </Card>
+          <h1 className="relative text-3xl font-bold text-white mb-2">{attempt.examTitle ?? "Imtihon Natijasi"}</h1>
+          <p className="relative text-orange-100 mb-8 opacity-90">
+            Topshirildi: {new Date(attempt.submittedAt!).toLocaleString()}
+          </p>
 
-      <Box sx={{ textAlign: "center", mb: 3 }}>
-        <Typography variant="h6" sx={{ color: "#FF5F00", fontWeight: 700 }}>
-          #3 out of 50 students
-        </Typography>
-        <Typography variant="body2" sx={{ color: "#6B7280" }}>
-          Excellent job! Top 10% of your class
-        </Typography>
-      </Box>
+          <div className="relative inline-flex items-center justify-center w-40 h-40 rounded-full bg-white/10 backdrop-blur-md border-4 border-white/20 mb-6 shadow-inner">
+            <div className="text-center">
+              <span className="block text-5xl font-black text-white">{score}%</span>
+              <span className="text-sm font-medium text-orange-100 uppercase tracking-wider">Natija</span>
+            </div>
+          </div>
 
-      <ResultsBreakdown
-        breakdown={scoreData.breakdown}
-        questions={exam.questions}
-        onReviewMistakes={handleReviewMistakes}
-      />
+          <div className="relative flex justify-center gap-4">
+            <div className="flex items-center gap-2 bg-black/20 rounded-full px-4 py-2 backdrop-blur-sm">
+              <Clock className="w-4 h-4 text-orange-200" />
+              <span className="text-sm font-medium">{Math.floor((attempt.durationSpentSec ?? 0) / 60)} daqiqa</span>
+            </div>
+            <div className="flex items-center gap-2 bg-black/20 rounded-full px-4 py-2 backdrop-blur-sm">
+              {isPass ? <CheckCircle className="w-4 h-4 text-green-400" /> : <XCircle className="w-4 h-4 text-red-400" />}
+              <span className="text-sm font-medium">{isPass ? "O'tdi" : "Yiqildi"}</span>
+            </div>
+          </div>
+        </div>
 
-      <Box sx={{ p: 2, display: "flex", gap: 2 }}>
-        <Button
-          fullWidth
-          variant="outlined"
-          onClick={() => navigate("/exams")}
-          sx={{ color: "#FF5F00", borderColor: "#FF5F00", py: 1.5, fontWeight: 600 }}
-        >
-          Boshqa imtihonlar
-        </Button>
-        <Button
-          fullWidth
-          variant="contained"
-          onClick={() => navigate("/exam/exam-001")}
-          sx={{ bgcolor: "#FF5F00", py: 1.5, fontWeight: 600 }}
-        >
-          Qayta boshlash
-        </Button>
-      </Box>
-    </Box>
+        {/* Stats / Details */}
+        <div className="grid grid-cols-2 gap-4">
+          <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+            <CardContent className="p-4 text-center">
+              <Trophy className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-white">#3</div>
+              <div className="text-xs text-slate-400">Reyting (Sinov)</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-white">Top 10%</div>
+              <div className="text-xs text-slate-400">Sinfdagi o'rni</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Actions */}
+        <div className="space-y-3 pt-4">
+          <Button
+            className="w-full bg-white text-slate-900 hover:bg-slate-100"
+            onClick={() => navigate("/exams")}
+          >
+            Boshqa imtihonlar
+          </Button>
+
+          {/* Only show retry if allowed (logic to be added) */}
+          <Button
+            variant="outline"
+            className="w-full border-white/10 text-slate-400 hover:bg-white/5 hover:text-white"
+            onClick={() => navigate(`/exam/${attempt.examId}`)}
+          >
+            Qayta topshirish
+          </Button>
+        </div>
+
+      </div>
+    </div>
   );
 };

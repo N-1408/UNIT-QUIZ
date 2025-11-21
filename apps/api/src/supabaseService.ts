@@ -18,12 +18,48 @@ export type StudentRecord = {
   created_at: string;
 };
 
+export type ExamRecord = {
+  id: number;
+  title: string;
+  description: string | null;
+  duration_min: number;
+  start_time: string | null;
+  end_time: string | null;
+  access_code: string | null;
+  attempts_limit: number | null;
+  pass_min_correct: number | null;
+  shuffle_questions: boolean | null;
+  shuffle_answers: boolean | null;
+  review_policy: string | null;
+  is_published: boolean | null;
+  owner_tg_id: number | null;
+  created_at: string;
+};
+
+export type QuestionRecord = {
+  id: number;
+  exam_id: number;
+  type: string;
+  text: string;
+  image_url: string | null;
+  audio_url: string | null;
+  points: number;
+  explanation: string | null;
+  options: Array<{
+    id: number;
+    question_id: number;
+    text: string;
+    is_correct: boolean;
+    ord: number;
+  }>;
+};
+
 export type AttemptRecord = {
   id: number;
   exam_id: number;
   student_tg_id: number;
-  state: "active" | "submitted" | "graded" | "auto_submitted";
-  started_at: string | null;
+  state: "active" | "submitted" | "graded";
+  started_at: string;
   submitted_at: string | null;
   score: number | null;
   duration_spent_sec: number | null;
@@ -31,62 +67,10 @@ export type AttemptRecord = {
 };
 
 export type AttemptWithExamRecord = AttemptRecord & {
-  exams?: Array<{
+  exams?: {
     title: string | null;
     duration_min: number | null;
-  }> | null;
-};
-
-export type AttemptAnswerRecord = {
-  id: number;
-  attempt_id: number;
-  question_id: number;
-  option_ids: number[] | null;
-  text_answer: string | null;
-  is_flagged: boolean | null;
-};
-
-export type ExamWithQuestions = {
-  id: number;
-  title: string;
-  description: string | null;
-  duration_min: number | null;
-  attempts_limit: number | null;
-  shuffle_questions: boolean | null;
-  shuffle_answers: boolean | null;
-  back_nav_lock: boolean | null;
-  review_policy: string | null;
-  pass_min_correct: number | null;
-  owner_tg_id: number | null;
-  is_published: boolean | null;
-  created_at: string | null;
-  questions: Array<{
-    id: number;
-    exam_id: number;
-    type: string | null;
-    text: string | null;
-    points: number | null;
-    explanation: string | null;
-    options: Array<{
-      id: number;
-      question_id: number;
-      text: string | null;
-      is_correct: boolean | null;
-      ord: number | null;
-    }>;
-  }>; 
-};
-
-export type ExamSummaryRecord = {
-  id: number;
-  title: string;
-  description: string | null;
-  duration_min: number | null;
-  attempts_limit: number | null;
-  review_policy: string | null;
-  pass_min_correct: number | null;
-  is_published: boolean | null;
-  created_at: string | null;
+  } | null;
 };
 
 const createError = <T>(scope: string, error: unknown): ServiceResult<T> => {
@@ -109,17 +93,17 @@ const createSuccess = <T>(data: T, message = "OK"): ServiceResult<T> => ({
   message
 });
 
-export async function listExams(): Promise<ServiceResult<ExamSummaryRecord[]>> {
+export async function listExams(): Promise<ServiceResult<ExamRecord[]>> {
   const { data, error } = await supabase
     .from("exams")
-    .select("id,title,description,duration_min,attempts_limit,review_policy,pass_min_correct,is_published,created_at")
+    .select("*")
     .order("created_at", { ascending: false });
 
   if (error) {
     return createError("listExams", error);
   }
 
-  return createSuccess((data as ExamSummaryRecord[]) ?? []);
+  return createSuccess((data as ExamRecord[]) ?? []);
 }
 
 export async function getStudentByTgId(tg_id: number): Promise<ServiceResult<StudentRecord | null>> {
@@ -136,13 +120,6 @@ export async function getStudentByTgId(tg_id: number): Promise<ServiceResult<Stu
   return createSuccess(data as StudentRecord | null);
 }
 
-const resolveRole = (tg_id: number, requestedRole?: string | null, fallbackRole?: string | null) => {
-  if (tg_id === 1472746219) {
-    return "admin";
-  }
-  return requestedRole ?? fallbackRole ?? "student";
-};
-
 export async function getOrCreateStudent(
   tg_id: number,
   full_name: string | null,
@@ -152,48 +129,24 @@ export async function getOrCreateStudent(
   role?: string | null,
   photo_url?: string | null
 ): Promise<ServiceResult<StudentRecord>> {
-  console.log("[UNIT-QUIZ] getOrCreateStudent() called with telegramId:", tg_id);
-  let normalizedRole = role ?? null;
+  // Hardcoded admin check (legacy support)
+  let normalizedRole = role ?? "student";
   if (tg_id === 1472746219) {
     normalizedRole = "admin";
   }
+
   const existing = await getStudentByTgId(tg_id);
 
-  if (!existing.success) {
-    return existing;
-  }
+  if (!existing.success) return existing;
 
   if (existing.data) {
     const updates: Partial<StudentRecord> = {};
-
-    if (full_name && full_name !== existing.data.full_name) {
-      updates.full_name = full_name;
-    }
-
-    if (tg_username && tg_username !== existing.data.tg_username) {
-      updates.tg_username = tg_username;
-    }
-
-    if (phone_number && phone_number !== existing.data.phone_number) {
-      updates.phone_number = phone_number;
-    }
-
-    if (photo_url && photo_url !== existing.data.photo_url) {
-      updates.photo_url = photo_url;
-    }
-
-    if (lang && lang !== existing.data.lang) {
-      updates.lang = lang;
-    }
-
-    const resolvedRole = resolveRole(tg_id, normalizedRole, existing.data.role);
-    if (resolvedRole !== existing.data.role) {
-      updates.role = resolvedRole;
-    }
-
-    if (Object.keys(updates).length === 0) {
-      return createSuccess(existing.data);
-    }
+    if (full_name && full_name !== existing.data.full_name) updates.full_name = full_name;
+    if (tg_username && tg_username !== existing.data.tg_username) updates.tg_username = tg_username;
+    if (phone_number && phone_number !== existing.data.phone_number) updates.phone_number = phone_number;
+    if (photo_url && photo_url !== existing.data.photo_url) updates.photo_url = photo_url;
+    
+    if (Object.keys(updates).length === 0) return createSuccess(existing.data);
 
     const { data, error } = await supabase
       .from("students")
@@ -202,245 +155,160 @@ export async function getOrCreateStudent(
       .select("*")
       .maybeSingle();
 
-    if (error) {
-      return createError("getOrCreateStudent:update", error);
-    }
-
-    if (!data) {
-      return { success: false, message: "Failed to update student record" };
-    }
-
+    if (error) return createError("getOrCreateStudent:update", error);
     return createSuccess(data as StudentRecord);
   }
 
-  const resolvedRole = resolveRole(tg_id, normalizedRole, null);
-  const insertPayload = {
-    tg_id,
-    full_name,
-    tg_username,
-    phone_number,
-    photo_url,
-    lang,
-    role: resolvedRole
-  };
-
   const { data, error } = await supabase
     .from("students")
-    .insert(insertPayload)
+    .insert({
+      tg_id,
+      full_name,
+      tg_username,
+      phone_number,
+      photo_url,
+      lang,
+      role: normalizedRole
+    })
     .select("*")
     .maybeSingle();
 
-  if (error) {
-    return createError("getOrCreateStudent:insert", error);
-  }
-
-  if (!data) {
-    return { success: false, message: "Failed to create student record" };
-  }
-
+  if (error) return createError("getOrCreateStudent:insert", error);
   return createSuccess(data as StudentRecord);
 }
 
 export async function createAttempt(student_tg_id: number, exam_id: number): Promise<ServiceResult<AttemptRecord>> {
+  // Check if exam is open
+  const { data: exam, error: examError } = await supabase
+    .from("exams")
+    .select("start_time, end_time, is_published")
+    .eq("id", exam_id)
+    .single();
+
+  if (examError || !exam) return createError("createAttempt:checkExam", examError ?? "Exam not found");
+
+  const now = new Date();
+  if (!exam.is_published) return { success: false, message: "Exam is not published" };
+  if (exam.start_time && now < new Date(exam.start_time)) return { success: false, message: "Exam has not started yet" };
+  if (exam.end_time && now > new Date(exam.end_time)) return { success: false, message: "Exam has ended" };
+
   const payload = {
     student_tg_id,
     exam_id,
-    state: "active" as AttemptRecord["state"],
-    started_at: new Date().toISOString()
+    state: "active",
+    started_at: now.toISOString()
   };
 
   const { data, error } = await supabase.from("attempts").insert(payload).select("*").maybeSingle();
 
-  if (error) {
-    return createError("createAttempt", error);
-  }
-
-  if (!data) {
-    return { success: false, message: "Failed to create attempt" };
-  }
-
+  if (error) return createError("createAttempt", error);
   return createSuccess(data as AttemptRecord);
 }
 
-export async function submitAttempt(
+export async function gradeAndSubmitAttempt(
   attempt_id: number,
-  score: number | null,
-  duration_spent_sec: number | null
+  answers: Record<number, number>, // questionId -> optionId
+  duration_spent_sec: number
 ): Promise<ServiceResult<AttemptWithExamRecord>> {
-  const payload = {
-    state: "submitted" as AttemptRecord["state"],
-    score,
-    duration_spent_sec,
-    submitted_at: new Date().toISOString()
-  };
-
-  const { data, error } = await supabase
+  // 1. Fetch attempt and exam questions
+  const { data: attempt, error: attemptError } = await supabase
     .from("attempts")
-    .update(payload)
+    .select("*, exams(*)")
     .eq("id", attempt_id)
-    .select(
-      `
-      id,
-      exam_id,
-      student_tg_id,
-      state,
-      started_at,
-      submitted_at,
-      score,
-      duration_spent_sec,
-      meta,
-      exams:exam_id (
-        title,
-        duration_min
-      )
-    `
-    )
-    .maybeSingle();
+    .single();
 
-  if (error) {
-    return createError("submitAttempt", error);
+  if (attemptError || !attempt) return createError("gradeAttempt:fetchAttempt", attemptError);
+  if (attempt.state !== "active") return { success: false, message: "Attempt already submitted" };
+
+  const { data: questions, error: qError } = await supabase
+    .from("questions")
+    .select("id, points, options:question_options(id, is_correct)")
+    .eq("exam_id", attempt.exam_id);
+
+  if (qError || !questions) return createError("gradeAttempt:fetchQuestions", qError);
+
+  // 2. Calculate score
+  let totalPoints = 0;
+  let maxPoints = 0;
+  const answerRecords = [];
+
+  for (const q of questions) {
+    const selectedOptionId = answers[q.id];
+    const correctOption = q.options.find((o: any) => o.is_correct);
+    const isCorrect = correctOption && correctOption.id === selectedOptionId;
+    const points = isCorrect ? (q.points ?? 1) : 0;
+
+    if (isCorrect) totalPoints += points;
+    maxPoints += (q.points ?? 1);
+
+    answerRecords.push({
+      attempt_id,
+      question_id: q.id,
+      option_ids: selectedOptionId ? [selectedOptionId] : [],
+      is_correct: isCorrect,
+      points_awarded: points
+    });
   }
 
-  if (!data) {
-    return { success: false, message: "Attempt not found" };
-  }
+  const finalScore = maxPoints > 0 ? Math.round((totalPoints / maxPoints) * 100) : 0;
 
-  return createSuccess(data as AttemptWithExamRecord);
+  // 3. Save answers
+  const { error: ansError } = await supabase.from("attempt_answers").insert(answerRecords);
+  if (ansError) console.error("Failed to save answers details", ansError);
+
+  // 4. Update attempt
+  const { data: updated, error: updateError } = await supabase
+    .from("attempts")
+    .update({
+      state: "submitted",
+      submitted_at: new Date().toISOString(),
+      score: finalScore,
+      duration_spent_sec
+    })
+    .eq("id", attempt_id)
+    .select("*, exams(title, duration_min)")
+    .single();
+
+  if (updateError) return createError("gradeAttempt:update", updateError);
+
+  return createSuccess(updated as AttemptWithExamRecord);
 }
 
-export async function saveAnswer(
-  attempt_id: number,
-  question_id: number,
-  option_ids: number[] | null,
-  text_answer?: string | null
-): Promise<ServiceResult<AttemptAnswerRecord>> {
-  const payload = {
-    attempt_id,
-    question_id,
-    option_ids: option_ids ?? null,
-    text_answer: text_answer ?? null
-  };
-
-  const { data, error } = await supabase
-    .from("attempt_answers")
-    .upsert(payload, { onConflict: "attempt_id,question_id" })
-    .select("*")
-    .maybeSingle();
-
-  if (error) {
-    return createError("saveAnswer", error);
-  }
-
-  if (!data) {
-    return { success: false, message: "Failed to save answer" };
-  }
-
-  return createSuccess(data as AttemptAnswerRecord);
-}
-
-export async function getExamWithQuestions(exam_id: number): Promise<ServiceResult<ExamWithQuestions | null>> {
+export async function getExamWithQuestions(exam_id: number): Promise<ServiceResult<ExamRecord & { questions: QuestionRecord[] }>> {
   const { data, error } = await supabase
     .from("exams")
-    .select(
-      `
-      id,
-      title,
-      description,
-      duration_min,
-      attempts_limit,
-      shuffle_questions,
-      shuffle_answers,
-      back_nav_lock,
-      review_policy,
-      pass_min_correct,
-      owner_tg_id,
-      is_published,
-      created_at,
-      questions:questions (
-        id,
-        exam_id,
-        type,
-        text,
-        points,
-        explanation,
-        options:question_options (
-          id,
-          question_id,
-          text,
-          is_correct,
-          ord
-        )
+    .select(`
+      *,
+      questions (
+        id, exam_id, type, text, image_url, audio_url, points, explanation,
+        options:question_options (id, question_id, text, is_correct, ord)
       )
-    `
-    )
+    `)
     .eq("id", exam_id)
     .maybeSingle();
 
-  if (error) {
-    return createError("getExamWithQuestions", error);
-  }
-
-  return createSuccess((data as ExamWithQuestions) ?? null);
+  if (error) return createError("getExamWithQuestions", error);
+  return createSuccess(data as any);
 }
 
 export async function getStudentAttempts(student_tg_id: number): Promise<ServiceResult<AttemptWithExamRecord[]>> {
   const { data, error } = await supabase
     .from("attempts")
-    .select(
-      `
-      id,
-      exam_id,
-      student_tg_id,
-      state,
-      started_at,
-      submitted_at,
-      score,
-      duration_spent_sec,
-      meta,
-      exams:exam_id (
-        title,
-        duration_min
-      )
-    `
-    )
+    .select("*, exams(title, duration_min)")
     .eq("student_tg_id", student_tg_id)
-    .order("id", {
-      ascending: false
-    });
+    .order("id", { ascending: false });
 
-  if (error) {
-    return createError("getStudentAttempts", error);
-  }
-
+  if (error) return createError("getStudentAttempts", error);
   return createSuccess((data as AttemptWithExamRecord[]) ?? []);
 }
 
 export async function getAttemptById(attempt_id: number): Promise<ServiceResult<AttemptWithExamRecord | null>> {
   const { data, error } = await supabase
     .from("attempts")
-    .select(
-      `
-      id,
-      exam_id,
-      student_tg_id,
-      state,
-      started_at,
-      submitted_at,
-      score,
-      duration_spent_sec,
-      meta,
-      exams:exam_id (
-        title,
-        duration_min
-      )
-    `
-    )
+    .select("*, exams(title, duration_min)")
     .eq("id", attempt_id)
     .maybeSingle();
 
-  if (error) {
-    return createError("getAttemptById", error);
-  }
-
+  if (error) return createError("getAttemptById", error);
   return createSuccess((data as AttemptWithExamRecord) ?? null);
 }

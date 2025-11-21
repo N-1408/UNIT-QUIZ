@@ -23,12 +23,14 @@ export type ExamQuestionDto = {
   type: string | null;
   text: string | null;
   points: number | null;
-  explanation: string | null;
+  explanation: string | null; // Null until review
+  imageUrl: string | null;
+  audioUrl: string | null;
   options: Array<{
     id: number;
     questionId: number;
     text: string | null;
-    isCorrect: boolean | null;
+    // isCorrect is REMOVED for security
     ord: number | null;
   }> | null;
 };
@@ -70,6 +72,6 @@ export type UserProfileResponse = {
 };
 
 export type SubmitAttemptPayload = {
-  score?: number | null;
+  answers?: Record<number, number>; // questionId -> optionId
   durationSpentSec?: number | null;
 };

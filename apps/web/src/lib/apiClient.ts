@@ -140,6 +140,12 @@ export const apiClient = {
 
   getResults: (tgId: number) => fetchAttempts(tgId),
 
+  createAttempt: (examId: number, studentTgId: number) =>
+    request<AttemptSummaryDto>("/attempts", {
+      method: "POST",
+      body: JSON.stringify({ examId, studentTgId })
+    }),
+
   submitAttempt: (attemptId: number, payload: SubmitAttemptPayload) =>
     request<AttemptSummaryDto>(`/attempts/${attemptId}/submit`, {
       method: "POST",

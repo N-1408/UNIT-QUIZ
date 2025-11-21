@@ -1,19 +1,26 @@
 import { Router } from "express";
-import { getExamWithQuestions, listExams, type ExamSummaryRecord } from "../supabaseService.js";
+import { getExamWithQuestions, listExams, type ExamRecord } from "../supabaseService.js";
 
 const router = Router();
 
-const deriveStatus = (exam: { is_published: boolean | null }): "upcoming" | "open" | "closed" =>
-  exam.is_published ? "open" : "upcoming";
+const deriveStatus = (exam: { is_published: boolean | null; start_time: string | null; end_time: string | null }): "upcoming" | "open" | "closed" => {
+  if (!exam.is_published) return "upcoming";
 
-const mapSummary = (exam: ExamSummaryRecord) => ({
+  const now = new Date();
+  if (exam.start_time && now < new Date(exam.start_time)) return "upcoming";
+  if (exam.end_time && now > new Date(exam.end_time)) return "closed";
+
+  return "open";
+};
+
+const mapSummary = (exam: ExamRecord) => ({
   id: exam.id,
   title: exam.title,
   description: exam.description,
   durationMin: exam.duration_min,
   attemptsLimit: exam.attempts_limit,
-  startsAt: exam.created_at,
-  endsAt: null,
+  startsAt: exam.start_time ?? exam.created_at,
+  endsAt: exam.end_time,
   status: deriveStatus(exam)
 });
 
@@ -46,35 +53,29 @@ router.get("/exams/:examId", async (req, res) => {
   }
 
   const exam = result.data;
+
+  // SECURITY: Do NOT expose is_correct to the client!
   const payload = {
-    ...mapSummary({
-      id: exam.id,
-      title: exam.title,
-      description: exam.description,
-      duration_min: exam.duration_min,
-      attempts_limit: exam.attempts_limit,
-      review_policy: exam.review_policy,
-      pass_min_correct: exam.pass_min_correct,
-      is_published: exam.is_published,
-      created_at: exam.created_at
-    }),
+    ...mapSummary(exam),
     reviewPolicy: exam.review_policy,
     passMinCorrect: exam.pass_min_correct,
     shuffleQuestions: exam.shuffle_questions,
     shuffleAnswers: exam.shuffle_answers,
-    backNavLock: exam.back_nav_lock,
+    backNavLock: false, // TODO: Add to schema if needed
     questions: exam.questions.map((question) => ({
       id: question.id,
       examId: question.exam_id,
       type: question.type,
       text: question.text,
       points: question.points,
-      explanation: question.explanation,
+      explanation: null, // Hide explanation until review
+      imageUrl: question.image_url,
+      audioUrl: question.audio_url,
       options: question.options.map((option) => ({
         id: option.id,
         questionId: option.question_id,
         text: option.text,
-        isCorrect: option.is_correct,
+        // isCorrect is INTENTIONALLY OMITTED
         ord: option.ord
       }))
     }))
