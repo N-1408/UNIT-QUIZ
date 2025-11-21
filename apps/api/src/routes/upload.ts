@@ -33,9 +33,9 @@ router.post("/:examId/import", upload.single("file"), async (req, res) => {
 
         if (mimeType === "application/pdf") {
             // Dynamic import for pdf-parse to handle ESM compatibility
-            const pdfParse = (await import("pdf-parse")).default;
+            const pdfParse = await import("pdf-parse");
             const dataBuffer = fs.readFileSync(filePath);
-            const data = await pdfParse(dataBuffer);
+            const data = await (pdfParse as any)(dataBuffer);
             questions = parsePdfContent(data.text);
         } else if (
             mimeType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
