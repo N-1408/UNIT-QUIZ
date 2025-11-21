@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { getStudentByTgId, getOrCreateStudent } from "../supabaseService.js";
+import { authMiddleware } from "../middleware/auth.js";
 
 const router = Router();
 
