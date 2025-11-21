@@ -146,6 +146,10 @@ async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
 }
 
 export const apiClient = {
+  // User & Profile
+  getCurrentUser: () =>
+    request<{ tgId: number; username?: string; firstName?: string; lastName?: string; role: string }>("/users/me"),
+
   syncUser: (input: SyncUserInput) =>
     request<UserProfileResponse>("/users/sync", {
       method: "POST",

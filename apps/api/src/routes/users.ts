@@ -32,6 +32,45 @@ const mapStudentRecord = (user: {
   };
 };
 
+// GET /api/users/me - Get current user profile
+router.get('/me', authMiddleware, async (req, res) => {
+  const user = req.user!; // req.user is populated by authMiddleware
+
+  try {
+    // We use getOrCreateStudent here to ensure the user record is up-to-date
+    // and to fetch the latest role from the database.
+    const result = await getOrCreateStudent(
+      user.tgId,
+      user.firstName || null, // Pass null if empty string
+      user.lastName || null,  // Pass null if empty string
+      user.username || null,
+      null, // lang is not typically part of the /me payload for update
+      null, // role is not typically part of the /me payload for update
+      null  // photoUrl is not typically part of the /me payload for update
+    );
+
+    if (!result.success || !result.data) {
+      console.error("Error fetching user profile for /me:", result.message ?? "Unknown error");
+      return res.status(500).json({ success: false, error: 'failed_to_fetch_profile' });
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        tgId: user.tgId,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: result.data.role // Use the role from the database
+      },
+      error: null
+    });
+  } catch (error) {
+    console.error('Error fetching user profile for /me:', error);
+    return res.status(500).json({ success: false, error: 'internal_error' });
+  }
+});
+
 router.get("/users/:telegramId", async (req, res) => {
   const telegramId = req.params.telegramId?.trim();
 

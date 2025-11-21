@@ -4,10 +4,12 @@ import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { initializeTelegram } from "@/lib/telegram";
+import { useRoleStore } from "@/store/roleStore";
 import { Play, Trophy, Clock, TrendingUp, BookOpen } from "lucide-react";
 
 export const HomePage = () => {
   const navigate = useNavigate();
+  const setRole = useRoleStore((state) => state.setRole);
   const [userName, setUserName] = useState("Student");
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -22,25 +24,21 @@ export const HomePage = () => {
       // 1. Init Telegram User
       try {
         await initializeTelegram();
-        // Sync user with backend
+
+        // 2. Fetch current user profile to get role
+        const userRes = await apiClient.getCurrentUser();
+        if (userRes.success && userRes.data) {
+          setRole(userRes.data.role as "student" | "admin");
+          setUserName(userRes.data.firstName || "Student");
+        }
+
+        // 3. Sync user with backend
         const webApp = (window as any).Telegram?.WebApp;
         if (webApp) {
           webApp.ready();
-          // We don't strictly need to call syncUser manually if every request does it via middleware,
-          // but syncUser endpoint might return profile data we need.
-          // For now, let's assume the backend middleware handles creation on first request.
-          // But we need to fetch user stats.
         }
 
-        // Fetch user profile/stats
-        // Since we don't have a dedicated "me" endpoint yet that returns stats, 
-        // we might need to rely on what we have or add one.
-        // For now, let's fetch attempts to calculate stats.
-
-        // We need the user's TG ID for some legacy calls if they still require it in query params,
-        // but ideally we should switch to using the token.
-        // The backend attempts endpoint now uses the token to identify the user.
-
+        // 4. Fetch user stats
         const attemptsRes = await apiClient.getAttempts(0); // 0 or any ID is ignored by backend if not admin
         if (attemptsRes.success && attemptsRes.data) {
           const submitted = attemptsRes.data.filter((a) => a.state === "submitted" || a.state === "graded");
