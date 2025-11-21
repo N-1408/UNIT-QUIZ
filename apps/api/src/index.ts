@@ -5,6 +5,7 @@ import testsRouter from './routes/tests.js';
 import usersRouter from './routes/users.js';
 import examsRouter from './routes/exams.js';
 import attemptsRouter from './routes/attempts.js';
+import uploadRouter from './routes/upload.js';
 import logRouter from './routes/log.js';
 import { bot } from './bot.js';
 
@@ -55,6 +56,7 @@ app.use('/api', testsRouter);
 app.use('/api', usersRouter);
 app.use('/api', examsRouter);
 app.use('/api', attemptsRouter);
+app.use('/api/upload', uploadRouter);
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Global error:', err);

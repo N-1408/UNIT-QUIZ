@@ -131,6 +131,19 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<ApiR
 
 const fetchAttempts = (tgId: number) => request<AttemptSummaryDto[]>(`/attempts?tgId=${encodeURIComponent(String(tgId))}`);
 
+async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
+  const payload = (await response.json().catch(() => ({}))) as ApiResponse<T>;
+
+  if (!response.ok) {
+    return {
+      success: false,
+      data: null,
+      error: payload.error || `HTTP Error ${response.status}`
+    };
+  }
+  return payload;
+}
+
 export const apiClient = {
   syncUser: (input: SyncUserInput) =>
     request<UserProfileResponse>("/users/sync", {
@@ -167,11 +180,32 @@ export const apiClient = {
       body: JSON.stringify(payload)
     }),
 
-  createQuestion: (examId: number, payload: any) =>
-    request<any>(`/exams/${examId}/questions`, {
+  createQuestion: async (examId: number, payload: any) => {
+    const res = await fetch(`${buildUrl(`/exams/${examId}/questions`)}`, {
       method: "POST",
-      body: JSON.stringify(payload)
-    }),
+      headers: buildHeaders(),
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(res);
+  },
+
+  uploadQuestions: async (examId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const webApp = (window as any).Telegram?.WebApp;
+    const initData = webApp?.initData || "";
+
+    const res = await fetch(`${buildUrl(`/upload/${examId}/import`)}`, {
+      method: "POST",
+      headers: {
+        "Authorization": `twa ${initData}`
+        // Content-Type is automatically set by browser for FormData
+      },
+      body: formData,
+    });
+    return handleResponse(res);
+  },
 
   submitAttempt: (attemptId: number, payload: SubmitAttemptPayload) =>
     request<AttemptSummaryDto>(`/attempts/${attemptId}/submit`, {

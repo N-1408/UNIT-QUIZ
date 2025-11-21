@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiClient } from "@/lib/apiClient";
-import { Plus, Trash2, Save } from "lucide-react";
+import { Plus, Trash2, Save, Upload } from "lucide-react";
 import type { ExamDetailDto, ExamQuestionDto } from "@/types/api";
 
 type QuestionEditorProps = {
@@ -91,7 +91,26 @@ export const QuestionEditor = ({ examId, onBack }: QuestionEditorProps) => {
         }
     };
 
-    if (loading) return <div className="text-white text-center py-10">Yuklanmoqda...</div>;
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setLoading(true);
+        const res = await apiClient.uploadQuestions(examId, file);
+        setLoading(false);
+
+        if (res.success) {
+            alert(`Successfully imported ${res.data.imported} questions!`);
+            loadExam();
+        } else {
+            alert("Import failed: " + res.error);
+        }
+
+        // Reset input
+        e.target.value = "";
+    };
+
+    if (loading && !exam) return <div className="text-white text-center py-10">Yuklanmoqda...</div>;
 
     return (
         <div className="space-y-6">
@@ -103,10 +122,24 @@ export const QuestionEditor = ({ examId, onBack }: QuestionEditorProps) => {
                     <h2 className="text-2xl font-bold text-white">{exam?.title}</h2>
                     <p className="text-slate-400 text-sm">{questions.length} ta savol</p>
                 </div>
-                <Button onClick={() => setIsAdding(true)} className="bg-orange-500 hover:bg-orange-600 text-white">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Savol qo'shish
-                </Button>
+                <div className="flex gap-2">
+                    <div className="relative">
+                        <input
+                            type="file"
+                            accept=".pdf,.xlsx,.xls"
+                            onChange={handleFileUpload}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <Button variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10">
+                            <Upload className="w-4 h-4 mr-2" />
+                            Import PDF/Excel
+                        </Button>
+                    </div>
+                    <Button onClick={() => setIsAdding(true)} className="bg-orange-500 hover:bg-orange-600 text-white">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Savol qo'shish
+                    </Button>
+                </div>
             </div>
 
             {isAdding && (
