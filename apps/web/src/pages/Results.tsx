@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { apiClient } from "@/lib/apiClient";
 import type { AttemptSummaryDto } from "@/types/api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { CheckCircle, XCircle, Clock, Share2, RotateCcw } from "lucide-react";
 import confetti from "canvas-confetti";
 import { cn } from "@/lib/utils";
