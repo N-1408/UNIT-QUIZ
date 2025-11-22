@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, FileText, BarChart2, User, Shield, Trophy, Hexagon } from "lucide-react";
+import { Home, FileText, BarChart2, User, Shield, Trophy } from "lucide-react";
 import { useRoleStore } from "@/store/roleStore";
 import { cn } from "@/lib/utils";
 
