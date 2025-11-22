@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Typography } from "@mui/material";
 
 type ExamTimerProps = {
   endTimeISO: string;
@@ -34,12 +33,12 @@ export const ExamTimer = ({ endTimeISO, onTimeout }: ExamTimerProps) => {
   const remainingMs = Math.max(0, endTime - now);
   const minutesLeft = remainingMs / 60000;
 
-  const color =
-    minutesLeft <= 1 ? "#DC2626" : minutesLeft <= 5 ? "#F97316" : "#111827";
+  const colorClass =
+    minutesLeft <= 1 ? "text-red-600" : minutesLeft <= 5 ? "text-orange-500" : "text-slate-900";
 
   return (
-    <Typography variant="body2" sx={{ fontWeight: 600, color }}>
+    <div className={`text-sm font-semibold ${colorClass}`}>
       {formatTime(remainingMs)}
-    </Typography>
+    </div>
   );
 };

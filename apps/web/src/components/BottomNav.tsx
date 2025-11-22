@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, FileText, BarChart2, User, Shield } from "lucide-react";
+import { Home, FileText, BarChart2, User, Shield, Trophy } from "lucide-react";
 import { useRoleStore } from "@/store/roleStore";
 import { cn } from "@/lib/utils";
 
@@ -9,15 +9,11 @@ export const BottomNav = () => {
   const location = useLocation();
   const role = useRoleStore((state) => state.role);
 
-  // Hide on exam taking pages
-  if (location.pathname.startsWith("/exam/")) {
-    return null;
-  }
-
   const navItems = useMemo(() => {
     const items = [
       { label: "Home", icon: Home, path: "/" },
-      { label: "Exams", icon: FileText, path: "/exams" },
+      { label: "Tests", icon: FileText, path: "/exams" },
+      { label: "Rating", icon: Trophy, path: "/leaderboard" },
       { label: "Results", icon: BarChart2, path: "/results" },
     ];
 
@@ -29,6 +25,11 @@ export const BottomNav = () => {
 
     return items;
   }, [role]);
+
+  // Hide on exam taking pages
+  if (location.pathname.startsWith("/exam/")) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">

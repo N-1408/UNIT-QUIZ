@@ -167,12 +167,12 @@ export const SettingsPage = () => {
         </div>
       </div>
 
-      {/* Admin Panel Button */}
-      {session.role === "admin" && (
+      {/* Admin/Teacher Panel Button */}
+      {(session.role === "admin" || session.role === "teacher") && (
         <button
           type="button"
           className="group relative w-full overflow-hidden rounded-[24px] bg-surface p-1 shadow-elev-sm transition-all hover:shadow-elev-md active:scale-[0.98]"
-          onClick={() => window.Telegram?.WebApp?.openLink?.("https://unit-quiz-admin.vercel.app")}
+          onClick={() => window.location.href = "/admin"}
         >
           <div className="relative flex items-center justify-between rounded-[20px] bg-surface-alt/50 p-4 transition-colors group-hover:bg-brand-light/30">
             <div className="flex items-center gap-4">
@@ -180,8 +180,8 @@ export const SettingsPage = () => {
                 <Shield className="h-5 w-5" />
               </div>
               <div className="text-left">
-                <h4 className="font-bold text-text-primary">Admin Panel</h4>
-                <p className="text-xs text-text-secondary">Go to Admin Panel</p>
+                <h4 className="font-bold text-text-primary">Teacher Panel</h4>
+                <p className="text-xs text-text-secondary">Manage exams and students</p>
               </div>
             </div>
             <ChevronRight className="h-5 w-5 text-text-secondary transition-transform group-hover:translate-x-1" />
@@ -189,7 +189,37 @@ export const SettingsPage = () => {
         </button>
       )}
 
-      {/* Settings Sections */}
+      {/* Profile Settings */}
+      <div className="space-y-4">
+        <h3 className="px-2 text-sm font-bold uppercase tracking-wider text-text-secondary">Profile Settings</h3>
+
+        <div className="overflow-hidden rounded-[24px] border border-border bg-surface/80 backdrop-blur-md shadow-sm p-4 space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-text-secondary">Full Name</label>
+            <input
+              type="text"
+              defaultValue={session.fullName}
+              className="w-full rounded-xl border border-border bg-surface-alt px-4 py-3 text-text-primary focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all"
+              placeholder="Enter your name"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-text-secondary">Group / Class</label>
+            <input
+              type="text"
+              placeholder="e.g. IELTS-204"
+              className="w-full rounded-xl border border-border bg-surface-alt px-4 py-3 text-text-primary focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all"
+            />
+          </div>
+
+          <button className="w-full rounded-xl bg-brand py-3 font-bold text-white shadow-lg shadow-brand/30 transition-transform active:scale-[0.98]">
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      {/* App Settings */}
       <div className="space-y-4">
         <h3 className="px-2 text-sm font-bold uppercase tracking-wider text-text-secondary">App Settings</h3>
 

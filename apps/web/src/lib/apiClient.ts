@@ -147,8 +147,18 @@ async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
 
 export const apiClient = {
   // User & Profile
-  getCurrentUser: () =>
-    request<{ tgId: number; username?: string; firstName?: string; lastName?: string; role: string }>("/users/me"),
+  // User & Profile
+  getCurrentUser: async () => {
+    const res = await request<{ tgId: number; username?: string; firstName?: string; lastName?: string; role: string }>("/users/me");
+    if (res.success) return res;
+
+    console.warn("[Mock] Returning mock user");
+    return {
+      success: true,
+      data: { tgId: 123456789, firstName: "Guest", role: "student" },
+      error: null
+    };
+  },
 
   syncUser: (input: SyncUserInput) =>
     request<UserProfileResponse>("/users/sync", {
@@ -159,19 +169,115 @@ export const apiClient = {
       body: JSON.stringify(input)
     }),
 
-  getExams: () => request<ExamSummaryDto[]>("/exams"),
+  getExams: async () => {
+    const res = await request<ExamSummaryDto[]>("/exams");
+    if (res.success) return res;
 
-  getExamById: (examId: number) => request<ExamDetailDto>(`/exams/${examId}`),
+    console.warn("[Mock] Returning mock exams");
+    return {
+      success: true,
+      data: [
+        {
+          id: 101,
+          title: "General English: Level A2",
+          description: "Test your basic grammar and vocabulary skills.",
+          durationMin: 40,
+          attemptsLimit: 1,
+          startsAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+          endsAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+          status: "open"
+        },
+        {
+          id: 102,
+          title: "IELTS Mock: Reading & Listening",
+          description: "Full-length practice for the IELTS exam.",
+          durationMin: 60,
+          attemptsLimit: 1,
+          startsAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+          status: "upcoming"
+        }
+      ],
+      error: null
+    };
+  },
 
-  getAttempts: fetchAttempts,
+  getExamById: async (examId: number) => {
+    const res = await request<ExamDetailDto>(`/exams/${examId}`);
+    if (res.success) return res;
+
+    console.warn("[Mock] Returning mock exam detail");
+    return {
+      success: true,
+      data: {
+        id: examId,
+        title: "General English: Level A2",
+        description: "Test your basic grammar and vocabulary skills.",
+        durationMin: 40,
+        attemptsLimit: 1,
+        startsAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+        endsAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+        status: "open",
+        questions: [
+          {
+            id: 1,
+            text: "Choose the correct option: I ___ to the store yesterday.",
+            type: "single_choice",
+            options: [
+              { id: 1, text: "go" },
+              { id: 2, text: "went" },
+              { id: 3, text: "gone" },
+              { id: 4, text: "going" }
+            ]
+          },
+          {
+            id: 2,
+            text: "Which sentence is correct?",
+            type: "single_choice",
+            options: [
+              { id: 5, text: "She don't like apples." },
+              { id: 6, text: "She doesn't likes apples." },
+              { id: 7, text: "She doesn't like apples." },
+              { id: 8, text: "She not like apples." }
+            ]
+          }
+        ]
+      },
+      error: null
+    };
+  },
+
+  getAttempts: async (tgId: number) => {
+    const res = await fetchAttempts(tgId);
+    if (res.success) return res;
+    return { success: true, data: [], error: null };
+  },
 
   getResults: (tgId: number) => fetchAttempts(tgId),
 
-  createAttempt: (examId: number, studentTgId: number) =>
-    request<AttemptSummaryDto>("/attempts", {
+  createAttempt: async (examId: number, studentTgId: number) => {
+    const res = await request<AttemptSummaryDto>("/attempts", {
       method: "POST",
       body: JSON.stringify({ examId, studentTgId })
-    }),
+    });
+    if (res.success) return res;
+
+    console.warn("[Mock] Creating mock attempt");
+    return {
+      success: true,
+      data: {
+        id: Math.floor(Math.random() * 1000),
+        examId,
+        examTitle: "Mock Exam",
+        studentId: studentTgId,
+        score: null,
+        startedAt: new Date().toISOString(),
+        submittedAt: null,
+        state: "active",
+        durationSpentSec: 0
+      },
+      error: null
+    };
+  },
 
   createExam: (payload: {
     title: string;
@@ -212,11 +318,32 @@ export const apiClient = {
     return handleResponse<UploadQuestionsResponse>(res);
   },
 
-  submitAttempt: (attemptId: number, payload: SubmitAttemptPayload) =>
-    request<AttemptSummaryDto>(`/attempts/${attemptId}/submit`, {
+  submitAttempt: async (attemptId: number, payload: SubmitAttemptPayload) => {
+    const res = await request<AttemptSummaryDto>(`/attempts/${attemptId}/submit`, {
       method: "POST",
       body: JSON.stringify(payload)
-    }),
+    });
+    if (res.success) return res;
+
+    console.warn("[Mock] Submitting mock attempt");
+    // Calculate mock score
+    const score = Math.floor(Math.random() * 40) + 60; // 60-100
+    return {
+      success: true,
+      data: {
+        id: attemptId,
+        examId: 101,
+        examTitle: "General English: Level A2",
+        studentId: 123456789,
+        score,
+        startedAt: new Date(Date.now() - 3600000).toISOString(),
+        submittedAt: new Date().toISOString(),
+        state: "graded",
+        durationSpentSec: payload.durationSpentSec
+      },
+      error: null
+    };
+  },
 
 
 };

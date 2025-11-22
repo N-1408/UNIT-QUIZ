@@ -7,6 +7,8 @@ import { ExamTaking } from "./pages/ExamTaking";
 import { TeacherDashboard } from "./pages/TeacherDashboard";
 import { BottomNav } from "./components/BottomNav";
 
+import { Leaderboard } from "@/pages/Leaderboard";
+
 function App() {
   return (
     <BrowserRouter>
@@ -17,6 +19,7 @@ function App() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/exam/:examId" element={<ExamTaking />} />
         <Route path="/admin" element={<TeacherDashboard />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
       </Routes>
       <BottomNav />
     </BrowserRouter>

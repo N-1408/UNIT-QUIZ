@@ -40,7 +40,7 @@ export const ExamCard = ({ exam, className }: ExamCardProps) => {
 
   return (
     <Link
-      to={`/exams/${exam.id}`}
+      to={`/exam/${exam.id}`}
       className={cn(
         "group relative flex min-h-[140px] flex-col justify-between gap-4 overflow-hidden rounded-[24px] bg-surface/80 p-5 text-left backdrop-blur-md transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-brand/20",
         className
