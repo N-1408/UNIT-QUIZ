@@ -1,17 +1,16 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiClient } from "@/lib/apiClient";
 import type { ExamDetailDto, AttemptSummaryDto } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { ExamTimer } from "@/components/ExamTimer";
-import { AlertTriangle, Volume2 } from "lucide-react";
-
-// Hardcoded for prototype, should come from auth context
-const STUDENT_ID = 7409467049;
+import { AlertTriangle, Volume2, Maximize } from "lucide-react";
+import { useRoleStore } from "@/store/roleStore";
 
 export const ExamTaking = () => {
   const { examId } = useParams<{ examId: string }>();
   const navigate = useNavigate();
+  const setRole = useRoleStore((state) => state.setRole);
 
   const [exam, setExam] = useState<ExamDetailDto | null>(null);
   const [attempt, setAttempt] = useState<AttemptSummaryDto | null>(null);
@@ -21,6 +20,51 @@ export const ExamTaking = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showWarning, setShowWarning] = useState(false);
+  const [violations, setViolations] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Anti-Cheat: Fullscreen Enforcement
+  const enterFullscreen = async () => {
+    try {
+      await document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } catch (err) {
+      console.error("Fullscreen error:", err);
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        setIsFullscreen(false);
+        if (attempt?.state === "active") {
+          setViolations((v) => v + 1);
+          setShowWarning(true);
+        }
+      } else {
+        setIsFullscreen(true);
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, [attempt]);
+
+  // Anti-Cheat: Disable Copy/Paste/Context Menu
+  useEffect(() => {
+    const preventDefault = (e: Event) => e.preventDefault();
+    document.addEventListener("contextmenu", preventDefault);
+    document.addEventListener("copy", preventDefault);
+    document.addEventListener("paste", preventDefault);
+    document.addEventListener("selectstart", preventDefault);
+
+    return () => {
+      document.removeEventListener("contextmenu", preventDefault);
+      document.removeEventListener("copy", preventDefault);
+      document.removeEventListener("paste", preventDefault);
+      document.removeEventListener("selectstart", preventDefault);
+    };
+  }, []);
 
   // Fetch Exam & Create/Resume Attempt
   useEffect(() => {
@@ -30,6 +74,14 @@ export const ExamTaking = () => {
       try {
         setLoading(true);
 
+        // 0. Get Current User
+        const userRes = await apiClient.getCurrentUser();
+        if (!userRes.success || !userRes.data) {
+          throw new Error("Foydalanuvchi aniqlanmadi. Iltimos qayta kiring.");
+        }
+        const userId = userRes.data.tgId;
+        setRole(userRes.data.role as "student" | "admin");
+
         // 1. Fetch Exam Details
         const examRes = await apiClient.getExamById(Number(examId));
         if (!examRes.success || !examRes.data) {
@@ -38,14 +90,7 @@ export const ExamTaking = () => {
         setExam(examRes.data);
 
         // 2. Create or Resume Attempt
-        // Check if we already have an active attempt locally or fetch from server
-        // For now, we'll just try to create a new one, and if it fails (e.g. limit reached), handle it.
-        // Ideally, we should check for *active* attempts first.
-        // Simplified flow: Always try to create/resume via a robust backend endpoint.
-        // Since our backend `createAttempt` doesn't handle "resume" logic explicitly (it just creates new),
-        // we might need to fetch attempts first.
-
-        const attemptsRes = await apiClient.getAttempts(STUDENT_ID);
+        const attemptsRes = await apiClient.getAttempts(userId);
         const activeAttempt = attemptsRes.data?.find(
           (a) => a.examId === Number(examId) && a.state === "active"
         );
@@ -53,10 +98,9 @@ export const ExamTaking = () => {
         if (activeAttempt) {
           setAttempt(activeAttempt);
         } else {
-          const createRes = await apiClient.createAttempt(Number(examId), STUDENT_ID);
+          const createRes = await apiClient.createAttempt(Number(examId), userId);
           if (!createRes.success || !createRes.data) {
-            // If creation failed, maybe they reached the limit?
-            // Check if they have a submitted attempt
+            // Check if already submitted
             const submittedAttempt = attemptsRes.data?.find(
               (a) => a.examId === Number(examId) && a.state !== "active"
             );
@@ -78,14 +122,14 @@ export const ExamTaking = () => {
     };
 
     initExam();
-  }, [examId, navigate]);
+  }, [examId, navigate, setRole]);
 
   // Anti-Cheat: Visibility Change
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden && attempt?.state === "active") {
+        setViolations((v) => v + 1);
         setShowWarning(true);
-        // Optional: Auto-submit after X seconds of background
       }
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -163,20 +207,44 @@ export const ExamTaking = () => {
       </div>
 
       {/* Warning Alert */}
-      {showWarning && (
-        <div className="bg-red-500/10 border-l-4 border-red-500 p-4 m-4 rounded-r flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
-          <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-          <div>
-            <h4 className="font-bold text-red-500 text-sm">Diqqat!</h4>
-            <p className="text-xs text-red-200/80">
-              Imtihon vaqtida ilovadan chiqish taqiqlanadi. Bu holat qayd etildi.
+      {/* Fullscreen Warning Overlay */}
+      {!isFullscreen && !loading && !error && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-6">
+          <div className="text-center max-w-md">
+            <Maximize className="w-16 h-16 text-orange-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">To'liq ekran rejimi talab qilinadi</h2>
+            <p className="text-slate-400 mb-6">
+              Imtihonni davom ettirish uchun to'liq ekran rejimiga o'tishingiz shart.
             </p>
-            <button
-              onClick={() => setShowWarning(false)}
-              className="text-xs underline mt-1 text-red-400 hover:text-red-300"
+            <Button onClick={enterFullscreen} className="bg-orange-500 hover:bg-orange-600 text-white w-full py-6 text-lg">
+              To'liq ekranga o'tish
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Violation Warning Modal */}
+      {showWarning && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-red-500/50 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl shadow-red-500/20">
+            <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">Ogohlantirish!</h3>
+            <p className="text-slate-300 mb-4">
+              Siz imtihon oynasidan chiqdingiz yoki to'liq ekranni tark etdingiz.
+              <br />
+              <span className="text-red-400 font-bold mt-2 block">
+                Qoidabuzarliklar soni: {violations}
+              </span>
+            </p>
+            <Button
+              onClick={() => {
+                setShowWarning(false);
+                enterFullscreen();
+              }}
+              className="w-full bg-red-600 hover:bg-red-700 text-white"
             >
-              Tushundim
-            </button>
+              Tushundim, davom etaman
+            </Button>
           </div>
         </div>
       )}

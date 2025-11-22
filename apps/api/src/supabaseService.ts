@@ -93,10 +93,7 @@ const createSuccess = <T>(data: T, message = "OK"): ServiceResult<T> => ({
   message
 });
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function listExams(): Promise<ServiceResult<ExamRecord[]>> {
   const { data, error } = await supabase
