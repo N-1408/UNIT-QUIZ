@@ -1,5 +1,5 @@
 import type { LanguageCode } from "@/store/useLanguage";
-import { supabase } from "@/lib/supabaseClient";
+
 import type {
   ApiResponse,
   ExamDetailDto,
@@ -218,18 +218,5 @@ export const apiClient = {
       body: JSON.stringify(payload)
     }),
 
-  getAttemptAnswersDirect: async (attemptId: number) => {
-    const { data, error } = await supabase
-      .from("attempt_answers")
-      .select("*")
-      .eq("attempt_id", attemptId);
 
-    if (error) {
-      console.error("[api] attempt_answers -", error);
-      return { success: false as const, data: null, error: error.message };
-    }
-
-    console.info("[api] attempt_answers '", data);
-    return { success: true as const, data, error: null };
-  }
 };
