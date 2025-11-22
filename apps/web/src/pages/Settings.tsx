@@ -6,8 +6,7 @@ import { PageContainer } from "@/components/layout/Page";
 import { useAuthStore } from "@/store/useAuth";
 import type { LanguageCode } from "@/store/useLanguage";
 import type { TelegramUser } from "@/lib/telegram";
-import { User, Shield, Globe, Palette, LogOut, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { User, Shield, Globe, Palette, ChevronRight } from "lucide-react";
 
 type TelegramUserExtended = TelegramUser & {
   language_code?: string;
