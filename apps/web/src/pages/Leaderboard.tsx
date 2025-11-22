@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
 import { Trophy, Medal, User, Crown, TrendingUp } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { useRoleStore } from "@/store/roleStore";
-import { apiClient } from "@/lib/apiClient";
 
 type LeaderboardUser = {
     id: number;
@@ -30,7 +25,7 @@ const MOCK_LEADERBOARD: LeaderboardUser[] = [
 ];
 
 export const Leaderboard = () => {
-    const [users, setUsers] = useState<LeaderboardUser[]>(MOCK_LEADERBOARD);
+    const [users] = useState<LeaderboardUser[]>(MOCK_LEADERBOARD);
     const [currentUser, setCurrentUser] = useState<LeaderboardUser | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -61,15 +56,6 @@ export const Leaderboard = () => {
 
         fetchData();
     }, []);
-
-    const getRankIcon = (rank: number) => {
-        switch (rank) {
-            case 1: return <Crown className="w-6 h-6 text-yellow-400 fill-yellow-400/20" />;
-            case 2: return <Medal className="w-6 h-6 text-slate-300 fill-slate-300/20" />;
-            case 3: return <Medal className="w-6 h-6 text-amber-600 fill-amber-600/20" />;
-            default: return <span className="text-slate-400 font-bold w-6 text-center">{rank}</span>;
-        }
-    };
 
     return (
         <div className="min-h-screen bg-slate-950 pb-24 font-sans text-slate-50 selection:bg-orange-500/30">
