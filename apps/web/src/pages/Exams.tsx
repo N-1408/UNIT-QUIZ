@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+
 import { ExamList } from "@/components/exams/ExamList";
 import type { ExamSummary as ExamCardSummary, ExamStatus } from "@/components/exams/ExamCard";
 import { PageContainer } from "@/components/layout/Page";
@@ -30,7 +30,7 @@ const mapExamToCard = (exam: ExamSummaryDto): ExamCardSummary => ({
 
 export const ExamsPage = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<ExamStatus>("open");
   const [items, setItems] = useState<ExamSummaryDto[]>([]);
   const [loading, setLoading] = useState(true);
