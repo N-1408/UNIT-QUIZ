@@ -61,7 +61,7 @@ export const HomePage = () => {
         if (user) {
           setUserName(user.first_name);
         } else {
-          setUserName("Mehmon");
+          setUserName("Guest");
         }
         setLoading(false);
       } catch (error) {
@@ -74,7 +74,7 @@ export const HomePage = () => {
   }, []);
 
   if (loading) {
-    return <div className="flex h-screen items-center justify-center text-white">Yuklanmoqda...</div>;
+    return <div className="flex h-screen items-center justify-center text-white">Loading...</div>;
   }
 
   return (
@@ -85,7 +85,7 @@ export const HomePage = () => {
 
         <div className="relative z-10 flex items-center justify-between mb-6">
           <div>
-            <p className="text-orange-200 text-sm font-medium mb-1">Xush kelibsiz 👋</p>
+            <p className="text-orange-200 text-sm font-medium mb-1">Welcome back 👋</p>
             <h1 className="text-3xl font-bold text-white">{userName}</h1>
           </div>
           <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-xl">
@@ -98,14 +98,14 @@ export const HomePage = () => {
           <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <div className="flex items-center gap-2 text-orange-200 mb-2">
               <Trophy className="w-4 h-4" />
-              <span className="text-xs font-medium">O'rtacha Ball</span>
+              <span className="text-xs font-medium">Average Score</span>
             </div>
             <p className="text-2xl font-bold text-white">{stats.averageScore}%</p>
           </div>
           <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
             <div className="flex items-center gap-2 text-orange-200 mb-2">
               <BookOpen className="w-4 h-4" />
-              <span className="text-xs font-medium">Topshirildi</span>
+              <span className="text-xs font-medium">Completed</span>
             </div>
             <p className="text-2xl font-bold text-white">{stats.totalExams} ta</p>
           </div>
@@ -122,7 +122,7 @@ export const HomePage = () => {
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
               <Play className="w-4 h-4 fill-current" />
             </div>
-            Imtihon Topshirish
+            Start Exam
           </span>
           <span className="opacity-60">→</span>
         </Button>
@@ -131,7 +131,7 @@ export const HomePage = () => {
         <div>
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <Clock className="w-5 h-5 text-orange-500" />
-            So'nggi Faoliyat
+            Recent Activity
           </h3>
 
           {stats.totalExams > 0 ? (
@@ -139,16 +139,16 @@ export const HomePage = () => {
               <CardContent className="p-5 flex items-center justify-between">
                 <div>
                   <h4 className="font-medium text-white mb-1">{stats.lastExamTitle}</h4>
-                  <p className="text-sm text-slate-400">Natija: {stats.lastExamScore}%</p>
+                  <p className="text-sm text-slate-400">Score: {stats.lastExamScore}%</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => navigate("/results")}>
-                  Ko'rish
+                  View
                 </Button>
               </CardContent>
             </Card>
           ) : (
             <div className="text-center p-8 rounded-2xl border border-dashed border-white/10 bg-white/5">
-              <p className="text-slate-400 text-sm">Hali hech qanday imtihon topshirmadingiz.</p>
+              <p className="text-slate-400 text-sm">You haven't taken any exams yet.</p>
             </div>
           )}
         </div>
@@ -157,7 +157,7 @@ export const HomePage = () => {
         <div>
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-green-500" />
-            Haftalik O'sish
+            Weekly Progress
           </h3>
           <div className="grid grid-cols-7 gap-2 h-24 items-end p-4 rounded-2xl bg-white/5 border border-white/10">
             {[40, 65, 30, 85, 50, 90, 75].map((h, i) => (

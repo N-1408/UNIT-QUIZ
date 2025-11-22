@@ -78,15 +78,25 @@ export const ResultsPage = () => {
   };
 
   if (loading) {
-    return <div className="flex h-screen items-center justify-center text-white">Natijalar yuklanmoqda...</div>;
+    return <div className="flex h-screen items-center justify-center text-white">Loading results...</div>;
   }
 
   if (!attempt) {
     return (
-      <div className="flex flex-col h-screen items-center justify-center text-white p-4 text-center">
-        <h2 className="text-2xl font-bold mb-2">Hali natijalar yo'q</h2>
-        <p className="text-slate-400 mb-6">Imtihon topshirganingizdan so'ng natijalar shu yerda ko'rinadi.</p>
-        <Button onClick={() => navigate("/exams")}>Imtihonlarga o'tish</Button>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-950 p-6 text-center">
+        <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-white/5 text-6xl shadow-2xl shadow-brand/20 ring-1 ring-white/10 backdrop-blur-xl">
+          📊
+        </div>
+        <h2 className="mb-2 text-3xl font-bold text-white">No results yet</h2>
+        <p className="mb-8 max-w-xs text-lg text-slate-400">
+          Results will appear here after you complete an exam.
+        </p>
+        <Button
+          onClick={() => navigate("/exams")}
+          className="h-14 rounded-2xl bg-brand px-8 text-lg font-bold text-white shadow-lg shadow-brand/40 transition-all hover:scale-105 hover:bg-brand-light hover:shadow-brand/60"
+        >
+          Go to Exams
+        </Button>
       </div>
     );
   }
@@ -106,7 +116,7 @@ export const ResultsPage = () => {
               activeTab === "result" ? "bg-brand text-white shadow-lg" : "text-slate-400 hover:text-white"
             )}
           >
-            Natijam
+            My Result
           </button>
           <button
             onClick={() => setActiveTab("leaderboard")}
@@ -115,7 +125,7 @@ export const ResultsPage = () => {
               activeTab === "leaderboard" ? "bg-brand text-white shadow-lg" : "text-slate-400 hover:text-white"
             )}
           >
-            Reyting
+            Leaderboard
           </button>
         </div>
       </div>
@@ -128,7 +138,7 @@ export const ResultsPage = () => {
               <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
 
               <div className="relative z-10">
-                <h1 className="text-2xl font-bold text-white mb-1">{attempt.examTitle ?? "Imtihon Natijasi"}</h1>
+                <h1 className="text-2xl font-bold text-white mb-1">{attempt.examTitle ?? "Exam Result"}</h1>
                 <p className="text-brand-light/80 text-sm mb-8">
                   {new Date(attempt.submittedAt!).toLocaleDateString()} • {new Date(attempt.submittedAt!).toLocaleTimeString()}
                 </p>
@@ -143,18 +153,18 @@ export const ResultsPage = () => {
                   </svg>
                   <div className="absolute flex flex-col items-center">
                     <span className="text-6xl font-black text-white tracking-tighter">{score}</span>
-                    <span className="text-sm font-bold text-brand-light uppercase tracking-widest">Ball</span>
+                    <span className="text-sm font-bold text-brand-light uppercase tracking-widest">Score</span>
                   </div>
                 </div>
 
                 <div className="flex justify-center gap-3">
                   <div className="flex items-center gap-2 rounded-2xl bg-black/20 px-4 py-2 backdrop-blur-sm">
                     <Clock className="w-4 h-4 text-brand-light" />
-                    <span className="text-sm font-bold">{Math.floor((attempt.durationSpentSec ?? 0) / 60)} daq</span>
+                    <span className="text-sm font-bold">{Math.floor((attempt.durationSpentSec ?? 0) / 60)} min</span>
                   </div>
                   <div className={cn("flex items-center gap-2 rounded-2xl px-4 py-2 backdrop-blur-sm", isPass ? "bg-green-500/20 text-green-100" : "bg-red-500/20 text-red-100")}>
                     {isPass ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                    <span className="text-sm font-bold">{isPass ? "O'tdi" : "Yiqildi"}</span>
+                    <span className="text-sm font-bold">{isPass ? "Passed" : "Failed"}</span>
                   </div>
                 </div>
               </div>
@@ -164,19 +174,19 @@ export const ResultsPage = () => {
             <div className="grid grid-cols-2 gap-3 mt-6">
               <Button variant="outline" className="h-14 rounded-2xl border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-white" onClick={() => navigate("/exams")}>
                 <RotateCcw className="mr-2 h-5 w-5" />
-                Qayta
+                Retry
               </Button>
               <Button className="h-14 rounded-2xl bg-white text-brand hover:bg-white/90" onClick={() => {
                 if (navigator.share) {
                   navigator.share({
-                    title: 'Mening Natijam',
-                    text: `Men ${attempt.examTitle} imtihonidan ${score} ball oldim!`,
+                    title: 'My Result',
+                    text: `I scored ${score} on the ${attempt.examTitle} exam!`,
                     url: window.location.href,
                   });
                 }
               }}>
                 <Share2 className="mr-2 h-5 w-5" />
-                Ulashish
+                Share
               </Button>
             </div>
           </div>
@@ -235,7 +245,7 @@ export const ResultsPage = () => {
                   <div className="flex-1">
                     <h4 className="font-bold text-white">{user.name}</h4>
                   </div>
-                  <div className="font-bold text-brand">{user.score} ball</div>
+                  <div className="font-bold text-brand">{user.score} pts</div>
                 </div>
               ))}
             </div>

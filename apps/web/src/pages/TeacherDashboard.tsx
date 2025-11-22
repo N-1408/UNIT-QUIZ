@@ -37,8 +37,8 @@ export const TeacherDashboard = () => {
         return (
             <div className="flex h-screen items-center justify-center text-white">
                 <div className="text-center">
-                    <h2 className="text-2xl font-bold mb-4">Ruxsat yo'q</h2>
-                    <Button onClick={() => navigate("/")}>Bosh sahifaga qaytish</Button>
+                    <h2 className="text-2xl font-bold mb-4">Access Denied</h2>
+                    <Button onClick={() => navigate("/")}>Back to Home</Button>
                 </div>
             </div>
         );
@@ -62,7 +62,7 @@ export const TeacherDashboard = () => {
                         onClick={() => setActiveTab("exams")}
                     >
                         <FileText className="w-4 h-4 mr-2" />
-                        Imtihonlar
+                        Exams
                     </Button>
                     <Button
                         variant={activeTab === "students" ? "default" : "ghost"}
@@ -70,7 +70,7 @@ export const TeacherDashboard = () => {
                         onClick={() => setActiveTab("students")}
                     >
                         <Users className="w-4 h-4 mr-2" />
-                        O'quvchilar
+                        Students
                     </Button>
                     <Button
                         variant={activeTab === "settings" ? "default" : "ghost"}
@@ -78,13 +78,13 @@ export const TeacherDashboard = () => {
                         onClick={() => setActiveTab("settings")}
                     >
                         <Settings className="w-4 h-4 mr-2" />
-                        Sozlamalar
+                        Settings
                     </Button>
                 </nav>
 
                 <Button variant="outline" className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10 border-red-500/20" onClick={() => navigate("/")}>
                     <LogOut className="w-4 h-4 mr-2" />
-                    Chiqish
+                    Logout
                 </Button>
             </div>
 
@@ -92,8 +92,8 @@ export const TeacherDashboard = () => {
             <div className="flex-1 p-8 overflow-y-auto">
                 <header className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-white mb-1">O'qituvchi Paneli</h1>
-                        <p className="text-slate-400">Xush kelibsiz, Ustoz!</p>
+                        <h1 className="text-3xl font-bold text-white mb-1">Teacher Panel</h1>
+                        <p className="text-slate-400">Welcome, Teacher!</p>
                     </div>
                     {!isCreatingExam && !selectedExamId && (
                         <Button
@@ -101,7 +101,7 @@ export const TeacherDashboard = () => {
                             onClick={() => setIsCreatingExam(true)}
                         >
                             <Plus className="w-4 h-4 mr-2" />
-                            Yangi Imtihon
+                            New Exam
                         </Button>
                     )}
                 </header>
@@ -111,7 +111,7 @@ export const TeacherDashboard = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <Card className="bg-white/5 border-white/10 backdrop-blur-md">
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-slate-400">Faol Imtihonlar</CardTitle>
+                                <CardTitle className="text-sm font-medium text-slate-400">Active Exams</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="text-3xl font-bold text-white">{exams.filter(e => e.status === 'open').length}</div>
@@ -119,7 +119,7 @@ export const TeacherDashboard = () => {
                         </Card>
                         <Card className="bg-white/5 border-white/10 backdrop-blur-md">
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-slate-400">Jami Imtihonlar</CardTitle>
+                                <CardTitle className="text-sm font-medium text-slate-400">Total Exams</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="text-3xl font-bold text-white">{exams.length}</div>
@@ -127,7 +127,7 @@ export const TeacherDashboard = () => {
                         </Card>
                         <Card className="bg-white/5 border-white/10 backdrop-blur-md">
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-slate-400">O'rtacha Natija</CardTitle>
+                                <CardTitle className="text-sm font-medium text-slate-400">Average Score</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="text-3xl font-bold text-white">--%</div>
@@ -156,13 +156,13 @@ export const TeacherDashboard = () => {
                             {activeTab === "exams" && (
                                 <div>
                                     {loading ? (
-                                        <div className="text-center py-20 text-slate-400">Yuklanmoqda...</div>
+                                        <div className="text-center py-20 text-slate-400">Loading...</div>
                                     ) : exams.length === 0 ? (
                                         <div className="text-center py-20">
                                             <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                                            <h3 className="text-xl font-semibold text-white mb-2">Imtihonlar ro'yxati</h3>
-                                            <p className="text-slate-400 mb-6">Hozircha imtihonlar yaratilmagan.</p>
-                                            <Button variant="outline" onClick={() => setIsCreatingExam(true)}>Yaratishni boshlash</Button>
+                                            <h3 className="text-xl font-semibold text-white mb-2">Exam List</h3>
+                                            <p className="text-slate-400 mb-6">No exams created yet.</p>
+                                            <Button variant="outline" onClick={() => setIsCreatingExam(true)}>Start Creating</Button>
                                         </div>
                                     ) : (
                                         <div className="grid grid-cols-1 gap-4">
@@ -171,10 +171,10 @@ export const TeacherDashboard = () => {
                                                     <div>
                                                         <h3 className="font-semibold text-white text-lg">{exam.title}</h3>
                                                         <div className="flex items-center gap-4 text-sm text-slate-400 mt-1">
-                                                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {exam.durationMin} daqiqa</span>
+                                                            <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {exam.durationMin} min</span>
                                                             <span className={`px-2 py-0.5 rounded-full text-xs ${exam.status === 'open' ? 'bg-green-500/20 text-green-400' :
-                                                                    exam.status === 'upcoming' ? 'bg-blue-500/20 text-blue-400' :
-                                                                        'bg-slate-500/20 text-slate-400'
+                                                                exam.status === 'upcoming' ? 'bg-blue-500/20 text-blue-400' :
+                                                                    'bg-slate-500/20 text-slate-400'
                                                                 }`}>
                                                                 {exam.status.toUpperCase()}
                                                             </span>
@@ -182,7 +182,7 @@ export const TeacherDashboard = () => {
                                                     </div>
                                                     <Button variant="secondary" onClick={() => setSelectedExamId(exam.id)}>
                                                         <Edit className="w-4 h-4 mr-2" />
-                                                        Boshqarish
+                                                        Manage
                                                     </Button>
                                                 </div>
                                             ))}
@@ -193,15 +193,15 @@ export const TeacherDashboard = () => {
                             {activeTab === "students" && (
                                 <div className="text-center py-20">
                                     <Users className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                                    <h3 className="text-xl font-semibold text-white mb-2">O'quvchilar ro'yxati</h3>
-                                    <p className="text-slate-400">Tez orada...</p>
+                                    <h3 className="text-xl font-semibold text-white mb-2">Student List</h3>
+                                    <p className="text-slate-400">Coming soon...</p>
                                 </div>
                             )}
                             {activeTab === "settings" && (
                                 <div className="text-center py-20">
                                     <Settings className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                                    <h3 className="text-xl font-semibold text-white mb-2">Sozlamalar</h3>
-                                    <p className="text-slate-400">Tez orada...</p>
+                                    <h3 className="text-xl font-semibold text-white mb-2">Settings</h3>
+                                    <p className="text-slate-400">Coming soon...</p>
                                 </div>
                             )}
                         </>

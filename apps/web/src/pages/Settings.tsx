@@ -100,10 +100,16 @@ export const SettingsPage = () => {
 
   if (!session) {
     return (
-      <PageContainer className="flex h-full min-h-[420px] items-center justify-center text-center">
-        <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="h-24 w-24 rounded-full bg-surface-alt"></div>
-          <div className="h-4 w-32 rounded bg-surface-alt"></div>
+      <PageContainer className="flex h-full min-h-[60vh] flex-col items-center justify-center gap-6 text-center">
+        <div className="relative h-24 w-24">
+          <div className="absolute inset-0 animate-ping rounded-full bg-brand/20"></div>
+          <div className="relative flex h-full w-full items-center justify-center rounded-full bg-surface-alt shadow-inner">
+            <User className="h-10 w-10 text-text-muted animate-pulse" />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="h-4 w-32 rounded bg-surface-alt animate-pulse mx-auto"></div>
+          <p className="text-sm text-text-secondary">Loading profile...</p>
         </div>
       </PageContainer>
     );
@@ -114,10 +120,10 @@ export const SettingsPage = () => {
       {/* Header */}
       <div className="flex flex-col gap-1 px-2">
         <h2 className="text-2xl font-bold text-text-primary">
-          {t("settings.title", { defaultValue: "Sozlamalar" })}
+          {t("settings.title", { defaultValue: "Settings" })}
         </h2>
         <p className="text-sm text-text-secondary">
-          {t("settings.subtitle", { defaultValue: "Profilni o'zingizga moslang." })}
+          {t("settings.subtitle", { defaultValue: "Customize your profile." })}
         </p>
       </div>
 
@@ -175,7 +181,7 @@ export const SettingsPage = () => {
               </div>
               <div className="text-left">
                 <h4 className="font-bold text-text-primary">Admin Panel</h4>
-                <p className="text-xs text-text-secondary">Boshqaruv paneliga o'tish</p>
+                <p className="text-xs text-text-secondary">Go to Admin Panel</p>
               </div>
             </div>
             <ChevronRight className="h-5 w-5 text-text-secondary transition-transform group-hover:translate-x-1" />
@@ -185,7 +191,7 @@ export const SettingsPage = () => {
 
       {/* Settings Sections */}
       <div className="space-y-4">
-        <h3 className="px-2 text-sm font-bold uppercase tracking-wider text-text-secondary">Ilova Sozlamalari</h3>
+        <h3 className="px-2 text-sm font-bold uppercase tracking-wider text-text-secondary">App Settings</h3>
 
         <div className="overflow-hidden rounded-[24px] border border-border bg-surface/80 backdrop-blur-md shadow-sm">
           <div className="p-4 border-b border-border/50">
@@ -193,7 +199,7 @@ export const SettingsPage = () => {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
                 <Globe className="h-4 w-4" />
               </div>
-              <span className="font-bold text-text-primary">Til (Language)</span>
+              <span className="font-bold text-text-primary">Language</span>
             </div>
             <LanguageRadio />
           </div>
@@ -203,7 +209,7 @@ export const SettingsPage = () => {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
                 <Palette className="h-4 w-4" />
               </div>
-              <span className="font-bold text-text-primary">Mavzu (Theme)</span>
+              <span className="font-bold text-text-primary">Theme</span>
             </div>
             <ThemeToggle />
           </div>

@@ -16,23 +16,23 @@ export const BottomNav = () => {
 
   const navItems = useMemo(() => {
     const items = [
-      { label: "Bosh sahifa", icon: Home, path: "/" },
-      { label: "Imtihonlar", icon: FileText, path: "/exams" },
-      { label: "Natijalar", icon: BarChart2, path: "/results" },
+      { label: "Home", icon: Home, path: "/" },
+      { label: "Exams", icon: FileText, path: "/exams" },
+      { label: "Results", icon: BarChart2, path: "/results" },
     ];
 
     if (role === "admin") {
       items.push({ label: "Admin", icon: Shield, path: "/admin" });
     } else {
-      items.push({ label: "Profil", icon: User, path: "/settings" });
+      items.push({ label: "Profile", icon: User, path: "/settings" });
     }
 
     return items;
   }, [role]);
 
   return (
-    <div className="fixed bottom-6 left-4 right-4 z-50">
-      <div className="mx-auto max-w-md rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/50 p-2 flex items-center justify-between">
+    <div className="fixed bottom-8 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
+      <div className="glass-dock pointer-events-auto flex items-center gap-2 rounded-[24px] p-2 transition-all duration-300 hover:scale-105 hover:shadow-glow/20">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
@@ -42,14 +42,26 @@ export const BottomNav = () => {
               key={item.path}
               onClick={() => navigate(item.path)}
               className={cn(
-                "flex flex-col items-center justify-center w-full py-2 rounded-xl transition-all duration-200",
+                "group relative flex h-12 w-12 flex-col items-center justify-center rounded-[18px] transition-all duration-300",
                 isActive
-                  ? "bg-orange-500 text-white shadow-lg shadow-orange-500/25"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
+                  ? "bg-brand text-white shadow-lg shadow-brand/30 scale-110"
+                  : "text-slate-400 hover:bg-white/10 hover:text-text-primary dark:hover:bg-white/5"
               )}
             >
-              <Icon className={cn("w-5 h-5 mb-1", isActive && "fill-current")} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              {isActive && (
+                <span className="absolute -top-1 right-1 h-2 w-2 rounded-full bg-white shadow-sm animate-pulse" />
+              )}
+              <Icon
+                className={cn(
+                  "h-6 w-6 transition-transform duration-300",
+                  isActive ? "scale-100" : "group-hover:scale-110",
+                  !isActive && "stroke-[1.5px]"
+                )}
+              />
+              {/* Tooltip on Hover */}
+              <span className="absolute -top-10 scale-0 rounded-lg bg-slate-900 px-2 py-1 text-[10px] font-bold text-white opacity-0 transition-all group-hover:scale-100 group-hover:opacity-100 dark:bg-white dark:text-slate-900">
+                {item.label}
+              </span>
             </button>
           );
         })}

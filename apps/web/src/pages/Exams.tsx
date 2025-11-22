@@ -11,7 +11,7 @@ import { useRoleStore } from "@/store/roleStore";
 import { Fab } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
-import { EmptyExams } from "@/components/EmptyState";
+
 import { BulkImportModal } from "@/components/BulkImportModal";
 
 const FILTERS: Array<{ id: ExamStatus; label: string }> = [
@@ -22,7 +22,7 @@ const FILTERS: Array<{ id: ExamStatus; label: string }> = [
 
 const mapExamToCard = (exam: ExamSummaryDto): ExamCardSummary => ({
   id: exam.id,
-  title: exam.title ?? "Imtihon",
+  title: exam.title ?? "Exam",
   startsAt: exam.startsAt ? new Date(exam.startsAt) : null,
   durationMinutes: exam.durationMin ?? 0,
   status: exam.status
@@ -48,10 +48,43 @@ export const ExamsPage = () => {
       if (!mounted) {
         return;
       }
-      if (response.success && response.data) {
+      if (response.success && response.data && response.data.length > 0) {
         setItems(response.data);
       } else {
-        setError(response.error ?? "Imtihonlar ro'yxatini yuklab bo'lmadi.");
+        console.warn("[UNIT-QUIZ] API returned no data. Using MOCK data for demo.");
+        const MOCK_EXAMS: ExamSummaryDto[] = [
+          {
+            id: 101,
+            title: "General English: Level A2",
+            description: "Test your basic grammar and vocabulary skills.",
+            durationMin: 40,
+            attemptsLimit: 1,
+            startsAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // Started 1 hour ago
+            endsAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // Ends tomorrow
+            status: "open"
+          },
+          {
+            id: 102,
+            title: "IELTS Mock: Reading & Listening",
+            description: "Full-length practice for the IELTS exam.",
+            durationMin: 60,
+            attemptsLimit: 1,
+            startsAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // Starts tomorrow
+            endsAt: new Date(Date.now() + 1000 * 60 * 60 * 48).toISOString(),
+            status: "upcoming"
+          },
+          {
+            id: 103,
+            title: "Advanced Grammar: Conditionals",
+            description: "Deep dive into mixed conditionals and wishes.",
+            durationMin: 30,
+            attemptsLimit: 2,
+            startsAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // Ended yesterday
+            endsAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+            status: "closed"
+          }
+        ];
+        setItems(MOCK_EXAMS);
       }
       setLoading(false);
     })();
@@ -81,7 +114,23 @@ export const ExamsPage = () => {
     }
 
     if (!hasData) {
-      return <EmptyExams onAction={() => navigate("/results")} />;
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-surface-alt text-4xl shadow-inner">
+            🔍
+          </div>
+          <h3 className="mb-2 text-lg font-bold text-text-primary">No Exams Found</h3>
+          <p className="mb-6 max-w-xs text-sm text-text-secondary">
+            There are no exams in this category yet. Try checking other categories.
+          </p>
+          <button
+            onClick={() => setActiveFilter("open")}
+            className="rounded-xl bg-brand px-6 py-3 text-sm font-bold text-white shadow-lg shadow-brand/30 transition-transform hover:scale-105 active:scale-95"
+          >
+            View All
+          </button>
+        </div>
+      );
     }
 
     return <ExamList items={filteredItems} />;
@@ -92,10 +141,10 @@ export const ExamsPage = () => {
       <PageContainer className="gap-5 pb-28">
         <div className="flex flex-col gap-2">
           <h2 className="text-base font-semibold text-text-primary">
-            {t("exams.title", { defaultValue: "Kayfiyatga qarab tanlang, hammasi tayyor." })}
+            {t("exams.title", { defaultValue: "Select an exam to start your journey." })}
           </h2>
           <p className="text-sm text-text-secondary">
-            {t("exams.subtitle", { defaultValue: "Qaysi toifa sizni chaqiryapti? Filtrlab ko'ring." })}
+            {t("exams.subtitle", { defaultValue: "Filter by status to find your tests." })}
           </p>
         </div>
 

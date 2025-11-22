@@ -3,113 +3,119 @@
 @tailwind utilities;
 
 :root {
+  /* Brand Colors - Vibrant Orange */
   --color-brand-primary: 255 95 0;
-  --color-brand-gradient1: 255 115 0;
-  --color-brand-gradient2: 255 95 0;
-  --color-brand-light: 255 240 230;
-  --color-brand-dark: 28 28 30;
+  --color-brand-gradient1: 255 140 0;
+  --color-brand-gradient2: 255 60 0;
+  --color-brand-light: 255 245 235;
+  --color-brand-dark: 20 10 0;
   --color-brand-ink: 255 255 255;
 
-  --color-ui-background: 250 250 250;
+  /* UI Colors - Glass & Depth */
+  --color-ui-background: 248 250 252;
   --color-ui-surface: 255 255 255;
-  --color-ui-surface-alt: 244 246 250;
-  --color-ui-surface-soft: 239 242 246;
-  --color-ui-border: 234 234 234;
-  --color-ui-border-strong: 210 214 222;
-  --color-ui-shadow: 0 0 0;
+  --color-ui-surface-alt: 241 245 249;
+  --color-ui-surface-glass: 255 255 255;
+  --color-ui-border: 226 232 240;
+  --color-ui-border-glass: 255 255 255;
 
-  --color-ui-info: 58 134 255;
-  --color-ui-success: 52 199 89;
-  --color-ui-warning: 255 204 0;
-  --color-ui-danger: 255 59 48;
-  --color-ui-accent1: 228 241 255;
-  --color-ui-accent2: 255 241 224;
-  --color-ui-accent3: 240 240 245;
-
-  --color-text-primary: 30 41 59;
-  --color-text-secondary: 100 116 139;
+  /* Text Colors */
+  --color-text-primary: 15 23 42;
+  --color-text-secondary: 71 85 105;
   --color-text-muted: 148 163 184;
 
+  /* CSS Variables */
   --brand: rgb(var(--color-brand-primary));
+  --brand-gradient1: rgb(var(--color-brand-gradient1));
+  --brand-gradient2: rgb(var(--color-brand-gradient2));
   --brand-light: rgb(var(--color-brand-light));
-  --brand-dark: rgb(var(--color-brand-dark));
-  --brand-ink: rgb(var(--color-brand-ink));
   --background: rgb(var(--color-ui-background));
   --surface: rgb(var(--color-ui-surface));
   --surface-alt: rgb(var(--color-ui-surface-alt));
-  --surface-soft: rgb(var(--color-ui-surface-soft));
   --border: rgb(var(--color-ui-border));
-  --border-strong: rgb(var(--color-ui-border-strong));
   --text-primary: rgb(var(--color-text-primary));
   --text-secondary: rgb(var(--color-text-secondary));
-  --text-muted: rgb(var(--color-text-muted));
 
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 10px 32px rgba(15, 23, 42, 0.12);
-  --shadow-lg: 0 16px 42px rgba(15, 23, 42, 0.14);
+  /* Shadows */
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --shadow-glow: 0 0 20px rgba(255, 95, 0, 0.3);
 
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-2xl: 24px;
-  --radius-3xl: 28px;
+  /* Radius */
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
 }
 
 .dark {
-  --color-ui-background: 16 16 18;
-  --color-ui-surface: 28 28 30;
-  --color-ui-surface-alt: 36 36 40;
-  --color-ui-surface-soft: 44 44 50;
-  --color-ui-border: 58 58 62;
-  --color-ui-border-strong: 80 80 86;
-  --color-ui-shadow: 0 0 0;
+  /* Dark Mode Colors - Deep Space */
+  --color-ui-background: 2 6 23;
+  --color-ui-surface: 15 23 42;
+  --color-ui-surface-alt: 30 41 59;
+  --color-ui-surface-glass: 15 23 42;
+  --color-ui-border: 30 41 59;
+  --color-ui-border-glass: 255 255 255;
 
-  --color-text-primary: 237 241 247;
-  --color-text-secondary: 186 194 208;
-  --color-text-muted: 140 148 162;
+  --color-text-primary: 248 250 252;
+  --color-text-secondary: 148 163 184;
+  --color-text-muted: 100 116 139;
 
-  --shadow-sm: 0 4px 18px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 12px 36px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.5);
-}
-
-*,
-*::before,
-*::after {
-  border-color: var(--border);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 30px rgba(255, 95, 0, 0.2);
 }
 
 body {
   min-height: 100vh;
-  background: rgb(var(--color-ui-background));
+  background-color: rgb(var(--color-ui-background));
   color: rgb(var(--color-text-primary));
   font-feature-settings: "liga" 1, "kern" 1;
-  @apply antialiased transition-colors duration-200 ease-in-out;
+  -webkit-tap-highlight-color: transparent;
+  @apply antialiased transition-colors duration-300;
+
+  /* Subtle Mesh Gradient Background */
+  background-image:
+    radial-gradient(at 0% 0%, rgba(var(--color-brand-primary), 0.03) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(var(--color-brand-primary), 0.03) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(var(--color-brand-primary), 0.01) 0px, transparent 50%);
+  background-attachment: fixed;
 }
 
-#root {
-  min-height: 100vh;
-}
-
-@layer base {
-  :root {
-    color-scheme: light;
-  }
-
-  .dark {
-    color-scheme: dark;
-  }
-
-  .theme-transition,
-  .theme-transition * {
-    transition: background-color 220ms ease, color 220ms ease, border-color 220ms ease;
-  }
-}
-
+/* Glass Utilities */
 @layer utilities {
-  .safe-area {
-    padding-top: env(safe-area-inset-top);
-    padding-right: env(safe-area-inset-right);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
+  .glass {
+    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-lg;
   }
+
+  .glass-card {
+    @apply bg-white/80 dark:bg-slate-900/60 backdrop-blur-md border border-white/40 dark:border-white/5 shadow-xl;
+  }
+
+  .glass-dock {
+    @apply bg-white/80 dark:bg-black/60 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl shadow-black/10 dark:shadow-black/50;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand to-brand-gradient1;
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
