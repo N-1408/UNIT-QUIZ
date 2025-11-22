@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { WordSpark } from "@/components/dashboard/WordSpark";
 import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -113,6 +114,9 @@ export const HomePage = () => {
       </div>
 
       <div className="px-6 -mt-8 relative z-20 space-y-6">
+        {/* Word Spark Feature */}
+        <WordSpark />
+
         {/* Quick Action */}
         <Button
           className="w-full h-16 text-lg shadow-xl shadow-orange-500/30 rounded-2xl flex items-center justify-between px-6"
