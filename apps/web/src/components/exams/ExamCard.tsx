@@ -42,33 +42,38 @@ export const ExamCard = ({ exam, className }: ExamCardProps) => {
     <Link
       to={`/exams/${exam.id}`}
       className={cn(
-        "group flex min-h-[132px] flex-col justify-between gap-3 rounded-[20px] border border-border bg-surface/95 p-4 text-left shadow-elev-sm transition duration-swift ease-fluid hover:scale-[0.99] hover:shadow-elev-md active:scale-[0.97]",
+        "group relative flex min-h-[140px] flex-col justify-between gap-4 overflow-hidden rounded-[24px] bg-surface/80 p-5 text-left backdrop-blur-md transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-brand/20",
         className
       )}
     >
-      <div className="flex items-start justify-between gap-3">
+      {/* Gradient Border Effect */}
+      <div className="absolute inset-0 rounded-[24px] border border-white/10 bg-gradient-to-br from-white/20 to-transparent opacity-100 transition-opacity duration-300 group-hover:opacity-0" />
+      <div className="absolute inset-0 rounded-[24px] p-[1px] opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-brand via-brand/50 to-transparent" style={{ mask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)', maskComposite: 'exclude' }} />
+
+      <div className="relative z-10 flex items-start justify-between gap-3">
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wide text-text-secondary">
-            <span className={cn("inline-flex items-center rounded-full px-2.5 py-1", meta.chipClass)}>
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider">
+            <span className={cn("inline-flex items-center rounded-full px-3 py-1 shadow-sm backdrop-blur-sm", meta.chipClass)}>
               {meta.label}
             </span>
             {exam.startsAt ? (
-              <span className="rounded-full bg-surface-alt px-2.5 py-1 text-text-secondary">
+              <span className="rounded-full bg-surface-alt/80 px-3 py-1 text-text-secondary backdrop-blur-sm">
                 {formatTime(exam.startsAt)}
               </span>
             ) : null}
           </div>
-          <h3 className="line-clamp-2 text-base font-semibold text-text-primary transition group-hover:text-brand">
+          <h3 className="line-clamp-2 text-lg font-bold text-text-primary transition-colors group-hover:text-brand">
             {exam.title}
           </h3>
-          <p className="text-xs text-text-secondary">{meta.hint}</p>
+          <p className="text-xs font-medium text-text-secondary/80">{meta.hint}</p>
         </div>
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-light text-brand shadow-elev-sm">
-          <Star className="h-5 w-5" />
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-light to-white text-brand shadow-md ring-1 ring-white/50 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12">
+          <Star className="h-6 w-6 fill-current" />
         </span>
       </div>
-      <div className="flex flex-wrap items-center gap-2 text-[11px] text-text-secondary">
-        <span className="inline-flex items-center gap-1 rounded-full bg-surface-alt px-3 py-1">
+
+      <div className="relative z-10 flex flex-wrap items-center gap-2 text-xs font-medium text-text-secondary">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-alt/50 px-3 py-1.5 backdrop-blur-sm transition-colors group-hover:bg-brand-light/50 group-hover:text-brand-dark">
           <Clock className="h-4 w-4" />
           {formatDuration(exam.durationMinutes)}
         </span>

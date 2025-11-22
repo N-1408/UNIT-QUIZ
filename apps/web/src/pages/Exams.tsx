@@ -90,34 +90,39 @@ export const ExamsPage = () => {
   return (
     <>
       <PageContainer className="gap-5 pb-28">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-base font-semibold text-text-primary">
-          {t("exams.title", { defaultValue: "Kayfiyatga qarab tanlang, hammasi tayyor." })}
-        </h2>
-        <p className="text-sm text-text-secondary">
-          {t("exams.subtitle", { defaultValue: "Qaysi toifa sizni chaqiryapti? Filtrlab ko'ring." })}
-        </p>
-      </div>
+        <div className="flex flex-col gap-2">
+          <h2 className="text-base font-semibold text-text-primary">
+            {t("exams.title", { defaultValue: "Kayfiyatga qarab tanlang, hammasi tayyor." })}
+          </h2>
+          <p className="text-sm text-text-secondary">
+            {t("exams.subtitle", { defaultValue: "Qaysi toifa sizni chaqiryapti? Filtrlab ko'ring." })}
+          </p>
+        </div>
 
-      <div className="inline-flex w-full items-center justify-between rounded-full border border-border bg-surface/95 p-1 shadow-elev-sm">
-          {FILTERS.map((filter) => {
-            const isActive = filter.id === activeFilter;
-            return (
-              <button
-                key={filter.id}
-                type="button"
-                onClick={() => setActiveFilter(filter.id)}
-                className={cn(
-                  "flex-1 rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wide transition duration-swift ease-fluid",
-                  isActive
-                    ? "bg-brand text-brand-ink shadow-elev-sm"
-                    : "text-text-secondary hover:text-text-primary"
-                )}
-              >
-                {filter.label}
-              </button>
-            );
-          })}
+        <div className="sticky top-4 z-30 mx-auto w-full max-w-md">
+          <div className="inline-flex w-full items-center justify-between rounded-full border border-white/20 bg-white/80 p-1.5 shadow-lg shadow-brand/5 backdrop-blur-xl transition-all hover:bg-white/90 dark:bg-black/60 dark:hover:bg-black/70">
+            {FILTERS.map((filter) => {
+              const isActive = filter.id === activeFilter;
+              return (
+                <button
+                  key={filter.id}
+                  type="button"
+                  onClick={() => setActiveFilter(filter.id)}
+                  className={cn(
+                    "relative flex-1 rounded-full px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 ease-out",
+                    isActive
+                      ? "text-white shadow-md"
+                      : "text-text-secondary hover:bg-black/5 hover:text-text-primary dark:hover:bg-white/10"
+                  )}
+                >
+                  {isActive && (
+                    <span className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-brand to-brand-gradient1 transition-transform duration-300" />
+                  )}
+                  {filter.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {renderContent()}
@@ -147,7 +152,7 @@ export const ExamsPage = () => {
     </>
   );
 };
-  const handleImport = (questions: unknown[]) => {
-    localStorage.setItem("importedQuestions", JSON.stringify(questions));
-    alert(`${questions.length} ta savol import qilindi!`);
-  };
+const handleImport = (questions: unknown[]) => {
+  localStorage.setItem("importedQuestions", JSON.stringify(questions));
+  alert(`${questions.length} ta savol import qilindi!`);
+};
