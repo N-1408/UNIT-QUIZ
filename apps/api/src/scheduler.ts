@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import { Bot } from "grammy";
-import { supabase } from "./supabaseService.js";
+import { supabase } from "./supabaseClient.js";
 
 const BOT_TOKEN = process.env.BOT_TOKEN;
 
