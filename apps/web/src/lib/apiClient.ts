@@ -185,7 +185,7 @@ export const apiClient = {
           attemptsLimit: 1,
           startsAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
           endsAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-          status: "open"
+          status: "open" as const
         },
         {
           id: 102,
@@ -194,7 +194,7 @@ export const apiClient = {
           durationMin: 60,
           attemptsLimit: 1,
           startsAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-          status: "upcoming"
+          status: "upcoming" as const
         }
       ],
       error: null
@@ -216,32 +216,47 @@ export const apiClient = {
         attemptsLimit: 1,
         startsAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
         endsAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-        status: "open",
+        status: "open" as const,
         questions: [
           {
             id: 1,
+            examId: examId,
             text: "Choose the correct option: I ___ to the store yesterday.",
             type: "single_choice",
+            points: 1,
+            explanation: null,
+            imageUrl: null,
+            audioUrl: null,
             options: [
-              { id: 1, text: "go" },
-              { id: 2, text: "went" },
-              { id: 3, text: "gone" },
-              { id: 4, text: "going" }
+              { id: 1, questionId: 1, text: "go", ord: 1 },
+              { id: 2, questionId: 1, text: "went", ord: 2 },
+              { id: 3, questionId: 1, text: "gone", ord: 3 },
+              { id: 4, questionId: 1, text: "going", ord: 4 }
             ]
           },
           {
             id: 2,
+            examId: examId,
             text: "Which sentence is correct?",
             type: "single_choice",
+            points: 1,
+            explanation: null,
+            imageUrl: null,
+            audioUrl: null,
             options: [
-              { id: 5, text: "She don't like apples." },
-              { id: 6, text: "She doesn't likes apples." },
-              { id: 7, text: "She doesn't like apples." },
-              { id: 8, text: "She not like apples." }
+              { id: 5, questionId: 2, text: "She don't like apples.", ord: 1 },
+              { id: 6, questionId: 2, text: "She doesn't likes apples.", ord: 2 },
+              { id: 7, questionId: 2, text: "She doesn't like apples.", ord: 3 },
+              { id: 8, questionId: 2, text: "She not like apples.", ord: 4 }
             ]
           }
-        ]
-      },
+        ],
+        reviewPolicy: "always",
+        passMinCorrect: 50,
+        shuffleQuestions: false,
+        shuffleAnswers: false,
+        backNavLock: false
+      } as ExamDetailDto,
       error: null
     };
   },
@@ -272,7 +287,7 @@ export const apiClient = {
         score: null,
         startedAt: new Date().toISOString(),
         submittedAt: null,
-        state: "active",
+        state: "active" as const,
         durationSpentSec: 0
       },
       error: null
@@ -338,7 +353,7 @@ export const apiClient = {
         score,
         startedAt: new Date(Date.now() - 3600000).toISOString(),
         submittedAt: new Date().toISOString(),
-        state: "graded",
+        state: "graded" as const,
         durationSpentSec: payload.durationSpentSec
       },
       error: null
