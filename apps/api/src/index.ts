@@ -68,6 +68,9 @@ const port = process.env.PORT || 8080;
 await bot.init();
 console.log(`Bot initialized as @${bot.botInfo?.username}`);
 
+// Start Scheduler
+startScheduler();
+
 app.listen(port, () => {
   console.log(`\u2705 Server running on port ${port}`);
 });
