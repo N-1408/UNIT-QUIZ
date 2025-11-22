@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Trophy, Medal, User, Crown, TrendingUp } from "lucide-react";
+import { Trophy, User, Crown, TrendingUp } from "lucide-react";
 
 type LeaderboardUser = {
     id: number;
