@@ -7,6 +7,7 @@ import examsRouter from './routes/exams.js';
 import attemptsRouter from './routes/attempts.js';
 import uploadRouter from './routes/upload.js';
 import logRouter from './routes/log.js';
+import { startScheduler } from "./scheduler.js";
 import { bot } from './bot.js';
 
 console.log('Server starting...');
