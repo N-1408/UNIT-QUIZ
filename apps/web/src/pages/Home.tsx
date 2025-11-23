@@ -88,7 +88,6 @@ export const HomePage = () => {
   // Calculate donut chart dasharray
   const radius = 40;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (stats.averageScore / 100) * circumference;
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 font-sans transition-colors duration-300">

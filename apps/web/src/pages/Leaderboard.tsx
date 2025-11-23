@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Trophy, User, Crown, TrendingUp } from "lucide-react";
+import { User, Crown, TrendingUp } from "lucide-react";
 
 type LeaderboardUser = {
     id: number;
@@ -83,8 +83,8 @@ export const Leaderboard = () => {
                                 key={filter}
                                 onClick={() => setActiveFilter(filter)}
                                 className={`relative flex-1 rounded-full px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 ease-out ${isActive
-                                        ? "text-white shadow-md"
-                                        : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                                    ? "text-white shadow-md"
+                                    : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
                                     }`}
                             >
                                 {isActive && (
