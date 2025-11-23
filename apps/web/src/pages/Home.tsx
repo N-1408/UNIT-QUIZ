@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { initializeTelegram } from "@/lib/telegram";
 import { useRoleStore } from "@/store/roleStore";
-import { Play, Trophy, Clock, TrendingUp, BookOpen } from "lucide-react";
+import { Play, Trophy, Clock, BookOpen, ChevronRight, Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const HomePage = () => {
   const navigate = useNavigate();
@@ -19,28 +20,22 @@ export const HomePage = () => {
     lastExamTitle: "",
     lastExamScore: 0,
   });
+  const [showStats, setShowStats] = useState(false);
 
   useEffect(() => {
     const init = async () => {
-      // 1. Init Telegram User
       try {
         await initializeTelegram();
-
-        // 2. Fetch current user profile to get role
         const userRes = await apiClient.getCurrentUser();
         if (userRes.success && userRes.data) {
           setRole(userRes.data.role as "student" | "admin");
           setUserName(userRes.data.firstName || "Student");
         }
 
-        // 3. Sync user with backend
         const webApp = (window as any).Telegram?.WebApp;
-        if (webApp) {
-          webApp.ready();
-        }
+        if (webApp) webApp.ready();
 
-        // 4. Fetch user stats
-        const attemptsRes = await apiClient.getAttempts(0); // 0 or any ID is ignored by backend if not admin
+        const attemptsRes = await apiClient.getAttempts(0);
         if (attemptsRes.success && attemptsRes.data) {
           const submitted = attemptsRes.data.filter((a) => a.state === "submitted" || a.state === "graded");
           const total = submitted.length;
@@ -57,17 +52,13 @@ export const HomePage = () => {
           });
         }
 
-        // Get user info from WebApp
         const user = webApp?.initDataUnsafe?.user;
-        if (user) {
-          setUserName(user.first_name);
-        } else {
-          setUserName("Guest");
-        }
+        if (user) setUserName(user.first_name);
+
         setLoading(false);
       } catch (error) {
-        console.error("Failed to initialize Telegram or fetch data:", error);
-        setLoading(false); // Ensure loading state is cleared even on error
+        console.error("Failed to initialize:", error);
+        setLoading(false);
       }
     };
 
@@ -75,104 +66,129 @@ export const HomePage = () => {
   }, []);
 
   if (loading) {
-    return <div className="flex h-screen items-center justify-center text-white">Loading...</div>;
+    return <div className="flex h-screen items-center justify-center text-foreground">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 pb-24 font-sans">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden rounded-b-[3rem] bg-gradient-to-br from-orange-600 to-orange-800 px-6 pt-12 pb-16 shadow-2xl shadow-orange-900/50">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-
-        <div className="relative z-10 flex items-center justify-between mb-6">
-          <div>
-            <p className="text-orange-200 text-sm font-medium mb-1">Welcome back 👋</p>
-            <h1 className="text-3xl font-bold text-white">{userName}</h1>
-          </div>
-          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-xl">
-            👨‍🎓
-          </div>
+    <div className="min-h-screen bg-background text-foreground pb-24 font-sans transition-colors duration-300">
+      {/* Header */}
+      <div className="px-6 pt-12 pb-6 flex items-center justify-between">
+        <div>
+          <p className="text-muted-foreground text-sm font-medium mb-1">Welcome back 👋</p>
+          <h1 className="text-3xl font-bold">{userName}</h1>
         </div>
-
-        {/* Main Stats Card */}
-        <div className="relative z-10 grid grid-cols-2 gap-4">
-          <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <div className="flex items-center gap-2 text-orange-200 mb-2">
-              <Trophy className="w-4 h-4" />
-              <span className="text-xs font-medium">Average Score</span>
-            </div>
-            <p className="text-2xl font-bold text-white">{stats.averageScore}%</p>
-          </div>
-          <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <div className="flex items-center gap-2 text-orange-200 mb-2">
-              <BookOpen className="w-4 h-4" />
-              <span className="text-xs font-medium">Completed</span>
-            </div>
-            <p className="text-2xl font-bold text-white">{stats.totalExams} ta</p>
-          </div>
+        <div className="w-12 h-12 rounded-full bg-secondary/50 backdrop-blur-md border border-border flex items-center justify-center text-xl shadow-sm">
+          👨‍🎓
         </div>
       </div>
 
-      <div className="px-6 -mt-8 relative z-20 space-y-6">
-        {/* Word Spark Feature */}
+      <div className="px-6 space-y-6">
+        {/* Average Score Button (Main Feature) */}
+        <button
+          onClick={() => setShowStats(!showStats)}
+          className="w-full relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-orange-500 to-red-600 p-6 text-white shadow-xl shadow-orange-500/20 transition-transform active:scale-95"
+        >
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="text-left">
+              <div className="flex items-center gap-2 text-orange-100 mb-2">
+                <Trophy className="w-5 h-5" />
+                <span className="font-medium">Average Score</span>
+              </div>
+              <div className="text-5xl font-bold tracking-tight">{stats.averageScore}%</div>
+              <p className="text-orange-100 text-sm mt-1">Based on {stats.totalExams} exams</p>
+            </div>
+            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
+              <ChevronRight className="w-8 h-8 text-white" />
+            </div>
+          </div>
+        </button>
+
+        {/* Stats Modal / Expandable (Inline for now) */}
+        {showStats && (
+          <div className="animate-in fade-in slide-in-from-top-4 bg-card border border-border rounded-2xl p-6 shadow-lg">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <Star className="w-5 h-5 text-yellow-500" />
+              Performance Stats
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-secondary/50 p-4 rounded-xl text-center">
+                <div className="text-2xl font-bold text-primary">{stats.totalExams}</div>
+                <div className="text-xs text-muted-foreground">Exams Taken</div>
+              </div>
+              <div className="bg-secondary/50 p-4 rounded-xl text-center">
+                <div className="text-2xl font-bold text-green-500">Top 10%</div>
+                <div className="text-xs text-muted-foreground">Ranking</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Word Spark */}
         <WordSpark />
 
-        {/* Quick Action */}
-        <Button
-          className="w-full h-16 text-lg shadow-xl shadow-orange-500/30 rounded-2xl flex items-center justify-between px-6"
-          onClick={() => navigate("/exams")}
-        >
-          <span className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <Play className="w-4 h-4 fill-current" />
+        {/* Quick Actions Grid */}
+        <div className="grid grid-cols-2 gap-4">
+          <Button
+            variant="outline"
+            className="h-32 flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-secondary/50 transition-all"
+            onClick={() => navigate("/exams")}
+          >
+            <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+              <Play className="w-6 h-6 fill-current" />
             </div>
-            Start Exam
-          </span>
-          <span className="opacity-60">→</span>
-        </Button>
+            <span className="font-semibold">Start Exam</span>
+          </Button>
 
-        {/* Recent Activity */}
-        <div>
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Clock className="w-5 h-5 text-orange-500" />
-            Recent Activity
-          </h3>
-
-          {stats.totalExams > 0 ? (
-            <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-              <CardContent className="p-5 flex items-center justify-between">
-                <div>
-                  <h4 className="font-medium text-white mb-1">{stats.lastExamTitle}</h4>
-                  <p className="text-sm text-slate-400">Score: {stats.lastExamScore}%</p>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => navigate("/results")}>
-                  View
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="text-center p-8 rounded-2xl border border-dashed border-white/10 bg-white/5">
-              <p className="text-slate-400 text-sm">You haven't taken any exams yet.</p>
+          <Button
+            variant="outline"
+            className="h-32 flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-secondary/50 transition-all"
+            onClick={() => navigate("/results")} // Or a dedicated "Completed" page
+          >
+            <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">
+              <Clock className="w-6 h-6" />
             </div>
-          )}
+            <span className="font-semibold">History</span>
+          </Button>
         </div>
 
-        {/* Weekly Progress (Mock for visual) */}
+        {/* Recent Activity List (Replacing Results Page mostly) */}
         <div>
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-green-500" />
-            Weekly Progress
-          </h3>
-          <div className="grid grid-cols-7 gap-2 h-24 items-end p-4 rounded-2xl bg-white/5 border border-white/10">
-            {[40, 65, 30, 85, 50, 90, 75].map((h, i) => (
-              <div key={i} className="w-full bg-white/10 rounded-t-lg relative group">
-                <div
-                  className="absolute bottom-0 w-full bg-orange-500/50 rounded-t-lg transition-all group-hover:bg-orange-500"
-                  style={{ height: `${h}%` }}
-                ></div>
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-primary" />
+              Completed Exams
+            </h3>
+            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => navigate("/results")}>
+              View All
+            </Button>
           </div>
+
+          {stats.totalExams > 0 ? (
+            <div className="space-y-3">
+              <Card className="bg-card border-border shadow-sm hover:shadow-md transition-all">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center font-bold text-white",
+                      stats.lastExamScore >= 80 ? "bg-green-500" : stats.lastExamScore >= 50 ? "bg-yellow-500" : "bg-red-500"
+                    )}>
+                      {stats.lastExamScore}
+                    </div>
+                    <div>
+                      <h4 className="font-medium">{stats.lastExamTitle}</h4>
+                      <p className="text-xs text-muted-foreground">Just now</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <div className="text-center p-8 rounded-2xl border border-dashed border-border bg-secondary/20">
+              <p className="text-muted-foreground text-sm">No completed exams yet.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
