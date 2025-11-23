@@ -67,9 +67,6 @@ export const Leaderboard = () => {
                     <h1 className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-orange-500 to-red-600">
                         Leaderboard
                     </h1>
-                    <p className="text-sm font-medium text-slate-400">
-                        Top performers this week
-                    </p>
                 </div>
             </div>
 

@@ -107,14 +107,9 @@ export const HomePage = () => {
 
       <div className="px-6 space-y-6">
         {/* Average Score Button (Main Feature) */}
-        <button
-          onClick={() => setShowStats(!showStats)}
-          className="w-full relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-orange-500 to-red-600 p-6 text-white shadow-xl shadow-orange-500/20 transition-transform active:scale-95 group"
-        >
+        {/* Average Score Card (Static) */}
+        <div className="w-full relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-orange-500 to-red-600 p-6 text-white shadow-xl shadow-orange-500/20">
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-
-          {/* Decorative Arrow Background */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/4 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-colors" />
 
           <div className="relative z-10 flex items-center justify-between">
             <div className="text-left">
@@ -152,13 +147,11 @@ export const HomePage = () => {
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform">
-                  <ChevronRight className="w-6 h-6 text-white" />
-                </div>
+                <span className="text-xl font-bold text-white">{stats.averageScore}</span>
               </div>
             </div>
           </div>
-        </button>
+        </div>
 
         {/* Stats Modal / Expandable (Inline for now) */}
         {showStats && (

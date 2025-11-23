@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, GraduationCap, Trophy, User, Shield } from "lucide-react";
+import { LayoutDashboard, Library, Medal, UserCircle, Shield } from "lucide-react";
 import { useRoleStore } from "@/store/roleStore";
 import { cn } from "@/lib/utils";
 
@@ -11,10 +11,10 @@ export const BottomNav = () => {
 
   const navItems = useMemo(() => {
     const items = [
-      { label: "Home", icon: Home, path: "/" },
-      { label: "Tests", icon: GraduationCap, path: "/exams" },
-      { label: "Rating", icon: Trophy, path: "/leaderboard" },
-      { label: "Profile", icon: User, path: "/settings" },
+      { label: "Home", icon: LayoutDashboard, path: "/" },
+      { label: "Tests", icon: Library, path: "/exams" },
+      { label: "Rating", icon: Medal, path: "/leaderboard" },
+      { label: "Profile", icon: UserCircle, path: "/settings" },
     ];
 
     if (role === "admin") {

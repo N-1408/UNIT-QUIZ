@@ -143,9 +143,6 @@ export const ExamsPage = () => {
           <h1 className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-brand to-brand-gradient1">
             Exams
           </h1>
-          <p className="text-sm font-medium text-muted-foreground">
-            {t("exams.subtitle", { defaultValue: "Choose your challenge" })}
-          </p>
         </div>
 
         <div className="sticky top-4 z-30 mx-auto w-full max-w-md">

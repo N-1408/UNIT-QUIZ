@@ -60,12 +60,39 @@ export const AdminDashboard = () => {
     setSnackbar({ open: true, message, severity });
   };
 
+  const [verifying, setVerifying] = useState(true);
+
   useEffect(() => {
-    if (role === "student") {
-      showSnackbar("Sizga ruxsat yo'q", "error");
-      navigate("/");
-    }
+    const verifyRole = async () => {
+      // If store says admin/teacher, we trust it initially but could verify.
+      // If store says student, we MUST verify in case it's a refresh.
+      if (role === "student") {
+        try {
+          // Import apiClient dynamically or use global if available
+          const { apiClient } = await import("@/lib/apiClient");
+          const res = await apiClient.getCurrentUser();
+          if (res.success && res.data && res.data.role !== "student") {
+            // Update store and allow access
+            useRoleStore.getState().setRole(res.data.role as "admin" | "teacher");
+          } else {
+            // Really a student
+            showSnackbar("Sizga ruxsat yo'q", "error");
+            navigate("/");
+          }
+        } catch (error) {
+          console.error("Role verification failed:", error);
+          navigate("/");
+        }
+      }
+      setVerifying(false);
+    };
+
+    verifyRole();
   }, [role, navigate]);
+
+  if (verifying && role === "student") {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  }
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
