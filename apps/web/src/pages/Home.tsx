@@ -22,6 +22,8 @@ export const HomePage = () => {
   });
   const [showStats, setShowStats] = useState(false);
 
+  const [userPhoto, setUserPhoto] = useState<string | null>(null);
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -30,10 +32,16 @@ export const HomePage = () => {
         if (userRes.success && userRes.data) {
           setRole(userRes.data.role as "student" | "admin");
           setUserName(userRes.data.firstName || "Student");
+          setUserPhoto(userRes.data.photoUrl || null);
         }
 
         const webApp = (window as any).Telegram?.WebApp;
-        if (webApp) webApp.ready();
+        if (webApp) {
+          webApp.ready();
+          if (webApp.initDataUnsafe?.user?.photo_url) {
+            setUserPhoto(webApp.initDataUnsafe.user.photo_url);
+          }
+        }
 
         const attemptsRes = await apiClient.getAttempts(0);
         if (attemptsRes.success && attemptsRes.data) {
@@ -69,6 +77,11 @@ export const HomePage = () => {
     return <div className="flex h-screen items-center justify-center text-foreground">Loading...</div>;
   }
 
+  // Calculate donut chart dasharray
+  const radius = 40;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (stats.averageScore / 100) * circumference;
+
   return (
     <div className="min-h-screen bg-background text-foreground pb-24 font-sans transition-colors duration-300">
       {/* Header */}
@@ -77,8 +90,12 @@ export const HomePage = () => {
           <p className="text-muted-foreground text-sm font-medium mb-1">Welcome back 👋</p>
           <h1 className="text-3xl font-bold">{userName}</h1>
         </div>
-        <div className="w-12 h-12 rounded-full bg-secondary/50 backdrop-blur-md border border-border flex items-center justify-center text-xl shadow-sm">
-          👨‍🎓
+        <div className="w-12 h-12 rounded-full bg-secondary/50 backdrop-blur-md border border-border flex items-center justify-center overflow-hidden shadow-sm">
+          {userPhoto ? (
+            <img src={userPhoto} alt="Profile" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-2xl">👨‍🎓</span>
+          )}
         </div>
       </div>
 
@@ -86,7 +103,7 @@ export const HomePage = () => {
         {/* Average Score Button (Main Feature) */}
         <button
           onClick={() => setShowStats(!showStats)}
-          className="w-full relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-orange-500 to-red-600 p-6 text-white shadow-xl shadow-orange-500/20 transition-transform active:scale-95"
+          className="w-full relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-orange-500 to-red-600 p-6 text-white shadow-xl shadow-orange-500/20 transition-transform active:scale-95 group"
         >
           <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
           <div className="relative z-10 flex items-center justify-between">
@@ -98,8 +115,35 @@ export const HomePage = () => {
               <div className="text-5xl font-bold tracking-tight">{stats.averageScore}%</div>
               <p className="text-orange-100 text-sm mt-1">Based on {stats.totalExams} exams</p>
             </div>
-            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
-              <ChevronRight className="w-8 h-8 text-white" />
+
+            {/* Animated Donut Chart */}
+            <div className="relative w-20 h-20 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle
+                  cx="40"
+                  cy="40"
+                  r={radius}
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  fill="transparent"
+                  className="text-white/20"
+                />
+                <circle
+                  cx="40"
+                  cy="40"
+                  r={radius}
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  fill="transparent"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  className="text-white transition-all duration-1000 ease-out"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <ChevronRight className="w-6 h-6 text-white group-hover:translate-x-1 transition-transform" />
+              </div>
             </div>
           </div>
         </button>

@@ -62,6 +62,10 @@
   --shadow-glow: 0 0 30px rgba(255, 95, 0, 0.2);
 }
 
+html {
+  background-color: rgb(var(--color-ui-background));
+}
+
 body {
   min-height: 100vh;
   background-color: rgb(var(--color-ui-background));

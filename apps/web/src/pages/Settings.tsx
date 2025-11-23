@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { LanguageRadio } from "@/components/settings/LanguageRadio";
 import { ThemeToggle } from "@/components/settings/ThemeToggle";
 import { useAuthStore } from "@/store/useAuth";
@@ -22,6 +23,7 @@ const normalizeLanguage = (value?: string | null): LanguageCode | undefined => {
 
 export const SettingsPage = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const session = useAuthStore((state) => state.session);
   const syncSession = useAuthStore((state) => state.syncSession);
   const mountedRef = useRef(true);
@@ -181,19 +183,19 @@ export const SettingsPage = () => {
         {/* Admin/Teacher Panel Button */}
         {(displaySession.role === "admin" || displaySession.role === "teacher") && (
           <button
-            onClick={() => (window.location.href = "/admin")}
-            className="w-full flex items-center justify-between p-4 rounded-2xl bg-card border border-border shadow-sm hover:bg-accent transition-colors"
+            onClick={() => navigate(displaySession.role === "admin" ? "/admin" : "/teacher")}
+            className="w-full flex items-center justify-between p-4 rounded-2xl bg-card border border-border shadow-sm hover:bg-accent transition-colors group"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500">
+              <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors">
                 <Shield className="w-5 h-5" />
               </div>
               <div className="text-left">
-                <h3 className="font-semibold">Teacher Panel</h3>
+                <h3 className="font-semibold">{displaySession.role === "admin" ? "Admin Panel" : "Teacher Panel"}</h3>
                 <p className="text-xs text-muted-foreground">Manage exams & students</p>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
           </button>
         )}
 
@@ -201,9 +203,9 @@ export const SettingsPage = () => {
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-1">Appearance</h3>
 
-          <div className="bg-card border border-border rounded-2xl overflow-hidden">
+          <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
             <div className="p-4 border-b border-border/50">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
                     <Globe className="w-4 h-4" />
@@ -214,12 +216,15 @@ export const SettingsPage = () => {
               <LanguageRadio />
             </div>
 
-            <div className="p-4 flex items-center justify-between">
+            <div className="p-4 flex items-center justify-between hover:bg-accent/50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-500">
                   <Palette className="w-4 h-4" />
                 </div>
-                <span className="font-medium">Theme</span>
+                <div className="flex flex-col">
+                  <span className="font-medium">Theme</span>
+                  <span className="text-xs text-muted-foreground">Toggle dark mode</span>
+                </div>
               </div>
               <ThemeToggle />
             </div>
@@ -230,17 +235,17 @@ export const SettingsPage = () => {
         <div className="space-y-4">
           <h3 className="px-2 text-sm font-bold uppercase tracking-wider text-text-secondary">Profile Settings</h3>
 
-          <div className="overflow-hidden rounded-[24px] border border-border bg-surface/80 backdrop-blur-md shadow-sm p-4 space-y-4">
+          <div className="overflow-hidden rounded-[24px] border border-border bg-card shadow-sm p-4 space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-text-secondary">Full Name</label>
               <input
                 type="text"
                 defaultValue={displaySession.fullName}
-                className="w-full rounded-xl border border-border bg-surface-alt px-4 py-3 text-text-primary focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all"
+                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-text-primary focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 transition-all"
                 placeholder="Enter your name"
               />
             </div>
-            <button className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform">
+            <button className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform hover:bg-primary/90">
               Save Changes
             </button>
           </div>

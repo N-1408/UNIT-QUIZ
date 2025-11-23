@@ -37,39 +37,62 @@ export const BottomNav = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#1c1c1e]/80 backdrop-blur-xl border-t border-white/5 pb-safe pt-2">
-      <div className="flex items-center justify-around px-2 pb-2">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          const Icon = item.icon;
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
+      <div className="w-full max-w-md pointer-events-auto">
+        <div className="relative bg-slate-900/90 backdrop-blur-xl border-t border-white/10 rounded-t-[32px] pb-6 pt-2 shadow-[0_-10px_40px_rgba(0,0,0,0.3)]">
+          {/* Active Indicator Background Glow */}
+          <div className="absolute inset-0 overflow-hidden rounded-t-[32px]">
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-orange-500/20 blur-[50px] rounded-full pointer-events-none" />
+          </div>
 
-          return (
-            <button
-              key={item.path}
-              onClick={() => handleNavigation(item.path)}
-              className={cn(
-                "flex flex-col items-center justify-center w-16 py-1 transition-all duration-200 active:scale-95",
-                isActive ? "text-orange-500" : "text-gray-500 hover:text-gray-400"
-              )}
-            >
-              <div className={cn(
-                "relative p-1 rounded-xl transition-all duration-300",
-                isActive && "bg-orange-500/10"
-              )}>
-                <Icon
-                  className={cn(
-                    "w-6 h-6 transition-all duration-300",
-                    isActive && "fill-current"
+          <div className="relative flex items-center justify-around px-2">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              const Icon = item.icon;
+
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => handleNav(item.path)}
+                  className="relative group flex flex-col items-center justify-center w-16 h-16"
+                >
+                  {/* Active Indicator Pill */}
+                  {isActive && (
+                    <div className="absolute -top-2 w-8 h-1 bg-orange-500 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.8)] animate-in fade-in zoom-in duration-300" />
                   )}
-                  strokeWidth={isActive ? 2.5 : 2}
-                />
-              </div>
-              <span className="text-[10px] font-medium mt-1">
-                {item.label}
-              </span>
-            </button>
-          );
-        })}
+
+                  <div
+                    className={cn(
+                      "p-2.5 rounded-2xl transition-all duration-300 ease-out",
+                      isActive
+                        ? "text-white bg-white/10 shadow-inner"
+                        : "text-slate-400 hover:text-white hover:bg-white/5"
+                    )}
+                  >
+                    <Icon
+                      className={cn(
+                        "w-6 h-6 transition-transform duration-300",
+                        isActive ? "scale-110" : "group-hover:scale-105"
+                      )}
+                      strokeWidth={isActive ? 2.5 : 2}
+                    />
+                  </div>
+
+                  <span
+                    className={cn(
+                      "text-[10px] font-medium mt-1 transition-all duration-300",
+                      isActive
+                        ? "text-white translate-y-0 opacity-100"
+                        : "text-slate-500 translate-y-1 opacity-0 group-hover:translate-y-0 group-hover:opacity-70"
+                    )}
+                  >
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );

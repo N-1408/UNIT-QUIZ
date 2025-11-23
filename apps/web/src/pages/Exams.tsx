@@ -139,13 +139,18 @@ export const ExamsPage = () => {
   return (
     <>
       <PageContainer className="gap-5 pb-28">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-base font-semibold text-text-primary">
-            {t("exams.title", { defaultValue: "Select an exam to start your journey." })}
-          </h2>
-          <p className="text-sm text-text-secondary">
-            {t("exams.subtitle", { defaultValue: "Filter by status to find your tests." })}
-          </p>
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white shadow-lg">
+          <div className="absolute top-0 right-0 -mt-4 -mr-4 h-32 w-32 rounded-full bg-white/10 blur-2xl"></div>
+          <div className="absolute bottom-0 left-0 -mb-4 -ml-4 h-24 w-24 rounded-full bg-white/10 blur-xl"></div>
+
+          <div className="relative z-10">
+            <h2 className="text-2xl font-bold mb-2">
+              {t("exams.title", { defaultValue: "Ready to test your skills?" })}
+            </h2>
+            <p className="text-blue-100 text-sm max-w-[80%]">
+              {t("exams.subtitle", { defaultValue: "Select an exam below and show what you've got! 🚀" })}
+            </p>
+          </div>
         </div>
 
         <div className="sticky top-4 z-30 mx-auto w-full max-w-md">

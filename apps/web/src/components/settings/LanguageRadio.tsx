@@ -2,10 +2,10 @@
 import { cn } from "@/lib/utils";
 import { useLanguageStore, type LanguageCode } from "@/store/useLanguage";
 
-const LANGUAGES: Array<{ value: LanguageCode; label: string }> = [
-  { value: "uz", label: "O'zbekcha" },
-  { value: "ru", label: "Ruscha" },
-  { value: "en", label: "English" }
+const LANGUAGES: Array<{ value: LanguageCode; label: string; flag: string }> = [
+  { value: "uz", label: "O'zbekcha", flag: "🇺🇿" },
+  { value: "ru", label: "Русский", flag: "🇷🇺" },
+  { value: "en", label: "English", flag: "🇬🇧" }
 ];
 
 type LanguageRadioProps = {
@@ -23,34 +23,27 @@ export const LanguageRadio = ({ className }: LanguageRadioProps) => {
   };
 
   return (
-    <fieldset className={cn("flex flex-col gap-2", className)}>
-      <legend className="text-xs font-semibold uppercase tracking-wide text-text-muted">Til</legend>
-      <div className="grid grid-cols-3 gap-2">
-        {LANGUAGES.map((item) => {
-          const checked = language === item.value;
-          return (
-            <label
-              key={item.value}
-              className={cn(
-                "flex items-center justify-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition duration-swift ease-fluid",
-                checked
-                  ? "border-brand bg-brand-light text-brand"
-                  : "border-border/70 bg-surface-alt text-text-secondary hover:border-brand/30 hover:text-text-primary"
-              )}
-            >
-              <span>{item.label}</span>
-              <input
-                type="radio"
-                name="language"
-                value={item.value}
-                checked={checked}
-                onChange={() => handleChange(item.value)}
-                className="sr-only"
-              />
-            </label>
-          );
-        })}
-      </div>
-    </fieldset>
+    <div className={cn("grid grid-cols-3 gap-2", className)}>
+      {LANGUAGES.map((item) => {
+        const checked = language === item.value;
+        return (
+          <button
+            key={item.value}
+            onClick={() => handleChange(item.value)}
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 rounded-xl border p-2 transition-all duration-200",
+              checked
+                ? "border-brand bg-brand/10 text-brand shadow-sm"
+                : "border-border/50 bg-card hover:bg-accent hover:border-border text-muted-foreground"
+            )}
+          >
+            <span className="text-2xl filter drop-shadow-sm">{item.flag}</span>
+            <span className={cn("text-xs font-medium", checked && "font-semibold")}>
+              {item.label}
+            </span>
+          </button>
+        );
+      })}
+    </div>
   );
 };

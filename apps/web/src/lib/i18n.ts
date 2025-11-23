@@ -10,7 +10,14 @@ const resources = {
       "exam.start": "Start Exam",
       "settings.dark_on": "🌙 Dark mode enabled - comfortable reading!",
       "results.passed": "✅ Excellent work! You're making great progress. 🌟",
-      "results.failed": "💪 Keep practicing! Every mistake is a learning opportunity."
+      "results.failed": "💪 Keep practicing! Every mistake is a learning opportunity.",
+      "exam.fullscreen_required": "Fullscreen Required",
+      "exam.fullscreen_desc": "You must enter fullscreen mode to continue the exam.",
+      "exam.enter_fullscreen": "Enter Fullscreen",
+      "exam.warning": "Warning!",
+      "exam.violation_desc": "You left the exam window or exited fullscreen.",
+      "exam.understood": "I understand, continue",
+      "exam.back": "Go Back"
     }
   },
   uz: {
@@ -21,7 +28,14 @@ const resources = {
       "exam.start": "Imtihonni Boshlash",
       "settings.dark_on": "🌙 Tungi rejim yoqildi - o'qish uchun qulay!",
       "results.passed": "✅ Ajoyib natija! Siz katta o'sishga erishdingiz. 🌟",
-      "results.failed": "💪 Mashq qilishda davom eting! Har bir xato - bu tajriba."
+      "results.failed": "💪 Mashq qilishda davom eting! Har bir xato - bu tajriba.",
+      "exam.fullscreen_required": "To'liq ekran rejimi talab qilinadi",
+      "exam.fullscreen_desc": "Imtihonni davom ettirish uchun to'liq ekran rejimiga o'tishingiz shart.",
+      "exam.enter_fullscreen": "To'liq ekranga o'tish",
+      "exam.warning": "Ogohlantirish!",
+      "exam.violation_desc": "Siz imtihon oynasidan chiqdingiz yoki to'liq ekranni tark etdingiz.",
+      "exam.understood": "Tushundim, davom etaman",
+      "exam.back": "Ortga qaytish"
     }
   },
   ru: {
@@ -32,7 +46,14 @@ const resources = {
       "exam.start": "Начать Экзамен",
       "settings.dark_on": "🌙 Темная тема включена - удобно для глаз!",
       "results.passed": "✅ Отличная работа! Вы делаете большие успехи. 🌟",
-      "results.failed": "💪 Продолжайте практиковаться! Каждая ошибка - это опыт."
+      "results.failed": "💪 Продолжайте практиковаться! Каждая ошибка - это опыт.",
+      "exam.fullscreen_required": "Требуется полноэкранный режим",
+      "exam.fullscreen_desc": "Вы должны перейти в полноэкранный режим, чтобы продолжить экзамен.",
+      "exam.enter_fullscreen": "На весь экран",
+      "exam.warning": "Внимание!",
+      "exam.violation_desc": "Вы покинули окно экзамена или вышли из полноэкранного режима.",
+      "exam.understood": "Я понял, продолжить",
+      "exam.back": "Назад"
     }
   }
 };

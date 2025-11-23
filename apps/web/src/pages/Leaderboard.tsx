@@ -29,6 +29,8 @@ export const Leaderboard = () => {
     const [currentUser, setCurrentUser] = useState<LeaderboardUser | null>(null);
     const [loading, setLoading] = useState(true);
 
+    const [activeFilter, setActiveFilter] = useState<"global" | "group" | "level">("global");
+
     useEffect(() => {
         // Simulate fetching data
         const fetchData = async () => {
@@ -61,11 +63,27 @@ export const Leaderboard = () => {
         <div className="min-h-screen bg-slate-950 pb-24 font-sans text-slate-50 selection:bg-orange-500/30">
             {/* Header */}
             <div className="sticky top-0 z-10 border-b border-white/10 bg-slate-950/80 backdrop-blur-md px-6 py-4">
-                <div className="flex items-center justify-between max-w-md mx-auto">
+                <div className="flex items-center justify-between max-w-md mx-auto mb-4">
                     <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
-                        Reyting
+                        Leaderboard
                     </h1>
                     <Trophy className="w-6 h-6 text-orange-500" />
+                </div>
+
+                {/* Filters */}
+                <div className="flex p-1 bg-white/5 rounded-xl max-w-md mx-auto">
+                    {(["global", "group", "level"] as const).map((filter) => (
+                        <button
+                            key={filter}
+                            onClick={() => setActiveFilter(filter)}
+                            className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all ${activeFilter === filter
+                                    ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
+                                    : "text-slate-400 hover:text-white"
+                                }`}
+                        >
+                            {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                        </button>
+                    ))}
                 </div>
             </div>
 
