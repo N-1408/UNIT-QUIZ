@@ -29,7 +29,7 @@ export const BottomNav = () => {
     return null;
   }
 
-  const handleNavigation = (path: string) => {
+  const handleNav = (path: string) => {
     if (window.Telegram?.WebApp?.HapticFeedback) {
       window.Telegram.WebApp.HapticFeedback.impactOccurred("light");
     }

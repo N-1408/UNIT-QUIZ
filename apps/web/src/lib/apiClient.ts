@@ -149,7 +149,7 @@ export const apiClient = {
   // User & Profile
   // User & Profile
   getCurrentUser: async () => {
-    const res = await request<{ tgId: number; username?: string; firstName?: string; lastName?: string; role: string }>("/users/me");
+    const res = await request<{ tgId: number; username?: string; firstName?: string; lastName?: string; role: string; photoUrl?: string }>("/users/me");
     if (res.success) return res;
 
     console.warn("[Mock] Returning mock user");

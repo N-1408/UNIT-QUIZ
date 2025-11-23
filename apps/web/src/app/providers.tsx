@@ -3,7 +3,7 @@ import type { PropsWithChildren } from "react";
 import { I18nextProvider } from "react-i18next";
 import i18n from "@/lib/i18n";
 import { initTelegramWebApp, syncTelegramTheme, type TelegramThemePayload, type TelegramUser } from "@/lib/telegram";
-import { useThemeStore } from "@/store/useTheme";
+import { initTelegramWebApp, syncTelegramTheme, type TelegramThemePayload, type TelegramUser } from "@/lib/telegram";
 import { useLanguageStore } from "@/store/useLanguage";
 import { useAuthStore } from "@/store/useAuth";
 import type { LanguageCode } from "@/store/useLanguage";
@@ -26,8 +26,6 @@ async function remoteLog(tag: string, data: unknown) {
 }
 
 export const AppProviders = ({ children }: PropsWithChildren) => {
-  const theme = useThemeStore((state) => state.theme);
-  const setTelegramTheme = useThemeStore((state) => state.setTelegramTheme);
   const language = useLanguageStore((state) => state.language);
   const setLanguage = useLanguageStore((state) => state.setLanguage);
 
@@ -149,23 +147,11 @@ export const AppProviders = ({ children }: PropsWithChildren) => {
   }, [language, setLanguage]);
 
   useEffect(() => {
-    const root = document.documentElement;
-    root.classList.add("theme-transition");
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    document.body.classList.toggle("dark", theme === "dark");
-    const timeout = window.setTimeout(() => {
-      root.classList.remove("theme-transition");
-    }, 320);
-    return () => window.clearTimeout(timeout);
-  }, [theme]);
-
-  useEffect(() => {
-    const cleanup = syncTelegramTheme(({ colorScheme, themeParams }) => {
-      setTelegramTheme(colorScheme);
+    const cleanup = syncTelegramTheme(({ themeParams }) => {
       applyTelegramThemeParams(themeParams);
     });
     return cleanup;
-  }, [setTelegramTheme, applyTelegramThemeParams]);
+  }, [applyTelegramThemeParams]);
 
   useEffect(() => {
     void i18n.changeLanguage(language);

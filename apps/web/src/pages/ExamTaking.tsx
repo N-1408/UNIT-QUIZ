@@ -1,18 +1,16 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiClient } from "@/lib/apiClient";
 import type { ExamDetailDto, AttemptSummaryDto } from "@/types/api";
 import { Button } from "@/components/ui/button";
-import { ExamTimer } from "@/components/ExamTimer";
 import { AlertTriangle, Volume2, Maximize } from "lucide-react";
-import { useRoleStore } from "@/store/roleStore";
 import { useAuthStore } from "@/store/useAuth";
 
 export const ExamTaking = () => {
   const { examId } = useParams<{ examId: string }>();
   const navigate = useNavigate();
-  const setRole = useRoleStore((state) => state.setRole);
+  const navigate = useNavigate();
 
   const [exam, setExam] = useState<ExamDetailDto | null>(null);
   const [attempt, setAttempt] = useState<AttemptSummaryDto | null>(null);
