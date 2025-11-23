@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+
 
 import { ExamList } from "@/components/exams/ExamList";
 import type { ExamSummary as ExamCardSummary, ExamStatus } from "@/components/exams/ExamCard";
