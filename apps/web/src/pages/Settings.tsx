@@ -46,7 +46,8 @@ export const SettingsPage = () => {
       let user = resolveUser();
 
       // If no user immediately, wait a bit (only if in Telegram env)
-      if (!user?.id && tg?.initData) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (!user?.id && (tg as any)?.initData) {
         await new Promise<void>((resolve) => {
           let attempts = 0;
           const check = () => {
