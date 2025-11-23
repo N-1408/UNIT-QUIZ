@@ -103,6 +103,18 @@ body {
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+html,
+body {
+  overflow-x: hidden;
+  background-color: rgb(var(--color-ui-background));
+  overscroll-behavior-y: none;
+  /* Prevent pull-to-refresh effect showing white background */
 }
 
 /* Animations */

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Trophy, User, Shield } from "lucide-react";
+import { Home, GraduationCap, Trophy, User, Shield } from "lucide-react";
 import { useRoleStore } from "@/store/roleStore";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,7 @@ export const BottomNav = () => {
   const navItems = useMemo(() => {
     const items = [
       { label: "Home", icon: Home, path: "/" },
-      { label: "Tests", icon: BookOpen, path: "/exams" },
+      { label: "Tests", icon: GraduationCap, path: "/exams" },
       { label: "Rating", icon: Trophy, path: "/leaderboard" },
       { label: "Profile", icon: User, path: "/settings" },
     ];
@@ -40,10 +40,6 @@ export const BottomNav = () => {
     <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
       <div className="w-full max-w-md pointer-events-auto">
         <div className="relative bg-slate-900/90 backdrop-blur-xl border-t border-white/10 rounded-t-[32px] pb-6 pt-2 shadow-[0_-10px_40px_rgba(0,0,0,0.3)]">
-          {/* Active Indicator Background Glow */}
-          <div className="absolute inset-0 overflow-hidden rounded-t-[32px]">
-            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-orange-500/20 blur-[50px] rounded-full pointer-events-none" />
-          </div>
 
           <div className="relative flex items-center justify-around px-2">
             {navItems.map((item) => {
@@ -75,6 +71,7 @@ export const BottomNav = () => {
                         isActive ? "scale-110" : "group-hover:scale-105"
                       )}
                       strokeWidth={isActive ? 2.5 : 2}
+                      fill={isActive ? "currentColor" : "none"}
                     />
                   </div>
 

@@ -62,28 +62,38 @@ export const Leaderboard = () => {
     return (
         <div className="min-h-screen bg-slate-950 pb-24 font-sans text-slate-50 selection:bg-orange-500/30">
             {/* Header */}
-            <div className="sticky top-0 z-10 border-b border-white/10 bg-slate-950/80 backdrop-blur-md px-6 py-4">
-                <div className="flex items-center justify-between max-w-md mx-auto mb-4">
-                    <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+            <div className="pt-2 pb-4 px-4 max-w-md mx-auto">
+                <div className="flex flex-col gap-1">
+                    <h1 className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-orange-500 to-red-600">
                         Leaderboard
                     </h1>
-                    <Trophy className="w-6 h-6 text-orange-500" />
+                    <p className="text-sm font-medium text-slate-400">
+                        Top performers this week
+                    </p>
                 </div>
+            </div>
 
-                {/* Filters */}
-                <div className="flex p-1 bg-white/5 rounded-xl max-w-md mx-auto">
-                    {(["global", "group", "level"] as const).map((filter) => (
-                        <button
-                            key={filter}
-                            onClick={() => setActiveFilter(filter)}
-                            className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all ${activeFilter === filter
-                                    ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20"
-                                    : "text-slate-400 hover:text-white"
-                                }`}
-                        >
-                            {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                        </button>
-                    ))}
+            {/* Filters (Sticky) */}
+            <div className="sticky top-4 z-30 mx-auto w-full max-w-md px-4 mb-6">
+                <div className="inline-flex w-full items-center justify-between rounded-full border border-white/10 bg-slate-900/80 p-1.5 shadow-lg shadow-black/20 backdrop-blur-xl">
+                    {(["global", "group", "level"] as const).map((filter) => {
+                        const isActive = activeFilter === filter;
+                        return (
+                            <button
+                                key={filter}
+                                onClick={() => setActiveFilter(filter)}
+                                className={`relative flex-1 rounded-full px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all duration-300 ease-out ${isActive
+                                        ? "text-white shadow-md"
+                                        : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                                    }`}
+                            >
+                                {isActive && (
+                                    <span className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-orange-500 to-red-600 transition-transform duration-300" />
+                                )}
+                                {filter}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
