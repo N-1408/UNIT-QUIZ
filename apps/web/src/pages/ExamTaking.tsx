@@ -10,7 +10,7 @@ import { useAuthStore } from "@/store/useAuth";
 export const ExamTaking = () => {
   const { examId } = useParams<{ examId: string }>();
   const navigate = useNavigate();
-  const navigate = useNavigate();
+
 
   const [exam, setExam] = useState<ExamDetailDto | null>(null);
   const [attempt, setAttempt] = useState<AttemptSummaryDto | null>(null);
