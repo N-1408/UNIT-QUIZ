@@ -29,7 +29,7 @@ const mapExamToCard = (exam: ExamSummaryDto): ExamCardSummary => ({
 });
 
 export const ExamsPage = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   // const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<ExamStatus>("open");
   const [items, setItems] = useState<ExamSummaryDto[]>([]);

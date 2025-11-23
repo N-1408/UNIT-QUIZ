@@ -20,7 +20,7 @@ export const HomePage = () => {
     lastExamTitle: "",
     lastExamScore: 0,
   });
-  const [showStats, setShowStats] = useState(false);
+  const [showStats] = useState(false);
 
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
 
